@@ -1,0 +1,16 @@
+[package]
+name = "polars_excel_writer"
+description = "A Polars extension to serialize dataframes to Excel xlsx files"
+authors = ["John McNamara <jmcnamara@cpan.org>"]
+repository = "https://github.com/jmcnamara/polars_excel_xwriter"
+keywords = ["polars", "excel", "xlsx"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+chrono = "0.4.26"
+polars = { version = "0.31.1", features = ["lazy"] }
+rust_xlsxwriter = { version = "0.44.0", features = ["chrono"] }
