@@ -35,5 +35,12 @@ fn main() {
 
     let mut file = File::create("dataframe.xlsx").expect("could not create file");
 
-    ExcelWriter::new(&mut file).finish(&mut df).unwrap();
+    ExcelWriter::new(&mut file)
+        .has_header(false)
+        .with_float_precision(3)
+        .with_time_format("hh::mm".to_string())
+        .with_date_format("yyyy mmm dd".to_string())
+        .with_datetime_format("yyyy mmm dd hh::mm".to_string())
+        .finish(&mut df)
+        .unwrap();
 }
