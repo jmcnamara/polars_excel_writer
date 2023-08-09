@@ -4,6 +4,8 @@
 //
 // Copyright 2023, John McNamara, jmcnamara@cpan.org
 
-pub mod excel_writer;
+pub mod write;
+pub mod xlsx_writer;
 
-pub use excel_writer::*;
+pub use write::*;
+pub use xlsx_writer::*;

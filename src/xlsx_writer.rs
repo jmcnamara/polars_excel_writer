@@ -4,8 +4,6 @@
 //
 // Copyright 2023, John McNamara, jmcnamara@cpan.org
 
-use std::io::Write;
-
 use polars::export::arrow::temporal_conversions::{
     date32_to_date, time64ns_to_time, timestamp_ms_to_datetime, timestamp_ns_to_datetime,
     timestamp_us_to_datetime,
@@ -13,39 +11,22 @@ use polars::export::arrow::temporal_conversions::{
 use polars::prelude::*;
 use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
 
-pub struct ExcelWriter<W: Write> {
-    buffer: W,
-    //header: bool,
+pub struct PolarsXlsxWriter {}
+
+
+impl Default for PolarsXlsxWriter {
+   fn default() -> Self {
+       Self::new()
+   }
 }
 
-impl<W> SerWriter<W> for ExcelWriter<W>
-where
-    W: Write,
-{
-    fn new(buffer: W) -> Self {
-        ExcelWriter {
-            buffer,
-            //header: true,
-        }
-    }
-
-    fn finish(&mut self, df: &mut DataFrame) -> PolarsResult<()> {
-        let xlsx_writer = PolarsXlsxWriter::new();
-        let bytes = xlsx_writer.write_buffer(df).unwrap();
-        self.buffer.write_all(&bytes).unwrap();
-
-        Ok(())
-    }
-}
-
-struct PolarsXlsxWriter {}
 
 impl PolarsXlsxWriter {
-    fn new() -> PolarsXlsxWriter {
+    pub fn new() -> PolarsXlsxWriter {
         PolarsXlsxWriter {}
     }
 
-    fn write_buffer(&self, df: &DataFrame) -> Result<Vec<u8>, XlsxError> {
+    pub fn write_buffer(&self, df: &DataFrame) -> Result<Vec<u8>, XlsxError> {
         // Create a new Excel file object.
         let mut workbook = Workbook::new();
         let mut headers = vec![];
