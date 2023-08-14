@@ -72,6 +72,10 @@ impl PolarsXlsxWriter {
                 Format::new().set_num_format(&excel_writer.datetime_format);
         }
 
+        if !excel_writer.null_string.is_empty() {
+            xlsx_writer.null_string = Some(excel_writer.null_string.clone());
+        }
+
         xlsx_writer
     }
 
@@ -191,7 +195,7 @@ impl PolarsXlsxWriter {
                     }
                     _ => {
                         println!(
-                            "WARNING: AnyValue data type '{}' is not supported",
+                            "WARNING: AnyValue data type '{}' is not supported by Excel",
                             data.dtype()
                         );
                         break;
