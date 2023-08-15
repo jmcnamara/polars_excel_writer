@@ -75,11 +75,11 @@ use crate::PolarsXlsxWriter;
 ///
 /// use polars_excel_writer::ExcelWriter;
 ///
-/// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+/// fn example(df: &mut DataFrame) -> PolarsResult<()> {
 ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 ///
 ///     ExcelWriter::new(&mut file)
-///         .finish(&mut df)
+///         .finish(df)
 /// }
 /// ```
 ///
@@ -165,12 +165,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .has_header(true)
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -201,12 +201,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .has_header(false)
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -262,12 +262,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_time_format("hh:mm")
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -323,12 +323,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_date_format("mmm d yyyy")
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -384,12 +384,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_datetime_format("hh::mm - mmm d yyyy")
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -441,12 +441,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_float_format("#,##0.00")
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -499,12 +499,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_float_precision(3)
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -552,12 +552,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_null_value("Null")
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
@@ -607,12 +607,12 @@ where
     /// #
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
     ///         .with_autofit()
-    ///         .finish(&mut df)
+    ///         .finish(df)
     /// }
     /// ```
     ///
