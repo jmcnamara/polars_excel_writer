@@ -1,6 +1,6 @@
 name: ❓ Question
 
-description: Ask a question about rust_xlsxwriter
+description: Ask a question about polars_excel_writer
 
 title: "question: <add a description here>"
 
@@ -11,7 +11,7 @@ body:
 - type: markdown
   attributes:
     value: |
-      General questions on how to do something with the rust_xlsxwriter module should be asked on
+      General questions on how to do something with the polars_excel_writer crate should be asked on
       [StackOverflow](http://stackoverflow.com/questions/tagged/rust_xlsxwriter) with a tag of "rust_xlsxwriter".
       This has a better chance of getting several answers and also helps others who might have similar questions in
       the future.

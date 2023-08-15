@@ -1,5 +1,5 @@
 
-## Pull Requests and Contributing to rust_rust_xlsxwriter
+## Pull Requests and Contributing to polars_excel_writer
 
 All patches and pull requests are welcome but must start with an issue tracker.
 
@@ -10,7 +10,7 @@ If the change is small such as a documentation or syntax fix then submit the cha
 
 For anything else follow the steps below:
 
-1. Pull requests and new feature proposals must start with an [Issue Tracker](https://github.com/jmcnamara/rust_xlsxwriter/issues). This serves as the focal point for the design discussion. Start with the Question or Feature Request template.
+1. Pull requests and new feature proposals must start with an [Issue Tracker](https://github.com/jmcnamara/polars_excel_writer/issues). This serves as the focal point for the design discussion. Start with the Question or Feature Request template.
 2. Describe what you plan to do. If there are API changes or additions add some pseudo-code to demonstrate them.
 3. Wait for a response (it should come quickly) before submitting a PR.
 
