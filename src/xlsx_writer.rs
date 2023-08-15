@@ -218,6 +218,7 @@ impl PolarsXlsxWriter {
         } else {
             max_row -= 1;
             table.set_header_row(false);
+            table.set_autofilter(false);
         }
 
         // Add the table to the worksheet.
