@@ -1,0 +1,25 @@
+name: 🎯  Feature Request
+
+description: Request a new feature in polars_excel_writer
+
+title: "feature request: <add a description here>"
+
+labels: [feature request]
+
+body:
+
+- type: markdown
+  attributes:
+    value: |
+      Use the dialog box below to request a new feature in polars_excel_writer.
+
+- type: textarea
+  attributes:
+    label: Feature Request
+    description: |
+      Describe the new feature that you would like to see in polars_excel_writer. If the feature isn't obvious consider
+      adding a screenshot to help explain the request.
+
+      You can also check the [Roadmap](https://github.com/jmcnamara/polars_excel_writer/issues/1) to see when/if the feature is planned.
+  validations:
+    required: true

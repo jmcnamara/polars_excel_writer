@@ -14,3 +14,13 @@ edition = "2021"
 chrono = "0.4.26"
 polars = { version = "0.31.1", features = ["lazy"] }
 rust_xlsxwriter = { version = "0.44.0", features = ["chrono"] }
+
+[package.metadata.commands]
+# Some local package management and release check commands.
+# Uses Cargo Commander.
+
+spellcheck = {cmd = [
+    "for f in src/*.rs; do aspell --lang=en_US --check $f; done",
+    "for f in examples/*.rs; do aspell --lang=en_US --check $f; done",
+    "aspell --lang=en_US --check README.md"
+]}

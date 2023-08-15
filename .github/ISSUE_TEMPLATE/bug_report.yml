@@ -1,0 +1,92 @@
+name: 🐞 Bug
+
+description: File a bug/issue in polars_excel_writer
+
+title: "Bug: <add a description here>"
+
+labels: [bug]
+
+body:
+
+- type: markdown
+  attributes:
+    value: Please fill in the title above and the sections below to submit your bug report.
+
+- type: textarea
+  attributes:
+    label: Current behavior
+    description: A description of what you're experiencing.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Expected behavior
+    description: A description of what you expected to happen.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Sample code to reproduce
+    description: Please add a small, complete, sample program that demonstrates your issue. It should include a dataframe.
+    value: |
+        ```rust
+        use polars::prelude::*;
+
+        fn main() {
+            // Create a sample dataframe for the example.
+            let mut df: DataFrame = df!(
+                "String" => &["North", "South", "East", "West"],
+                "Int" => &[1, 2, 3, 4],
+                "Float" => &[1.0, 2.22, 3.333, 4.4444],
+            )
+            .unwrap();
+
+            example(&mut df).unwrap();
+        }
+
+        use polars_excel_writer::ExcelWriter;
+
+        fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+            let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+
+            ExcelWriter::new(&mut file).finish(&mut df)
+        }
+        ```
+    render: markdown
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Environment
+    description: |
+      Any relevant version or system information:
+    value: |
+        - polars_excel_writer version:
+        - rustc version:
+        - Excel version:
+        - OS:
+    render: markdown
+  validations:
+    required: false
+
+
+- type: textarea
+  attributes:
+    label: Any other information
+    description: |
+      Anything that will give more context about the issue you are encountering.
+
+      Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
+
+
+- type: markdown
+  attributes:
+    value: |
+      **Note** for OpenOffice and LibreOffice users: Please verify that the
+      issue being reported also happens in Excel.
+

@@ -93,6 +93,7 @@ impl PolarsXlsxWriter {
     }
 
     // TODO
+    #[allow(clippy::too_many_lines)]
     fn create_xlsx_file(&self, df: &DataFrame) -> Result<Workbook, XlsxError> {
         // Create a new Excel file object.
         let mut workbook = Workbook::new();
