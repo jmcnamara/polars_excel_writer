@@ -66,7 +66,7 @@
 //!             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 //!         ],
 //!     )
-//!     .expect("should not fail");
+//!     .unwrap();
 //!
 //!     example(&mut df).unwrap();
 //! }
@@ -85,8 +85,6 @@
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/excelwriter_intro.png">
 //!
-
-
 
 /// A module that provide the `ExcelWriter` struct which implements the Polars
 /// `SerWriter` trait to serialize a dataframe to an Excel XLSX file.

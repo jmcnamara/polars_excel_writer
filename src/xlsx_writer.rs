@@ -17,6 +17,7 @@ use crate::ExcelWriter;
 
 pub struct PolarsXlsxWriter {
     has_header: bool,
+    has_autofit: bool,
     date_format: Format,
     time_format: Format,
     float_format: Format,
@@ -39,6 +40,7 @@ impl PolarsXlsxWriter {
 
         PolarsXlsxWriter {
             has_header: true,
+            has_autofit: false,
             date_format,
             time_format,
             null_string: None,
@@ -52,6 +54,7 @@ impl PolarsXlsxWriter {
     ) -> PolarsXlsxWriter {
         let mut xlsx_writer = PolarsXlsxWriter {
             has_header: excel_writer.has_header,
+            has_autofit: excel_writer.has_autofit,
             ..Default::default()
         };
 
@@ -86,9 +89,7 @@ impl PolarsXlsxWriter {
     pub fn write_buffer(&self, df: &DataFrame) -> Result<Vec<u8>, XlsxError> {
         let mut workbook = self.create_xlsx_file(df)?;
 
-        let buf = workbook.save_to_buffer().unwrap();
-
-        Ok(buf)
+        workbook.save_to_buffer()
     }
 
     // TODO
@@ -195,7 +196,7 @@ impl PolarsXlsxWriter {
                     }
                     _ => {
                         println!(
-                            "WARNING: AnyValue data type '{}' is not supported by Excel",
+                            "WARNING: Polars AnyValue data type '{}' is not supported by Excel",
                             data.dtype()
                         );
                         break;
@@ -222,7 +223,9 @@ impl PolarsXlsxWriter {
         worksheet.add_table(0, 0, max_row as u32, max_col as u16 - 1, &table)?;
 
         // Autofit the columns.
-        //worksheet.autofit();
+        if self.has_autofit {
+            worksheet.autofit();
+        }
 
         Ok(workbook)
     }

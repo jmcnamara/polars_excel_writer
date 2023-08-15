@@ -4,8 +4,8 @@
 
 //! An example of writing a Polar Rust dataframe to an Excel file.
 
-use polars::prelude::*;
 use chrono::prelude::*;
+use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
@@ -32,7 +32,7 @@ fn main() {
             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
         ],
     )
-    .expect("should not fail");
+    .unwrap();
 
     example(&mut df).unwrap();
 }
@@ -42,6 +42,5 @@ use polars_excel_writer::ExcelWriter;
 fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 
-    ExcelWriter::new(&mut file)
-        .finish(&mut df)
+    ExcelWriter::new(&mut file).finish(&mut df)
 }

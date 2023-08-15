@@ -63,7 +63,7 @@ fn main() {
             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
         ],
     )
-    .expect("should not fail");
+    .unwrap();
 
     example(&mut df).unwrap();
 }

@@ -15,7 +15,7 @@ fn main() {
         "Int" => &[1, 2, 3, 4],
         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     )
-    .expect("should not fail");
+    .unwrap();
 
     example(&mut df).unwrap();
 }

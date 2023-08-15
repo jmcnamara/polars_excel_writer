@@ -5,8 +5,8 @@
 //! An example of writing a Polar Rust dataframe to an Excel file. This example
 //! demonstrates how to change the default format for Polars datetime types.
 
-use polars::prelude::*;
 use chrono::prelude::*;
+use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
@@ -21,7 +21,7 @@ fn main() {
             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
         ],
     )
-    .expect("should not fail");
+    .unwrap();
 
     example(&mut df).unwrap();
 }
@@ -32,6 +32,6 @@ fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 
     ExcelWriter::new(&mut file)
-    .with_datetime_format("hh::mm - mmm d yyyy")
-    .finish(&mut df)
+        .with_datetime_format("hh::mm - mmm d yyyy")
+        .finish(&mut df)
 }

@@ -5,8 +5,8 @@
 //! An example of writing a Polar Rust dataframe to an Excel file. This example
 //! demonstrates how to change the default format for Polars time types.
 
-use polars::prelude::*;
 use chrono::prelude::*;
+use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
@@ -21,7 +21,7 @@ fn main() {
             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
         ],
     )
-    .expect("should not fail");
+    .unwrap();
 
     example(&mut df).unwrap();
 }

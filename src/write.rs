@@ -12,8 +12,6 @@ use polars::prelude::*;
 
 use crate::PolarsXlsxWriter;
 
-
-
 /// `ExcelWriter` implements the Polars [`SerWriter`] trait to serialize a
 /// dataframe to an Excel XLSX file.
 ///
@@ -70,7 +68,7 @@ use crate::PolarsXlsxWriter;
 ///             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 ///         ],
 ///     )
-///     .expect("should not fail");
+///     .unwrap();
 ///
 ///     example(&mut df).unwrap();
 /// }
@@ -95,6 +93,7 @@ where
 {
     writer: W,
     pub(crate) has_header: bool,
+    pub(crate) has_autofit: bool,
     pub(crate) date_format: String,
     pub(crate) time_format: String,
     pub(crate) null_string: String,
@@ -110,6 +109,7 @@ where
         ExcelWriter {
             writer: buffer,
             has_header: true,
+            has_autofit: false,
             date_format: String::new(),
             null_string: String::new(),
             time_format: String::new(),
@@ -120,8 +120,13 @@ where
 
     fn finish(&mut self, df: &mut DataFrame) -> PolarsResult<()> {
         let xlsx_writer = PolarsXlsxWriter::new_from_excel_writer(self);
-        let bytes = xlsx_writer.write_buffer(df).unwrap();
-        self.writer.write_all(&bytes).unwrap();
+        let bytes = xlsx_writer
+            .write_buffer(df)
+            .map_err(|err| polars_err!(ComputeError: "rust_xlsxwriter error: '{}'", err))?;
+
+        self.writer
+            .write_all(&bytes)
+            .map_err(|err| polars_err!(ComputeError: "write_all(): '{}'", err))?;
 
         Ok(())
     }
@@ -235,6 +240,7 @@ where
     /// # // This code is available in examples/excelwriter_time_format.rs
     /// #
     /// # use polars::prelude::*;
+    /// # use chrono::prelude::*;
     /// #
     /// # fn main() {
     /// #     // Create a sample dataframe for the example.
@@ -249,7 +255,7 @@ where
     /// #             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
     /// #         ],
     /// #     )
-    /// #     .expect("should not fail");
+    /// #     .unwrap();
     /// #
     /// #     example(&mut df).unwrap();
     /// # }
@@ -294,6 +300,8 @@ where
     /// # // This code is available in examples/excelwriter_date_format.rs
     /// #
     /// # use polars::prelude::*;
+    /// # use chrono::prelude::*;
+    /// #
     /// #
     /// # fn main() {
     /// #     // Create a sample dataframe for the example.
@@ -308,7 +316,7 @@ where
     /// #             NaiveDate::from_ymd_opt(2023, 1, 14),
     /// #         ],
     /// #     )
-    /// #     .expect("should not fail");
+    /// #     .unwrap();
     /// #
     /// #     example(&mut df).unwrap();
     /// # }
@@ -353,6 +361,8 @@ where
     /// # // This code is available in examples/excelwriter_datetime_format.rs
     /// #
     /// # use polars::prelude::*;
+    /// # use chrono::prelude::*;
+    /// #
     /// #
     /// # fn main() {
     /// #     // Create a sample dataframe for the example.
@@ -367,7 +377,7 @@ where
     /// #             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
     /// #         ],
     /// #     )
-    /// #     .expect("should not fail");
+    /// #     .unwrap();
     /// #
     /// #     example(&mut df).unwrap();
     /// # }
@@ -378,8 +388,8 @@ where
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
     ///     ExcelWriter::new(&mut file)
-    ///     .with_datetime_format("hh::mm - mmm d yyyy")
-    ///     .finish(&mut df)
+    ///         .with_datetime_format("hh::mm - mmm d yyyy")
+    ///         .finish(&mut df)
     /// }
     /// ```
     ///
@@ -424,7 +434,7 @@ where
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
     /// #     )
-    /// #     .expect("should not fail");
+    /// #     .unwrap();
     /// #
     /// #     example(&mut df).unwrap();
     /// # }
@@ -482,7 +492,7 @@ where
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )
-    /// #     .expect("should not fail");
+    /// #     .unwrap();
     /// #
     /// #     example(&mut df).unwrap();
     /// # }
@@ -511,9 +521,108 @@ where
         self
     }
 
-    /// TODO
+    /// Replace Null values in the exported dataframe with string values.
+    ///
+    /// By default Null values in a dataframe aren't exported to Excel and will
+    /// appear as empty cells. If you wish you can specify a string such as
+    /// "Null", "NULL" or "N/A" as an alternative.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting a value for Null values in the dataframe. The
+    /// default is to write them as blank cells.
+    ///
+    /// ```
+    /// # // This code is available in examples/excelwriter_null_values.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a dataframe with Null values.
+    /// #     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
+    /// #     let buffer = std::io::Cursor::new(csv_string);
+    /// #     let mut df = CsvReader::new(buffer)
+    /// #         .with_null_values(NullValues::AllColumnsSingle("NULL".to_string()).into())
+    /// #         .finish()
+    /// #         .unwrap();
+    /// #
+    /// #     example(&mut df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::ExcelWriter;
+    ///
+    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+    ///
+    ///     ExcelWriter::new(&mut file)
+    ///         .with_null_value("Null")
+    ///         .finish(&mut df)
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
+    ///
     pub fn with_null_value(mut self, null_value: impl Into<String>) -> Self {
         self.null_string = null_value.into();
+        self
+    }
+
+    /// Simulate autofit for columns in the dataframe output.
+    ///
+    /// Use a simulated autofit to adjust dataframe columns to the maximum
+    /// string or number widths.
+    ///
+    /// There are several limitations to this autofit method, see the
+    /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
+    ///
+    /// [`worksheet.autofit()`]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates autofitting column widths in the output worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/excelwriter_autofit.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let mut df: DataFrame = df!(
+    /// #         "Col 1" => &["A", "B", "C", "D"],
+    /// #         "Column 2" => &["A", "B", "C", "D"],
+    /// #         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
+    /// #         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&mut df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::ExcelWriter;
+    ///
+    /// fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+    ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+    ///
+    ///     ExcelWriter::new(&mut file)
+    ///         .with_autofit()
+    ///         .finish(&mut df)
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
+    ///
+    pub fn with_autofit(mut self) -> Self {
+        self.has_autofit = true;
         self
     }
 }
