@@ -39,8 +39,8 @@ fn main() {
 
 use polars_excel_writer::ExcelWriter;
 
-fn example(mut df: &mut DataFrame) -> PolarsResult<()> {
+fn example(df: &mut DataFrame) -> PolarsResult<()> {
     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 
-    ExcelWriter::new(&mut file).finish(&mut df)
+    ExcelWriter::new(&mut file).finish(df)
 }
