@@ -8,11 +8,11 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::ExcelWriter;
+use polars_excel_writer::{ExcelWriter, PolarsXlsxWriter};
 use rust_xlsxwriter::XlsxError;
 
 // Test case to compare dataframe output against an Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
@@ -26,11 +26,39 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to compare dataframe output against an Excel file.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let df: DataFrame = df!(
+        "Foo" => &[1, 1, 1],
+        "Bar" => &[2, 2, 2],
+    )
+    .unwrap();
+
+    let mut xl = PolarsXlsxWriter::new();
+    xl.write_dataframe(&df).unwrap();
+    xl.write_excel(filename).unwrap();
+
+    Ok(())
+}
+
 #[test]
 fn dataframe_excelwriter01() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn dataframe_write_excel01() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dataframe01")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

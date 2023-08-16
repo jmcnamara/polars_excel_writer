@@ -119,9 +119,9 @@ where
     }
 
     fn finish(&mut self, df: &mut DataFrame) -> PolarsResult<()> {
-        let xlsx_writer = PolarsXlsxWriter::new_from_excel_writer(self);
+        let mut xlsx_writer = PolarsXlsxWriter::new_from_excel_writer(self);
         let bytes = xlsx_writer
-            .write_buffer(df)
+            .write_to_buffer(df)
             .map_err(|err| polars_err!(ComputeError: "rust_xlsxwriter error: '{}'", err))?;
 
         self.writer

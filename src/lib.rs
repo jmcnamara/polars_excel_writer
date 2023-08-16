@@ -90,9 +90,11 @@
 /// `SerWriter` trait to serialize a dataframe to an Excel XLSX file.
 pub mod write;
 
+/// TODO
 pub mod xlsx_writer;
 
 pub use write::*;
 pub use xlsx_writer::*;
 
 pub use ExcelWriter;
+pub use PolarsXlsxWriter;
