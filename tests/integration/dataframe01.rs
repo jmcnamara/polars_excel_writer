@@ -9,34 +9,51 @@ use crate::common;
 
 use polars::prelude::*;
 use polars_excel_writer::{ExcelWriter, PolarsXlsxWriter};
-use rust_xlsxwriter::XlsxError;
+use rust_xlsxwriter::{Workbook, XlsxError};
 
-// Test case to compare dataframe output against an Excel file.
+// Compare output against target Excel file using ExcelWriter.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
-    )
-    .unwrap();
+    )?;
 
-    let mut file = std::fs::File::create(filename).unwrap();
+    let mut file = std::fs::File::create(filename)?;
 
-    ExcelWriter::new(&mut file).finish(&mut df).unwrap();
+    ExcelWriter::new(&mut file).finish(&mut df)?;
 
     Ok(())
 }
 
-// Test case to compare dataframe output against an Excel file.
+// Compare output against target Excel file using PolarsXlsxWriter.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
-    )
-    .unwrap();
+    )?;
 
     let mut xl = PolarsXlsxWriter::new();
-    xl.write_dataframe(&df).unwrap();
-    xl.write_excel(filename).unwrap();
+    xl.write_dataframe(&df)?;
+    xl.write_excel(filename)?;
+
+    Ok(())
+}
+
+// Compare output against target Excel file using rust_xlsxwriter.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let df: DataFrame = df!(
+        "Foo" => &[1, 1, 1],
+        "Bar" => &[2, 2, 2],
+    )?;
+
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let mut xl = PolarsXlsxWriter::new();
+
+    xl.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+
+    workbook.save(filename)?;
 
     Ok(())
 }
@@ -59,6 +76,18 @@ fn dataframe_write_excel01() {
         .set_name("dataframe01")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn dataframe_to_worksheet01() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dataframe01")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

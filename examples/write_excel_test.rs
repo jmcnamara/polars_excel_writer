@@ -20,12 +20,17 @@ fn main() {
 }
 
 use polars_excel_writer::PolarsXlsxWriter;
+use rust_xlsxwriter::Workbook;
 
 fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
     let mut xl = PolarsXlsxWriter::new();
 
-    xl.write_dataframe_to_cell(df, 1, 1)?;
-    xl.write_excel("dataframe.xlsx")?;
+    xl.write_dataframe_to_worksheet(df, worksheet, 0, 0)?;
+
+    workbook.save("dataframe.xlsx")?;
 
     Ok(())
 }

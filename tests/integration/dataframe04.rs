@@ -19,16 +19,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     )?;
 
     let mut xl = PolarsXlsxWriter::new();
-    xl.write_dataframe_to_cell(&df, 1, 1)?;
+
+    xl.write_dataframe_to_cell(&df, 0, 0)?;
+    xl.write_dataframe_to_cell(&df, 0, 3)?;
+
     xl.write_excel(filename)?;
 
     Ok(())
 }
 
 #[test]
-fn dataframe_write_excel03() {
+fn dataframe_write_excel04() {
     let test_runner = common::TestRunner::new()
-        .set_name("dataframe03")
+        .set_name("dataframe04")
         .set_function(create_new_xlsx_file)
         .initialize();
 

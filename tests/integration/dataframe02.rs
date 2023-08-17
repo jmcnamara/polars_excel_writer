@@ -11,38 +11,35 @@ use polars::prelude::*;
 use polars_excel_writer::{ExcelWriter, PolarsXlsxWriter};
 use rust_xlsxwriter::XlsxError;
 
-// Test case to compare dataframe output against an Excel file.
+// Compare output against target Excel file using todo.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],
         "Column2" => &["Bar", "Bar", "Bar"],
-    )
-    .unwrap();
+    )?;
 
-    let mut file = std::fs::File::create(filename).unwrap();
+    let mut file = std::fs::File::create(filename)?;
 
     ExcelWriter::new(&mut file)
         .has_header(false)
         .with_autofit()
-        .finish(&mut df)
-        .unwrap();
+        .finish(&mut df)?;
 
     Ok(())
 }
 
-// Test case to compare dataframe output against an Excel file.
+// Compare output against target Excel file using todo.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],
         "Column2" => &["Bar", "Bar", "Bar"],
-    )
-    .unwrap();
+    )?;
 
     let mut xl = PolarsXlsxWriter::new();
     xl.has_header(false).use_autofit(true);
 
-    xl.write_dataframe(&df).unwrap();
-    xl.write_excel(filename).unwrap();
+    xl.write_dataframe(&df)?;
+    xl.write_excel(filename)?;
 
     Ok(())
 }

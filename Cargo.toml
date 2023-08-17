@@ -13,7 +13,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.26"
 polars = { version = "0.32.1", features = ["lazy"] }
-rust_xlsxwriter = { version = "0.45.0", features = ["chrono"] }
+rust_xlsxwriter = { version = "0.45.0", features = ["chrono", "polars"], git = "https://github.com/jmcnamara/rust_xlsxwriter" }
 
 
 [dev-dependencies]
