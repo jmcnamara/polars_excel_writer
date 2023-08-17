@@ -20,15 +20,8 @@ use crate::ExcelWriter;
 
 /// TODO
 pub struct PolarsXlsxWriter {
-    has_header: bool,
-    use_autofit: bool,
-    date_format: Format,
-    time_format: Format,
-    float_format: Format,
-    datetime_format: Format,
-    null_string: Option<String>,
     workbook: Workbook,
-    table: Table,
+    options: WriterOptions,
 }
 
 impl Default for PolarsXlsxWriter {
@@ -41,24 +34,12 @@ impl Default for PolarsXlsxWriter {
 impl PolarsXlsxWriter {
     /// TODO
     pub fn new() -> PolarsXlsxWriter {
-        let float_format = Format::default();
-        let date_format = Format::new().set_num_format("yyyy\\-mm\\-dd;@");
-        let time_format = Format::new().set_num_format("hh:mm:ss;@");
-        let datetime_format = Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
-
         let mut workbook = Workbook::new();
         workbook.add_worksheet();
 
         PolarsXlsxWriter {
-            has_header: true,
-            use_autofit: false,
-            date_format,
-            time_format,
-            null_string: None,
-            float_format,
-            datetime_format,
             workbook,
-            table: Table::new(),
+            options: WriterOptions::default(),
         }
     }
 
@@ -77,7 +58,7 @@ impl PolarsXlsxWriter {
     /// # Errors
     ///
     pub fn write_dataframe(&mut self, df: &DataFrame) -> PolarsResult<()> {
-        let options = self.clone_options();
+        let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
@@ -95,7 +76,7 @@ impl PolarsXlsxWriter {
         row: u32,
         col: u16,
     ) -> PolarsResult<()> {
-        let options = self.clone_options();
+        let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, row, col, &options)?;
@@ -114,7 +95,7 @@ impl PolarsXlsxWriter {
         row: u32,
         col: u16,
     ) -> PolarsResult<()> {
-        let options = self.clone_options();
+        let options = self.options.clone();
 
         Self::write_dataframe_internal(df, worksheet, row, col, &options)?;
 
@@ -123,18 +104,15 @@ impl PolarsXlsxWriter {
 
     /// TODO
     pub fn has_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
-        self.has_header = has_header;
-        self.table.set_header_row(has_header);
-        if !has_header {
-            self.table.set_autofilter(false);
-        }
+        self.options.has_header = has_header;
+        self.options.table.set_header_row(has_header);
 
         self
     }
 
     /// TODO
     pub fn use_autofit(&mut self, use_autofit: bool) -> &mut PolarsXlsxWriter {
-        self.use_autofit = use_autofit;
+        self.options.use_autofit = use_autofit;
         self
     }
 
@@ -164,7 +142,7 @@ impl PolarsXlsxWriter {
         worksheet: &mut Worksheet,
         row_offset: u32,
         col_offset: u16,
-        options: &PolarsXlsxWriter,
+        options: &WriterOptions,
     ) -> Result<(), XlsxError> {
         let header_offset = u32::from(options.has_header);
 
@@ -296,25 +274,6 @@ impl PolarsXlsxWriter {
         Ok(())
     }
 
-    // Clone the lightweight options from a PolarsXlsxWriter instance without
-    // the potentially more heavyweight Workbook which may contain worksheets
-    // and a lot of data. The lightweight clone is used to pass options to the
-    // worksheet writer without having to pass an additional reference to self.
-    // TODO. Refactor to its own struct.
-    fn clone_options(&self) -> PolarsXlsxWriter {
-        PolarsXlsxWriter {
-            has_header: self.has_header,
-            use_autofit: self.use_autofit,
-            date_format: self.date_format.clone(),
-            time_format: self.time_format.clone(),
-            float_format: self.float_format.clone(),
-            datetime_format: self.date_format.clone(),
-            null_string: self.null_string.clone(),
-            table: self.table.clone(),
-            workbook: Workbook::new(),
-        }
-    }
-
     // -----------------------------------------------------------------------
     // TODO
     // -----------------------------------------------------------------------
@@ -323,44 +282,45 @@ impl PolarsXlsxWriter {
     pub(crate) fn new_from_excel_writer<W: Write>(
         excel_writer: &ExcelWriter<W>,
     ) -> PolarsXlsxWriter {
-        let mut xlsx_writer = PolarsXlsxWriter {
+        let mut options = WriterOptions {
             has_header: excel_writer.has_header,
             use_autofit: excel_writer.has_autofit,
             ..Default::default()
         };
 
         if !excel_writer.has_header {
-            xlsx_writer.table.set_header_row(false);
-            xlsx_writer.table.set_autofilter(false);
+            options.table.set_header_row(false);
         }
 
         if !excel_writer.float_format.is_empty() {
-            xlsx_writer.float_format = Format::new().set_num_format(&excel_writer.float_format);
+            options.float_format = Format::new().set_num_format(&excel_writer.float_format);
         }
 
         if !excel_writer.time_format.is_empty() {
-            xlsx_writer.time_format = Format::new().set_num_format(&excel_writer.time_format);
+            options.time_format = Format::new().set_num_format(&excel_writer.time_format);
         }
 
         if !excel_writer.date_format.is_empty() {
-            xlsx_writer.date_format = Format::new().set_num_format(&excel_writer.date_format);
+            options.date_format = Format::new().set_num_format(&excel_writer.date_format);
         }
 
         if !excel_writer.datetime_format.is_empty() {
-            xlsx_writer.datetime_format =
-                Format::new().set_num_format(&excel_writer.datetime_format);
+            options.datetime_format = Format::new().set_num_format(&excel_writer.datetime_format);
         }
 
         if !excel_writer.null_string.is_empty() {
-            xlsx_writer.null_string = Some(excel_writer.null_string.clone());
+            options.null_string = Some(excel_writer.null_string.clone());
         }
 
-        xlsx_writer
+        PolarsXlsxWriter {
+            options,
+            ..Default::default()
+        }
     }
 
     // TODO
     pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
-        let options = self.clone_options();
+        let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
@@ -368,5 +328,53 @@ impl PolarsXlsxWriter {
         let buf = self.workbook.save_to_buffer()?;
 
         Ok(buf)
+    }
+}
+
+// -----------------------------------------------------------------------
+// TODO
+// -----------------------------------------------------------------------
+
+/// TODO
+#[derive(Clone)]
+struct WriterOptions {
+    has_header: bool,
+    use_autofit: bool,
+    date_format: Format,
+    time_format: Format,
+    float_format: Format,
+    datetime_format: Format,
+    null_string: Option<String>,
+    table: Table,
+}
+
+impl Default for WriterOptions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// TODO
+impl WriterOptions {
+    // TODO
+    fn new() -> WriterOptions {
+        let float_format = Format::default();
+        let date_format = Format::new().set_num_format("yyyy\\-mm\\-dd;@");
+        let time_format = Format::new().set_num_format("hh:mm:ss;@");
+        let datetime_format = Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
+
+        let mut workbook = Workbook::new();
+        workbook.add_worksheet();
+
+        WriterOptions {
+            has_header: true,
+            use_autofit: false,
+            date_format,
+            time_format,
+            null_string: None,
+            float_format,
+            datetime_format,
+            table: Table::new(),
+        }
     }
 }
