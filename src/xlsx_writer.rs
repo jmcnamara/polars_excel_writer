@@ -6,7 +6,6 @@
 
 #![warn(missing_docs)]
 
-use std::io::Write;
 use std::path::Path;
 
 use polars::export::arrow::temporal_conversions::{
@@ -16,12 +15,10 @@ use polars::export::arrow::temporal_conversions::{
 use polars::prelude::*;
 use rust_xlsxwriter::{Format, Table, Workbook, Worksheet, XlsxError};
 
-use crate::ExcelWriter;
-
 /// TODO
 pub struct PolarsXlsxWriter {
-    workbook: Workbook,
-    options: WriterOptions,
+    pub(crate) workbook: Workbook,
+    pub(crate) options: WriterOptions,
 }
 
 impl Default for PolarsXlsxWriter {
@@ -241,7 +238,7 @@ impl PolarsXlsxWriter {
                         )?;
                     }
                     _ => {
-                        println!(
+                        eprintln!(
                             "WARNING: Polars AnyValue data type '{}' is not supported by Excel",
                             data.dtype()
                         );
@@ -279,46 +276,6 @@ impl PolarsXlsxWriter {
     // -----------------------------------------------------------------------
 
     // TODO
-    pub(crate) fn new_from_excel_writer<W: Write>(
-        excel_writer: &ExcelWriter<W>,
-    ) -> PolarsXlsxWriter {
-        let mut options = WriterOptions {
-            has_header: excel_writer.has_header,
-            use_autofit: excel_writer.has_autofit,
-            ..Default::default()
-        };
-
-        if !excel_writer.has_header {
-            options.table.set_header_row(false);
-        }
-
-        if !excel_writer.float_format.is_empty() {
-            options.float_format = Format::new().set_num_format(&excel_writer.float_format);
-        }
-
-        if !excel_writer.time_format.is_empty() {
-            options.time_format = Format::new().set_num_format(&excel_writer.time_format);
-        }
-
-        if !excel_writer.date_format.is_empty() {
-            options.date_format = Format::new().set_num_format(&excel_writer.date_format);
-        }
-
-        if !excel_writer.datetime_format.is_empty() {
-            options.datetime_format = Format::new().set_num_format(&excel_writer.datetime_format);
-        }
-
-        if !excel_writer.null_string.is_empty() {
-            options.null_string = Some(excel_writer.null_string.clone());
-        }
-
-        PolarsXlsxWriter {
-            options,
-            ..Default::default()
-        }
-    }
-
-    // TODO
     pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
         let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
@@ -337,15 +294,15 @@ impl PolarsXlsxWriter {
 
 /// TODO
 #[derive(Clone)]
-struct WriterOptions {
-    has_header: bool,
-    use_autofit: bool,
-    date_format: Format,
-    time_format: Format,
-    float_format: Format,
-    datetime_format: Format,
-    null_string: Option<String>,
-    table: Table,
+pub(crate) struct WriterOptions {
+    pub(crate) has_header: bool,
+    pub(crate) use_autofit: bool,
+    pub(crate) date_format: Format,
+    pub(crate) time_format: Format,
+    pub(crate) float_format: Format,
+    pub(crate) datetime_format: Format,
+    pub(crate) null_string: Option<String>,
+    pub(crate) table: Table,
 }
 
 impl Default for WriterOptions {
@@ -358,22 +315,14 @@ impl Default for WriterOptions {
 impl WriterOptions {
     // TODO
     fn new() -> WriterOptions {
-        let float_format = Format::default();
-        let date_format = Format::new().set_num_format("yyyy\\-mm\\-dd;@");
-        let time_format = Format::new().set_num_format("hh:mm:ss;@");
-        let datetime_format = Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
-
-        let mut workbook = Workbook::new();
-        workbook.add_worksheet();
-
         WriterOptions {
             has_header: true,
             use_autofit: false,
-            date_format,
-            time_format,
+            time_format: "hh:mm:ss;@".into(),
+            date_format: "yyyy\\-mm\\-dd;@".into(),
+            datetime_format: "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
             null_string: None,
-            float_format,
-            datetime_format,
+            float_format: Format::default(),
             table: Table::new(),
         }
     }

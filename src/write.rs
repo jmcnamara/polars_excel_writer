@@ -9,8 +9,9 @@
 use std::io::Write;
 
 use polars::prelude::*;
+use rust_xlsxwriter::Format;
 
-use crate::PolarsXlsxWriter;
+use crate::{PolarsXlsxWriter, WriterOptions};
 
 /// `ExcelWriter` implements the Polars [`SerWriter`] trait to serialize a
 /// dataframe to an Excel XLSX file.
@@ -92,13 +93,7 @@ where
     W: Write,
 {
     writer: W,
-    pub(crate) has_header: bool,
-    pub(crate) has_autofit: bool,
-    pub(crate) date_format: String,
-    pub(crate) time_format: String,
-    pub(crate) null_string: String,
-    pub(crate) float_format: String,
-    pub(crate) datetime_format: String,
+    options: WriterOptions,
 }
 
 impl<W> SerWriter<W> for ExcelWriter<W>
@@ -108,18 +103,15 @@ where
     fn new(buffer: W) -> Self {
         ExcelWriter {
             writer: buffer,
-            has_header: true,
-            has_autofit: false,
-            date_format: String::new(),
-            null_string: String::new(),
-            time_format: String::new(),
-            float_format: String::new(),
-            datetime_format: String::new(),
+            options: WriterOptions::default(),
         }
     }
 
     fn finish(&mut self, df: &mut DataFrame) -> PolarsResult<()> {
-        let mut xlsx_writer = PolarsXlsxWriter::new_from_excel_writer(self);
+        let mut xlsx_writer = PolarsXlsxWriter {
+            options: self.options.clone(),
+            ..Default::default()
+        };
         let bytes = xlsx_writer.write_to_buffer(df)?;
 
         self.writer.write_all(&bytes)?;
@@ -212,7 +204,8 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
     ///
     pub fn has_header(mut self, has_header: bool) -> Self {
-        self.has_header = has_header;
+        self.options.has_header = has_header;
+        self.options.table.set_header_row(has_header);
         self
     }
 
@@ -272,8 +265,8 @@ where
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_time_format.png">
     ///
-    pub fn with_time_format(mut self, format: impl Into<String>) -> Self {
-        self.time_format = format.into();
+    pub fn with_time_format(mut self, format: impl Into<Format>) -> Self {
+        self.options.time_format = format.into();
         self
     }
 
@@ -332,8 +325,8 @@ where
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
     ///
-    pub fn with_date_format(mut self, format: impl Into<String>) -> Self {
-        self.date_format = format.into();
+    pub fn with_date_format(mut self, format: impl Into<Format>) -> Self {
+        self.options.date_format = format.into();
         self
     }
 
@@ -394,8 +387,8 @@ where
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
     ///
-    pub fn with_datetime_format(mut self, format: impl Into<String>) -> Self {
-        self.datetime_format = format.into();
+    pub fn with_datetime_format(mut self, format: impl Into<Format>) -> Self {
+        self.options.datetime_format = format.into();
         self
     }
 
@@ -451,8 +444,8 @@ where
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
     ///
-    pub fn with_float_format(mut self, format: impl Into<String>) -> Self {
-        self.float_format = format.into();
+    pub fn with_float_format(mut self, format: impl Into<Format>) -> Self {
+        self.options.float_format = format.into();
         self
     }
 
@@ -512,7 +505,7 @@ where
     pub fn with_float_precision(mut self, precision: usize) -> Self {
         if (1..=30).contains(&precision) {
             let precision = "0".repeat(precision);
-            self.float_format = format!("0.{precision}");
+            self.options.float_format = Format::new().set_num_format(format!("0.{precision}"));
         }
         self
     }
@@ -563,7 +556,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
     ///
     pub fn with_null_value(mut self, null_value: impl Into<String>) -> Self {
-        self.null_string = null_value.into();
+        self.options.null_string = Some(null_value.into());
         self
     }
 
@@ -618,7 +611,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
     ///
     pub fn with_autofit(mut self) -> Self {
-        self.has_autofit = true;
+        self.options.use_autofit = true;
         self
     }
 }
