@@ -50,6 +50,18 @@ impl PolarsXlsxWriter {
         Ok(())
     }
 
+    // TODO
+    pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
+        let options = self.options.clone();
+        let worksheet = self.last_worksheet()?;
+
+        Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
+
+        let buf = self.workbook.save_to_buffer()?;
+
+        Ok(buf)
+    }
+
     /// TODO
     ///
     /// # Errors
@@ -99,20 +111,223 @@ impl PolarsXlsxWriter {
         Ok(())
     }
 
+    /// Turn on/off the dataframe header in the exported Excel file.
+    ///
+    /// Turn on/off the dataframe header row in Excel table. It is on by
+    /// default.
+    ///
     /// TODO
-    pub fn has_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_on.png">
+    ///
+    /// If we set `has_header()` to `false` we can output the dataframe from the
+    /// previous example without the header row:
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
+    ///
+    pub fn set_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
         self.options.has_header = has_header;
         self.options.table.set_header_row(has_header);
-
         self
     }
 
+    /// Set the Excel number format for time values.
+    ///
+    /// [Datetimes in Excel] are stored as f64 floats with a format used to
+    /// display them. The default time format used by this library is
+    /// `hh:mm:ss;@`. This method can be used to specify an alternative user
+    /// defined format.
+    ///
+    /// [Datetimes in Excel]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
     /// TODO
-    pub fn use_autofit(&mut self, use_autofit: bool) -> &mut PolarsXlsxWriter {
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_time_format.png">
+    ///
+    pub fn set_time_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.options.time_format = format.into();
+        self
+    }
+
+    /// Set the Excel number format for date values.
+    ///
+    /// [Datetimes in Excel] are stored as f64 floats with a format used to
+    /// display them. The default date format used by this library is
+    /// `yyyy-mm-dd;@`. This method can be used to specify an alternative user
+    /// defined format.
+    ///
+    /// [Datetimes in Excel]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This example
+    /// demonstrates how to change the default format for Polars date types.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
+    ///
+    pub fn set_date_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.options.date_format = format.into();
+        self
+    }
+
+    /// Set the Excel number format for datetime values.
+    ///
+    /// [Datetimes in Excel] are stored as f64 floats with a format used to
+    /// display them. The default datetime format used by this library is
+    /// `yyyy-mm-dd hh:mm:ss`. This method can be used to specify an alternative
+    /// user defined format.
+    ///
+    /// [Datetimes in Excel]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates how to change the default format for Polars
+    /// datetime types.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
+    ///
+    pub fn set_datetime_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.options.datetime_format = format.into();
+        self
+    }
+
+    /// Set the Excel number format for floats.
+    ///
+    /// Set the Excel number format for f32/f64 float types using an Excel
+    /// number format string. These format strings can be obtained for the
+    /// Format Cells -> Number dialog in Excel.
+    ///
+    /// See all the [Number Format Categories] and subsequent sections in the
+    /// `rust_xlsxwriter` documentation.
+    ///
+    /// [Number Format Categories]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#number-format-categories
+    ///
+    /// Note, the numeric values aren't truncated in Excel, this option just
+    /// controls the display of the number.
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting an Excel number format for floats.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
+    ///
+    pub fn set_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.options.float_format = format.into();
+        self
+    }
+
+    /// Set the Excel number precision for floats.
+    ///
+    /// Set the number precision of all floats exported from the dataframe to
+    /// Excel. The precision is converted to an Excel number format (see
+    /// [`set_float_format()`](PolarsXlsxWriter::set_float_format) above), so for
+    /// example 3 is converted to the Excel format `0.000`.
+    ///
+    /// The precision should be in the Excel range 1-30.
+    ///
+    /// Note, the numeric values aren't truncated in Excel, this option just
+    /// controls the display of the number.
+    ///
+    ///
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates how to set the precision of the float output.
+    /// Setting the precision to 3 is equivalent to an Excel number format of
+    /// `0.000`.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_precision.png">
+    ///
+    pub fn set_float_precision(&mut self, precision: usize) -> &mut PolarsXlsxWriter {
+        if (1..=30).contains(&precision) {
+            let precision = "0".repeat(precision);
+            self.options.float_format = Format::new().set_num_format(format!("0.{precision}"));
+        }
+        self
+    }
+
+    /// Replace Null values in the exported dataframe with string values.
+    ///
+    /// By default Null values in a dataframe aren't exported to Excel and will
+    /// appear as empty cells. If you wish you can specify a string such as
+    /// "Null", "NULL" or "N/A" as an alternative.
+    ///
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting a value for Null values in the dataframe. The
+    /// default is to write them as blank cells.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
+    ///
+    pub fn set_null_value(&mut self, null_value: impl Into<String>) -> &mut PolarsXlsxWriter {
+        self.options.null_string = Some(null_value.into());
+        self
+    }
+
+    /// Simulate autofit for columns in the dataframe output.
+    ///
+    /// Use a simulated autofit to adjust dataframe columns to the maximum
+    /// string or number widths.
+    ///
+    /// There are several limitations to this autofit method, see the
+    /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
+    ///
+    /// [`worksheet.autofit()`]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
+    ///
+    /// TODO
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates autofitting column widths in the output worksheet.
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
+    ///
+    /// TODO
+    pub fn set_autofit(&mut self, use_autofit: bool) -> &mut PolarsXlsxWriter {
         self.options.use_autofit = use_autofit;
         self
     }
-
     // -----------------------------------------------------------------------
     // Internal functions/methods.
     // -----------------------------------------------------------------------
@@ -269,22 +484,6 @@ impl PolarsXlsxWriter {
         }
 
         Ok(())
-    }
-
-    // -----------------------------------------------------------------------
-    // TODO
-    // -----------------------------------------------------------------------
-
-    // TODO
-    pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
-        let options = self.options.clone();
-        let worksheet = self.last_worksheet()?;
-
-        Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
-
-        let buf = self.workbook.save_to_buffer()?;
-
-        Ok(buf)
     }
 }
 

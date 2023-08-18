@@ -11,7 +11,7 @@ use std::io::Write;
 use polars::prelude::*;
 use rust_xlsxwriter::Format;
 
-use crate::{PolarsXlsxWriter, WriterOptions};
+use crate::PolarsXlsxWriter;
 
 /// `ExcelWriter` implements the Polars [`SerWriter`] trait to serialize a
 /// dataframe to an Excel XLSX file.
@@ -93,7 +93,7 @@ where
     W: Write,
 {
     writer: W,
-    options: WriterOptions,
+    xlsx_writer: PolarsXlsxWriter,
 }
 
 impl<W> SerWriter<W> for ExcelWriter<W>
@@ -103,17 +103,12 @@ where
     fn new(buffer: W) -> Self {
         ExcelWriter {
             writer: buffer,
-            options: WriterOptions::default(),
+            xlsx_writer: PolarsXlsxWriter::default(),
         }
     }
 
     fn finish(&mut self, df: &mut DataFrame) -> PolarsResult<()> {
-        let mut xlsx_writer = PolarsXlsxWriter {
-            options: self.options.clone(),
-            ..Default::default()
-        };
-        let bytes = xlsx_writer.write_to_buffer(df)?;
-
+        let bytes = self.xlsx_writer.write_to_buffer(df)?;
         self.writer.write_all(&bytes)?;
 
         Ok(())
@@ -204,8 +199,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
     ///
     pub fn has_header(mut self, has_header: bool) -> Self {
-        self.options.has_header = has_header;
-        self.options.table.set_header_row(has_header);
+        self.xlsx_writer.set_header(has_header);
         self
     }
 
@@ -266,7 +260,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_time_format.png">
     ///
     pub fn with_time_format(mut self, format: impl Into<Format>) -> Self {
-        self.options.time_format = format.into();
+        self.xlsx_writer.set_time_format(format);
         self
     }
 
@@ -326,7 +320,7 @@ where
     /// <img src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
     ///
     pub fn with_date_format(mut self, format: impl Into<Format>) -> Self {
-        self.options.date_format = format.into();
+        self.xlsx_writer.set_date_format(format);
         self
     }
 
@@ -388,7 +382,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
     ///
     pub fn with_datetime_format(mut self, format: impl Into<Format>) -> Self {
-        self.options.datetime_format = format.into();
+        self.xlsx_writer.set_datetime_format(format);
         self
     }
 
@@ -445,7 +439,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
     ///
     pub fn with_float_format(mut self, format: impl Into<Format>) -> Self {
-        self.options.float_format = format.into();
+        self.xlsx_writer.set_float_format(format);
         self
     }
 
@@ -503,10 +497,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_precision.png">
     ///
     pub fn with_float_precision(mut self, precision: usize) -> Self {
-        if (1..=30).contains(&precision) {
-            let precision = "0".repeat(precision);
-            self.options.float_format = Format::new().set_num_format(format!("0.{precision}"));
-        }
+        self.xlsx_writer.set_float_precision(precision);
         self
     }
 
@@ -556,7 +547,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
     ///
     pub fn with_null_value(mut self, null_value: impl Into<String>) -> Self {
-        self.options.null_string = Some(null_value.into());
+        self.xlsx_writer.set_null_value(null_value);
         self
     }
 
@@ -611,7 +602,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
     ///
     pub fn with_autofit(mut self) -> Self {
-        self.options.use_autofit = true;
+        self.xlsx_writer.set_autofit(true);
         self
     }
 }

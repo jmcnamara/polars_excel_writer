@@ -36,8 +36,8 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     )?;
 
     let mut xl = PolarsXlsxWriter::new();
-    xl.has_header(false);
-    xl.use_autofit(true);
+    xl.set_header(false);
+    xl.set_autofit(true);
 
     xl.write_dataframe(&df)?;
     xl.write_excel(filename)?;

@@ -28,7 +28,7 @@ fn example(df: &mut DataFrame) -> PolarsResult<()> {
 
     let mut xl = PolarsXlsxWriter::new();
 
-    xl.has_header(false);
+    xl.set_header(false);
 
     xl.write_dataframe_to_worksheet(df, worksheet, 0, 0)?;
 
