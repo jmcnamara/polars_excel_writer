@@ -22,11 +22,6 @@
 //! [`SerWriter`]:
 //!     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
 //!
-//! [`CsvWriter`]:
-//!     https://docs.rs/polars/latest/polars/prelude/struct.CsvWriter.html
-//!
-//! [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
-//!
 //![`write_excel()`]:
 //!    https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
 //!
@@ -86,14 +81,18 @@
 //! <img src="https://rustxlsxwriter.github.io/images/excelwriter_intro.png">
 //!
 
-/// A module that provide the `ExcelWriter` struct which implements the Polars
+/// A module that exports the `ExcelWriter` struct which implements the Polars
 /// `SerWriter` trait to serialize a dataframe to an Excel XLSX file.
 pub mod write;
 
-/// TODO
+/// A module that exports the `PolarsXlsxWriter` struct which provides an Excel
+/// XLSX serializer that works with Polars dataframes and which can also
+/// interact with the [`rust_xlsxwriter`] writing engine that it wraps.
 pub mod xlsx_writer;
 
+#[doc(hidden)]
 pub use write::*;
+#[doc(hidden)]
 pub use xlsx_writer::*;
 
 pub use ExcelWriter;
