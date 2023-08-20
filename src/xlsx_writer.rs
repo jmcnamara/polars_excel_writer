@@ -15,7 +15,7 @@ use polars::export::arrow::temporal_conversions::{
 use polars::prelude::*;
 use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 
-/// `PolarsXlsxWriter` provides an Excel XLSX serializer that works with Polars
+/// `PolarsXlsxWriter` provides an Excel Xlsx serializer that works with Polars
 /// dataframes and which can also interact with the [`rust_xlsxwriter`] writing
 /// engine that it wraps. This allows simple Excel serialization of worksheets
 /// with a straightforward interface but also a high degree of configurability
@@ -31,6 +31,14 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// modify existing files.
 ///
 /// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
+///
+/// `PolarsXlsxWriter` tries to replicate the interface options provided by the
+///  Polars Python [`write_excel()`] dataframe method.
+///
+/// [`write_excel()`]:
+///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
+///
+/// ## Examples
 ///
 /// Here is an example of writing a Polars Rust dataframe to an Excel file using
 /// `PolarsXlsxWriter`.
@@ -99,8 +107,9 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// programs to access functionality that it doesn't provide natively.
 ///
 /// For example, say we wanted to write a dataframe to an Excel workbook but
-/// also plot the data on an Excel chart. We can use `PolarsXlsxWriter` for the
-/// data writing part and `rust_xlsxwriter` for all the other functionality.
+/// also plot the data on an Excel chart. We can use `PolarsXlsxWriter` crate
+/// for the data writing part and `rust_xlsxwriter` for all the other
+/// functionality.
 ///
 /// Here is an example that demonstrate this:
 ///
@@ -171,17 +180,19 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 ///
 /// ## `PolarsError` and `XlsxError`
 ///
-/// The `rust_xlsxwriter` crate uses an error type called [`XlsxError`] while
-/// Polars and `PolarsXlsxWriter` use an error type called [`PolarsError`]. In
-/// order to make interoperability with Polars easier the
-/// `rust_xlsxwriter::XlsxError` type maps to (and from) the `PolarsError` type.
+/// The `rust_xlsxwriter` crate uses an error type called
+/// [`XlsxError`](rust_xlsxwriter::XlsxError) while `Polars` and
+/// `PolarsXlsxWriter` use an error type called [`PolarsError`]. In order to
+/// make interoperability with Polars easier the `rust_xlsxwriter::XlsxError`
+/// type maps to (and from) the `PolarsError` type.
 ///
 /// That is why in the previous example we were able to use two different error
-/// types within the same result/error context of `PolarsError`. Note:
-/// `PolarsResult<T>` expands to `Result<T, PolarsError>`.
+/// types within the same result/error context of `PolarsError`. Note, the error
+/// type is not explicit in the previous example but `PolarsResult<T>` expands
+/// to `Result<T, PolarsError>`.
 ///
 /// In order for this to be enabled you must use the `rust_xlsxwriter` `polars`
-/// crate feature. For convenience it is turned on automatically when you use
+/// crate feature, however, this is turned on automatically when you use
 /// `polars_excel_writer`.
 ///
 pub struct PolarsXlsxWriter {
@@ -215,6 +226,11 @@ impl PolarsXlsxWriter {
     ///
     /// The worksheet must be written to a file using
     /// [`write_excel()`](PolarsXlsxWriter::write_excel).
+    ///
+    /// # Parameters
+    ///
+    /// * `df` - A Polars dataframe.
+    ///
     /// # Errors
     ///
     /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
@@ -264,11 +280,17 @@ impl PolarsXlsxWriter {
     /// Writes the supplied dataframe to a user defined cell in the first sheet
     /// of a new Excel workbook.
     ///
-    /// Since the dataframe can be positioned with the worksheet it is possible
+    /// Since the dataframe can be positioned within the worksheet it is possible
     /// to write more than one to the same worksheet (without overlapping).
     ///
     /// The worksheet must be written to a file using
     /// [`write_excel()`](PolarsXlsxWriter::write_excel).
+    ///
+    /// # Parameters
+    ///
+    /// * `df` - A Polars dataframe.
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
     ///
     /// # Errors
     ///
@@ -338,6 +360,14 @@ impl PolarsXlsxWriter {
     /// additional Excel functionality provided by `rust_xlsxwriter`. See
     /// [Interacting with `rust_xlsxwriter`](#interacting-with-rust_xlsxwriter)
     /// and the example below.
+    ///
+    /// # Parameters
+    ///
+    /// * `df` - A Polars dataframe.
+    /// * `worksheet` - A `rust_xlsxwriter` [`Worksheet`].
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
     ///
     /// # Errors
     ///
@@ -444,6 +474,10 @@ impl PolarsXlsxWriter {
     /// Turn on/off the dataframe header row in the Excel table. It is on by
     /// default.
     ///
+    /// # Parameters
+    ///
+    /// * `has_header` - Export dataframe with/without header.
+    ///
     /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
@@ -501,8 +535,50 @@ impl PolarsXlsxWriter {
     /// [Datetimes in Excel]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
     ///
-    /// TODO
+    /// # Parameters
     ///
+    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This example
+    /// demonstrates how to change the default format for Polars time types.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_time_format.rs
+    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Time" => &[
+    ///             NaiveTime::from_hms_milli_opt(2, 00, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 18, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 37, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
+    ///         ],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_time_format("hh:mm");
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -524,11 +600,50 @@ impl PolarsXlsxWriter {
     /// [Datetimes in Excel]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
     ///
-    /// TODO
+    /// # Parameters
+    ///
+    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This example
     /// demonstrates how to change the default format for Polars date types.
     ///
+    /// ```
+    /// # // This code is available in examples/write_excel_date_format.rs
+    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Date" => &[
+    ///             NaiveDate::from_ymd_opt(2023, 1, 11),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 12),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 13),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 14),
+    ///         ],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_date_format("mmm d yyyy");
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -549,12 +664,50 @@ impl PolarsXlsxWriter {
     /// [Datetimes in Excel]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
     ///
-    /// TODO
+    /// # Parameters
     ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This
-    /// example demonstrates how to change the default format for Polars
-    /// datetime types.
+    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
     ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This example
+    /// demonstrates how to change the default format for Polars datetime types.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_datetime_format.rs
+    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Datetime" => &[
+    ///             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
+    ///         ],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_datetime_format("hh::mm - mmm d yyyy");
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -569,22 +722,56 @@ impl PolarsXlsxWriter {
     /// Set the Excel number format for floats.
     ///
     /// Set the Excel number format for f32/f64 float types using an Excel
-    /// number format string. These format strings can be obtained for the
-    /// Format Cells -> Number dialog in Excel.
+    /// number format string. These format strings can be obtained from the
+    /// `Format Cells -> Number` dialog in Excel.
     ///
-    /// See all the [Number Format Categories] and subsequent sections in the
-    /// `rust_xlsxwriter` documentation.
+    /// See the [Number Format Categories] section and subsequent Number Format
+    /// sections in the `rust_xlsxwriter` documentation.
     ///
     /// [Number Format Categories]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#number-format-categories
     ///
     /// Note, the numeric values aren't truncated in Excel, this option just
     /// controls the display of the number.
-    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
     /// demonstrates setting an Excel number format for floats.
     ///
+    /// ```
+    /// # // This code is available in examples/write_excel_float_format.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_float_format("#,##0.00");
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -603,19 +790,47 @@ impl PolarsXlsxWriter {
     /// [`set_float_format()`](PolarsXlsxWriter::set_float_format) above), so for
     /// example 3 is converted to the Excel format `0.000`.
     ///
-    /// The precision should be in the Excel range 1-30.
-    ///
     /// Note, the numeric values aren't truncated in Excel, this option just
     /// controls the display of the number.
     ///
+    /// # Parameters
     ///
-    /// TODO
+    /// * `precision` - The floating point precision in the Excel range 1-30.
     ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This
-    /// example demonstrates how to set the precision of the float output.
-    /// Setting the precision to 3 is equivalent to an Excel number format of
-    /// `0.000`.
+    /// # Examples
     ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This example
+    /// demonstrates how to set the precision of the float output. Setting the
+    /// precision to 3 is equivalent to an Excel number format of `0.000`.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_float_precision.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_float_precision(3);
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -636,12 +851,46 @@ impl PolarsXlsxWriter {
     /// appear as empty cells. If you wish you can specify a string such as
     /// "Null", "NULL" or "N/A" as an alternative.
     ///
-    /// TODO
+    /// # Parameters
+    ///
+    /// * `null_value` - A replacement string for Null values.
+    ///
+    /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
-    /// demonstrates setting a value for Null values in the dataframe. The
-    /// default is to write them as blank cells.
+    /// demonstrates setting a value for Null values in the dataframe. The default
+    /// is to write them as blank cells.
     ///
+    /// ```
+    /// # // This code is available in examples/write_excel_null_values.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a dataframe with Null values.
+    /// #     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
+    /// #     let buffer = std::io::Cursor::new(csv_string);
+    /// #     let df = CsvReader::new(buffer)
+    /// #         .with_null_values(NullValues::AllColumnsSingle("NULL".to_string()).into())
+    /// #         .finish()
+    /// #         .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_null_value("Null");
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
@@ -658,33 +907,67 @@ impl PolarsXlsxWriter {
     /// Use a simulated autofit to adjust dataframe columns to the maximum
     /// string or number widths.
     ///
-    /// There are several limitations to this autofit method, see the
+    /// **Note**: There are several limitations to this autofit method, see the
     /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
     ///
     /// [`worksheet.autofit()`]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
     ///
-    /// TODO
+    /// # Parameters
     ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This
-    /// example demonstrates autofitting column widths in the output worksheet.
+    /// * `autofit` - Turn autofit on/off. It is off by default.
     ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This example
+    /// demonstrates autofitting column widths in the output worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_autofit.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// fn main() {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Col 1" => &["A", "B", "C", "D"],
+    ///         "Column 2" => &["A", "B", "C", "D"],
+    ///         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
+    ///         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     example(&df).unwrap();
+    /// }
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut writer = PolarsXlsxWriter::new();
+    ///
+    ///     writer.set_autofit(true);
+    ///
+    ///     writer.write_dataframe(df)?;
+    ///     writer.write_excel("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     ///
     /// Output file:
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
     ///
-    /// TODO
-    pub fn set_autofit(&mut self, use_autofit: bool) -> &mut PolarsXlsxWriter {
-        self.options.use_autofit = use_autofit;
+    pub fn set_autofit(&mut self, autofit: bool) -> &mut PolarsXlsxWriter {
+        self.options.use_autofit = autofit;
         self
     }
     // -----------------------------------------------------------------------
     // Internal functions/methods.
     // -----------------------------------------------------------------------
 
-    // TODO
+    // Workaround to map `rust_xlsxwriter` path output to `SerWriter` file/buffer.
     pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
         let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
@@ -696,6 +979,7 @@ impl PolarsXlsxWriter {
         Ok(buf)
     }
 
+    // Get the last (generally only) worksheet in the workbook for writing to.
     fn last_worksheet(&mut self) -> PolarsResult<&mut Worksheet> {
         let mut last_index = self.workbook.worksheets().len();
 
@@ -711,7 +995,8 @@ impl PolarsXlsxWriter {
         Ok(worksheet)
     }
 
-    // TODO
+    // Write the dataframe to a `rust_xlsxwriter` Worksheet. It is structured as
+    // an associated method to allow it to handle external worksheets.
     #[allow(clippy::too_many_lines)]
     fn write_dataframe_internal(
         df: &DataFrame,
@@ -852,10 +1137,10 @@ impl PolarsXlsxWriter {
 }
 
 // -----------------------------------------------------------------------
-// TODO
+// Helper structs.
 // -----------------------------------------------------------------------
 
-/// TODO
+// A struct for storing and passing configuration settings.
 #[derive(Clone)]
 pub(crate) struct WriterOptions {
     pub(crate) has_header: bool,
@@ -874,9 +1159,7 @@ impl Default for WriterOptions {
     }
 }
 
-// TODO
 impl WriterOptions {
-    // TODO
     fn new() -> WriterOptions {
         WriterOptions {
             has_header: true,

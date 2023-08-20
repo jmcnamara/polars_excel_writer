@@ -10,7 +10,7 @@ use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
-    let mut df: DataFrame = df!(
+    let df: DataFrame = df!(
         "Datetime" => &[
             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
@@ -20,15 +20,18 @@ fn main() {
     )
     .unwrap();
 
-    example(&mut df).unwrap();
+    example(&df).unwrap();
 }
 
-use polars_excel_writer::ExcelWriter;
+use polars_excel_writer::PolarsXlsxWriter;
 
-fn example(df: &mut DataFrame) -> PolarsResult<()> {
-    let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+fn example(df: &DataFrame) -> PolarsResult<()> {
+    let mut writer = PolarsXlsxWriter::new();
 
-    ExcelWriter::new(&mut file)
-        .with_datetime_format("hh::mm - mmm d yyyy")
-        .finish(df)
+    writer.set_datetime_format("hh::mm - mmm d yyyy");
+
+    writer.write_dataframe(df)?;
+    writer.write_excel("dataframe.xlsx")?;
+
+    Ok(())
 }

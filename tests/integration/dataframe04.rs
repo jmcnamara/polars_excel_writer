@@ -11,7 +11,7 @@ use polars::prelude::*;
 use polars_excel_writer::PolarsXlsxWriter;
 use rust_xlsxwriter::XlsxError;
 
-// Compare output against target Excel file using todo.
+// Compare output against target Excel file using PolarsXlsxWriter.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],

@@ -4,17 +4,17 @@
 //
 // Copyright 2023, John McNamara, jmcnamara@cpan.org
 
-//! A crate for serializing Polars dataframes to Excel XLSX files.
+//! A crate for serializing Polars dataframes to Excel Xlsx files.
 //!
 //! The `polars_excel_writer` provides two interfaces for writing a dataframe to
-//! an Excel XLSX file:
+//! an Excel Xlsx file:
 //!
 //! - [`ExcelWriter`](crate::ExcelWriter) a simple Excel serializer that
 //! implements the Polars [`SerWriter`] trait to write a dataframe to an Excel
-//! XLSX file.
+//! Xlsx file.
 //! - [`PolarsXlsxWriter`](crate::PolarsXlsxWriter) a more configurable Excel
 //!   serializer that more closely resembles the interface options provided by
-//!   the Polars [`write_excel()`] dataframe method.
+//!   the Polars Python [`write_excel()`] dataframe method.
 //!
 //! `ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
 //! turn uses the [`rust_xlsxwriter`] crate.
@@ -82,11 +82,11 @@
 //!
 
 /// A module that exports the `ExcelWriter` struct which implements the Polars
-/// `SerWriter` trait to serialize a dataframe to an Excel XLSX file.
+/// `SerWriter` trait to serialize a dataframe to an Excel Xlsx file.
 pub mod write;
 
 /// A module that exports the `PolarsXlsxWriter` struct which provides an Excel
-/// XLSX serializer that works with Polars dataframes and which can also
+/// Xlsx serializer that works with Polars dataframes and which can also
 /// interact with the [`rust_xlsxwriter`] writing engine that it wraps.
 pub mod xlsx_writer;
 

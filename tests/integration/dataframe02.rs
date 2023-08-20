@@ -11,7 +11,7 @@ use polars::prelude::*;
 use polars_excel_writer::{ExcelWriter, PolarsXlsxWriter};
 use rust_xlsxwriter::XlsxError;
 
-// Compare output against target Excel file using todo.
+// Compare output against target Excel file using ExcelWriter.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],
@@ -28,7 +28,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Compare output against target Excel file using todo.
+// Compare output against target Excel file using PolarsXlsxWriter.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],

@@ -1,12 +1,12 @@
 # polars_excel_writer
 
 The `polars_excel_writer` crate is a library for serializing Polars dataframes
-to Excel XLSX files.
+to Excel Xlsx files.
 
-It provides two interfaces for writing a dataframe to an Excel XLSX file:
+It provides two interfaces for writing a dataframe to an Excel Xlsx file:
 
 - [`ExcelWriter`] a simple Excel serializer that implements the Polars
-  [`SerWriter`] trait to write a dataframe to an Excel XLSX file.
+  [`SerWriter`] trait to write a dataframe to an Excel Xlsx file.
 
 - [`PolarsXlsxWriter`] a more configurable Excel serializer that more closely
   resembles the interface options provided by the Polars [`write_excel()`]

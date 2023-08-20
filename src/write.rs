@@ -14,7 +14,7 @@ use rust_xlsxwriter::Format;
 use crate::PolarsXlsxWriter;
 
 /// `ExcelWriter` implements the Polars [`SerWriter`] trait to serialize a
-/// dataframe to an Excel XLSX file.
+/// dataframe to an Excel Xlsx file.
 ///
 /// `ExcelWriter` provides a simple interface for writing to an Excel file
 /// similar to Polars [`CsvWriter`].
@@ -220,9 +220,6 @@ where
     /// # fn main() {
     /// #     // Create a sample dataframe for the example.
     /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #         "Time" => &[
     /// #             NaiveTime::from_hms_milli_opt(2, 00, 3, 456).unwrap(),
     /// #             NaiveTime::from_hms_milli_opt(2, 18, 3, 456).unwrap(),
@@ -342,9 +339,6 @@ where
     /// # fn main() {
     /// #     // Create a sample dataframe for the example.
     /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #         "Datetime" => &[
     /// #             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
     /// #             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
@@ -381,11 +375,11 @@ where
     /// Set the Excel number format for floats.
     ///
     /// Set the Excel number format for f32/f64 float types using an Excel
-    /// number format string. These format strings can be obtained for the
-    /// Format Cells -> Number dialog in Excel.
+    /// number format string. These format strings can be obtained from the
+    /// `Format Cells -> Number` dialog in Excel.
     ///
-    /// See all the [Number Format Categories] and subsequent sections in the
-    /// `rust_xlsxwriter` documentation.
+    /// See the [Number Format Categories] section and subsequent Number Format
+    /// sections in the `rust_xlsxwriter` documentation.
     ///
     /// [Number Format Categories]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#number-format-categories

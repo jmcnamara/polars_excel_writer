@@ -10,20 +10,23 @@ use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
-    let mut df: DataFrame = df!(
+    let df: DataFrame = df!(
         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     )
     .unwrap();
 
-    example(&mut df).unwrap();
+    example(&df).unwrap();
 }
 
-use polars_excel_writer::ExcelWriter;
+use polars_excel_writer::PolarsXlsxWriter;
 
-fn example(df: &mut DataFrame) -> PolarsResult<()> {
-    let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+fn example(df: &DataFrame) -> PolarsResult<()> {
+    let mut writer = PolarsXlsxWriter::new();
 
-    ExcelWriter::new(&mut file)
-        .with_float_precision(3)
-        .finish(df)
+    writer.set_float_precision(3);
+
+    writer.write_dataframe(df)?;
+    writer.write_excel("dataframe.xlsx")?;
+
+    Ok(())
 }
