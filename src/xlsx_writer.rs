@@ -13,7 +13,7 @@ use polars::export::arrow::temporal_conversions::{
     timestamp_us_to_datetime,
 };
 use polars::prelude::*;
-use rust_xlsxwriter::{Format, Table, Workbook, Worksheet, XlsxError};
+use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 
 /// `PolarsXlsxWriter` provides an Excel XLSX serializer that works with Polars
 /// dataframes and which can also interact with the [`rust_xlsxwriter`] writing
@@ -719,7 +719,7 @@ impl PolarsXlsxWriter {
         row_offset: u32,
         col_offset: u16,
         options: &WriterOptions,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<(), PolarsError> {
         let header_offset = u32::from(options.has_header);
 
         // Iterate through the dataframe column by column.
@@ -817,11 +817,11 @@ impl PolarsXlsxWriter {
                         )?;
                     }
                     _ => {
-                        eprintln!(
-                            "WARNING: Polars AnyValue data type '{}' is not supported by Excel",
+                        polars_bail!(
+                            ComputeError:
+                            "Polars AnyValue data type '{}' is not supported by Excel",
                             data.dtype()
                         );
-                        break;
                     }
                 }
             }
