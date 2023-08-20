@@ -6,8 +6,8 @@
 
 //! A crate for serializing Polars dataframes to Excel Xlsx files.
 //!
-//! The `polars_excel_writer` provides two interfaces for writing a dataframe to
-//! an Excel Xlsx file:
+//! The `polars_excel_writer` crate provides two interfaces for writing a
+//! dataframe to an Excel Xlsx file:
 //!
 //! - [`ExcelWriter`](crate::ExcelWriter) a simple Excel serializer that
 //! implements the Polars [`SerWriter`] trait to write a dataframe to an Excel
@@ -28,13 +28,13 @@
 //!  # Examples
 //!
 //! An example of writing a Polar Rust dataframe to an Excel file using the
-//! `ExcelWriter` interface.
+//! `ExcelWriter` and `PolarsXlsxWriter` interfaces.
 //!
 //! ```rust
-//! # // This code is available in examples/excelwriter_intro.rs
+//! # // This code is available in examples/app_demo.rs
 //! #
-//! use polars::prelude::*;
 //! use chrono::prelude::*;
+//! use polars::prelude::*;
 //!
 //! fn main() {
 //!     // Create a sample dataframe for the example.
@@ -63,22 +63,37 @@
 //!     )
 //!     .unwrap();
 //!
-//!     example(&mut df).unwrap();
+//!     example1(&mut df).unwrap();
+//!     example2(&df).unwrap();
 //! }
 //!
+//! // The ExcelWriter interface.
 //! use polars_excel_writer::ExcelWriter;
 //!
-//! fn example(df: &mut DataFrame) -> PolarsResult<()> {
+//! fn example1(df: &mut DataFrame) -> PolarsResult<()> {
 //!     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 //!
-//!     ExcelWriter::new(&mut file)
-//!         .finish(df)
+//!     ExcelWriter::new(&mut file).finish(df)
+//! }
+//!
+//! // The PolarsXlsxWriter interface. For this simple case it is similar to the
+//! // ExcelWriter interface but it has additional options to support more complex
+//! // use cases.
+//! use polars_excel_writer::PolarsXlsxWriter;
+//!
+//! fn example2(df: &DataFrame) -> PolarsResult<()> {
+//!     let mut writer = PolarsXlsxWriter::new();
+//!
+//!     writer.write_dataframe(df)?;
+//!     writer.write_excel("dataframe2.xlsx")?;
+//!
+//!     Ok(())
 //! }
 //! ```
 //!
-//! Output file:
+//! Second output file (same as the first):
 //!
-//! <img src="https://rustxlsxwriter.github.io/images/excelwriter_intro.png">
+//! <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 //!
 
 /// A module that exports the `ExcelWriter` struct which implements the Polars

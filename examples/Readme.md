@@ -1,8 +1,13 @@
-# Examples for the `polars_excel_writer` library.
+# Examples for the `rust_xlsxwriter` library.
 
 This directory contains working examples showing different features of the
-`polars_excel_writer` library.
+`rust_xlsxwriter` library.
 
+The `app_{name}.rs` examples are small complete programs showing a feature or
+collection of features.
+
+The `doc_{struct}_{function}.rs` examples are more specific examples from the
+documentation and generally show how an individual function works.
 
 * `excelwriter_autofit.rs` - An example of writing a Polar Rust dataframe
   to an Excel file. This example demonstrates autofitting column widths in
@@ -51,6 +56,9 @@ This directory contains working examples showing different features of the
 * `write_excel_chart.rs` - An example of using `polars_excel_writer` in
   conjunction with `rust_xlsxwriter` to write a Polars dataframe to a
   worksheet and then add a chart to plot the data.
+
+* `write_excel_combined.rs` - An example of writing a Polar Rust dataframe
+  to an Excel file.
 
 * `write_excel_date_format.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This example demonstrates how to change the

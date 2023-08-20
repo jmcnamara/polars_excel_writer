@@ -1,40 +1,9 @@
-# polars_excel_writer
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-The `polars_excel_writer` crate is a library for serializing Polars dataframes
-to Excel Xlsx files.
+//! An example of writing a Polar Rust dataframe to an Excel file.
 
-It provides two interfaces for writing a dataframe to an Excel Xlsx file:
-
-- [`ExcelWriter`] a simple Excel serializer that implements the Polars
-  [`SerWriter`] trait to write a dataframe to an Excel Xlsx file.
-
-- [`PolarsXlsxWriter`] a more configurable Excel serializer that more closely
-  resembles the interface options provided by the Polars [`write_excel()`]
-  dataframe method.
-
-`ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
-turn uses the [`rust_xlsxwriter`] crate.
-
-[`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/struct.ExcelWriter.html
-[`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/struct.PolarsXlsxWriter.html
-
-[`SerWriter`]:
-    https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
-
-[`CsvWriter`]:
-    https://docs.rs/polars/latest/polars/prelude/struct.CsvWriter.html
-
-[`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
-
-[`write_excel()`]:
-   https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
-
-## Example
-
-An example of writing a Polar Rust dataframe to an Excel file using the
-`ExcelWriter` interface.
-
-```rust
 use chrono::prelude::*;
 use polars::prelude::*;
 
@@ -91,9 +60,3 @@ fn example2(df: &DataFrame) -> PolarsResult<()> {
 
     Ok(())
 }
-```
-
-Second output file (same as the first):
-
-<img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
-
