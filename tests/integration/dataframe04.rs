@@ -18,12 +18,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2, 2, 2],
     )?;
 
-    let mut xl = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsXlsxWriter::new();
 
-    xl.write_dataframe_to_cell(&df, 0, 0)?;
-    xl.write_dataframe_to_cell(&df, 0, 3)?;
+    xlsx_writer.write_dataframe_to_cell(&df, 0, 0)?;
+    xlsx_writer.write_dataframe_to_cell(&df, 0, 3)?;
 
-    xl.write_excel(filename)?;
+    xlsx_writer.save(filename)?;
 
     Ok(())
 }

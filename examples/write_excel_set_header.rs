@@ -22,12 +22,12 @@ fn main() {
 use polars_excel_writer::PolarsXlsxWriter;
 
 fn example(df: &DataFrame) -> PolarsResult<()> {
-    let mut writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsXlsxWriter::new();
 
-    writer.set_header(false);
+    xlsx_writer.set_header(false);
 
-    writer.write_dataframe(df)?;
-    writer.write_excel("dataframe.xlsx")?;
+    xlsx_writer.write_dataframe(df)?;
+    xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

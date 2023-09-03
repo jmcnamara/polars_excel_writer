@@ -82,10 +82,10 @@
 //! use polars_excel_writer::PolarsXlsxWriter;
 //!
 //! fn example2(df: &DataFrame) -> PolarsResult<()> {
-//!     let mut writer = PolarsXlsxWriter::new();
+//!     let mut xlsx_writer = PolarsXlsxWriter::new();
 //!
-//!     writer.write_dataframe(df)?;
-//!     writer.write_excel("dataframe2.xlsx")?;
+//!     xlsx_writer.write_dataframe(df)?;
+//!     xlsx_writer.save("dataframe2.xlsx")?;
 //!
 //!     Ok(())
 //! }

@@ -35,12 +35,12 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Column2" => &["Bar", "Bar", "Bar"],
     )?;
 
-    let mut xl = PolarsXlsxWriter::new();
-    xl.set_header(false);
-    xl.set_autofit(true);
+    let mut xlsx_writer = PolarsXlsxWriter::new();
+    xlsx_writer.set_header(false);
+    xlsx_writer.set_autofit(true);
 
-    xl.write_dataframe(&df)?;
-    xl.write_excel(filename)?;
+    xlsx_writer.write_dataframe(&df)?;
+    xlsx_writer.save(filename)?;
 
     Ok(())
 }

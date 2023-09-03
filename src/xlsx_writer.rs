@@ -6,6 +6,7 @@
 
 #![warn(missing_docs)]
 
+use std::io::{Seek, Write};
 use std::path::Path;
 
 use polars::export::arrow::temporal_conversions::{
@@ -82,10 +83,10 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// use polars_excel_writer::PolarsXlsxWriter;
 ///
 /// fn example(df: &DataFrame) -> PolarsResult<()> {
-///     let mut writer = PolarsXlsxWriter::new();
+///     let mut xlsx_writer = PolarsXlsxWriter::new();
 ///
-///     writer.write_dataframe(df)?;
-///     writer.write_excel("dataframe.xlsx")?;
+///     xlsx_writer.write_dataframe(df)?;
+///     xlsx_writer.save("dataframe.xlsx")?;
 ///
 ///     Ok(())
 /// }
@@ -137,8 +138,8 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 ///     let worksheet = workbook.add_worksheet();
 ///
 ///     // Write the dataframe to the worksheet using `PolarsXlsxWriter`.
-///     let mut writer = PolarsXlsxWriter::new();
-///     writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+///     let mut xlsx_writer = PolarsXlsxWriter::new();
+///     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 ///
 ///     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
 ///     // range of the dataframe in the worksheet.
@@ -225,7 +226,7 @@ impl PolarsXlsxWriter {
     /// new Excel workbook.
     ///
     /// The worksheet must be written to a file using
-    /// [`write_excel()`](PolarsXlsxWriter::write_excel).
+    /// [`save()`](PolarsXlsxWriter::save).
     ///
     /// # Parameters
     ///
@@ -252,10 +253,10 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.write_dataframe(&df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -284,7 +285,7 @@ impl PolarsXlsxWriter {
     /// to write more than one to the same worksheet (without overlapping).
     ///
     /// The worksheet must be written to a file using
-    /// [`write_excel()`](PolarsXlsxWriter::write_excel).
+    /// [`save()`](PolarsXlsxWriter::save).
     ///
     /// # Parameters
     ///
@@ -318,13 +319,13 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Write two dataframes to the same worksheet.
-    ///     writer.write_dataframe_to_cell(&df1, 0, 0)?;
-    ///     writer.write_dataframe_to_cell(&df2, 0, 2)?;
+    ///     xlsx_writer.write_dataframe_to_cell(&df1, 0, 0)?;
+    ///     xlsx_writer.write_dataframe_to_cell(&df2, 0, 2)?;
     ///
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -353,7 +354,7 @@ impl PolarsXlsxWriter {
     ///
     /// Writes the dataframe to a `rust_xlsxwriter` [`Worksheet`] object. This
     /// worksheet cannot be saved via
-    /// [`write_excel()`](PolarsXlsxWriter::write_excel). Instead it must be
+    /// [`save()`](PolarsXlsxWriter::save). Instead it must be
     /// used in conjunction with a `rust_xlsxwriter` [`Workbook`].
     ///
     /// This is useful for mixing `PolarsXlsxWriter` data writing with
@@ -402,8 +403,8 @@ impl PolarsXlsxWriter {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Write the dataframe to the worksheet using `PolarsXlsxWriter`.
-    ///     let mut writer = PolarsXlsxWriter::new();
-    ///     writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
     ///
     ///     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
     ///     // range of the dataframe in the worksheet.
@@ -443,12 +444,12 @@ impl PolarsXlsxWriter {
 
     /// Save the Workbook as an xlsx file.
     ///
-    /// The `write_excel()` method writes all the workbook and worksheet data to
+    /// The `save()` method writes all the workbook and worksheet data to
     /// a new xlsx file. It will overwrite any existing file.
     ///
     /// The method can be called multiple times so it is possible to get
     /// incremental files at different stages of a process, or to save the same
-    /// Workbook object to different paths. However, `write_excel()` is an
+    /// Workbook object to different paths. However, `save()` is an
     /// expensive operation which assembles multiple files into an xlsx/zip
     /// container so for performance reasons you shouldn't call it
     /// unnecessarily.
@@ -463,7 +464,7 @@ impl PolarsXlsxWriter {
     /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
     /// errors in a string.
     ///
-    pub fn write_excel<P: AsRef<Path>>(&mut self, path: P) -> PolarsResult<()> {
+    pub fn save<P: AsRef<Path>>(&mut self, path: P) -> PolarsResult<()> {
         self.workbook.save(path)?;
 
         Ok(())
@@ -503,12 +504,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_header(false);
+    ///     xlsx_writer.set_header(false);
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -569,12 +570,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_time_format("hh:mm");
+    ///     xlsx_writer.set_time_format("hh:mm");
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -634,12 +635,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_date_format("mmm d yyyy");
+    ///     xlsx_writer.set_date_format("mmm d yyyy");
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -698,12 +699,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_datetime_format("hh::mm - mmm d yyyy");
+    ///     xlsx_writer.set_datetime_format("hh::mm - mmm d yyyy");
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -762,12 +763,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_float_format("#,##0.00");
+    ///     xlsx_writer.set_float_format("#,##0.00");
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -821,12 +822,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_float_precision(3);
+    ///     xlsx_writer.set_float_precision(3);
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -881,12 +882,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_null_value("Null");
+    ///     xlsx_writer.set_null_value("Null");
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -943,12 +944,12 @@ impl PolarsXlsxWriter {
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn example(df: &DataFrame) -> PolarsResult<()> {
-    ///     let mut writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
-    ///     writer.set_autofit(true);
+    ///     xlsx_writer.set_autofit(true);
     ///
-    ///     writer.write_dataframe(df)?;
-    ///     writer.write_excel("dataframe.xlsx")?;
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -967,19 +968,22 @@ impl PolarsXlsxWriter {
     // Internal functions/methods.
     // -----------------------------------------------------------------------
 
-    // Workaround to map `rust_xlsxwriter` path output to `SerWriter` file/buffer.
-    pub(crate) fn write_to_buffer(&mut self, df: &DataFrame) -> PolarsResult<Vec<u8>> {
+    // Method to support writing to ExcelWriter writer<W>.
+    pub(crate) fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
+    where
+        W: Write + Seek + Send,
+    {
         let options = self.options.clone();
         let worksheet = self.last_worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
 
-        let buf = self.workbook.save_to_buffer()?;
+        self.workbook.save_to_writer(writer)?;
 
-        Ok(buf)
+        Ok(())
     }
 
-    // Get the last (generally only) worksheet in the workbook for writing to.
+    // Get the last (and generally only) worksheet in the workbook for writing.
     fn last_worksheet(&mut self) -> PolarsResult<&mut Worksheet> {
         let mut last_index = self.workbook.worksheets().len();
 

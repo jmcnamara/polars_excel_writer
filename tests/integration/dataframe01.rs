@@ -32,9 +32,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2, 2, 2],
     )?;
 
-    let mut xl = PolarsXlsxWriter::new();
-    xl.write_dataframe(&df)?;
-    xl.write_excel(filename)?;
+    let mut xlsx_writer = PolarsXlsxWriter::new();
+    xlsx_writer.write_dataframe(&df)?;
+    xlsx_writer.save(filename)?;
 
     Ok(())
 }
@@ -49,9 +49,9 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let mut xl = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsXlsxWriter::new();
 
-    xl.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+    xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 
     workbook.save(filename)?;
 
