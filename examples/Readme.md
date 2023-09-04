@@ -49,6 +49,9 @@ documentation and generally show how an individual function works.
   dataframe to an Excel file. This example demonstrates how to change the
   default format for Polars time types.
 
+* `perf_test.rs` - Simple performance test to compare with the Python
+  Polars example in `perf_test.py`.
+
 * `write_excel_autofit.rs` - An example of writing a Polar Rust dataframe
   to an Excel file. This example demonstrates autofitting column widths in
   the output worksheet.
@@ -87,6 +90,10 @@ documentation and generally show how an individual function works.
 * `write_excel_set_header.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This demonstrates saving the dataframe
   without a header.
+
+* `write_excel_set_table.rs` - An example of writing a Polar Rust dataframe
+  to an Excel file. This demonstrates setting properties of the worksheet
+  table that wraps the output dataframe.
 
 * `write_excel_time_format.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This example demonstrates how to change the

@@ -99,8 +99,8 @@ Second output file (same as the first):
 
 ## See also
 
-- [Changelog]
-- [Performance]
+- [Changelog]: Recent additions and fixes.
+- [Performance]: Performance comparison with Python based methods.
 
 [Changelog]: https://github.com/jmcnamara/polars_excel_writer/blob/main/CHANGELOG.md
-[Performance]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/#examples
+[Performance]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/#performance
