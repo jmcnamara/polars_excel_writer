@@ -78,9 +78,9 @@ fn example1(df: &mut DataFrame) -> PolarsResult<()> {
     ExcelWriter::new(&mut file).finish(df)
 }
 
-// The PolarsXlsxWriter interface. For this simple case it is similar to the
-// ExcelWriter interface but it has additional options to support more complex
-// use cases.
+// The PolarsXlsxWriter interface. For this simple case it is
+// similar to the ExcelWriter interface but it has additional
+// options to support more complex use cases.
 use polars_excel_writer::PolarsXlsxWriter;
 
 fn example2(df: &DataFrame) -> PolarsResult<()> {
@@ -97,3 +97,10 @@ Second output file (same as the first):
 
 <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 
+## See also
+
+- [Changelog]
+- [Performance]
+
+[Changelog]: https://github.com/jmcnamara/polars_excel_writer/blob/main/CHANGELOG.md
+[Performance]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/#examples
