@@ -95,6 +95,43 @@
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 //!
+//!
+//! ## Performance
+//!
+//! The table below shows the performance of writing a dataframe using
+//! Python Polars, Python Pandas and `PolarsXlsxWriter`.
+//!
+//! - Performance data:
+//!
+//!   | Test Case                     | Time (s) | Relative (%) |
+//!   | :---------------------------- | :------- | :----------- |
+//!   | `Polars`                      |     6.49 |         100% |
+//!   | `Pandas`                      |    10.92 |         168% |
+//!   | `polars_excel_writer`         |     1.22 |          19% |
+//!   | `polars_excel_writer` + `zlib`|     1.08 |          17% |
+//!
+//! The tested configurations were:
+//!
+//! - `Polars`: The dataframe was created in Python Polars and written using the
+//!   [`write_excel()`] function. See [`perf_test.py`].
+//! - `Pandas`: The dataframe was created in Polars but converted to Pandas and
+//!   then written via the Pandas [`to_excel()`] function. See also
+//!   [`perf_test.py`].
+//! - `polars_excel_writer`: The dataframe was created in Rust Polars and
+//!   written using the `PolarsXlsxWriter` interface. See [`perf_test.rs`].
+//! - `polars_excel_writer` + `zlib`: Same as the previous test case but uses
+//!   the `zlib` feature flag to enable the C zlib library in conjunction with
+//!   the backend `ZipWriter`.
+//!
+//! **Note**: The performance was tested for the dataframe writing code only.
+//! The code used to create the dataframes was omitted from the test results.
+//!
+//! [`perf_test.py`]:
+//! https://github.com/jmcnamara/polars_excel_writer/blob/main/examples/perf_test.py
+//! [`perf_test.rs`]:
+//! https://github.com/jmcnamara/polars_excel_writer/blob/main/examples/perf_test.rs
+//! [`to_excel()`]:
+//! https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
 
 /// A module that exports the `ExcelWriter` struct which implements the Polars
 /// `SerWriter` trait to serialize a dataframe to an Excel Xlsx file.
