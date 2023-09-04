@@ -521,7 +521,6 @@ impl PolarsXlsxWriter {
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
     ///
     pub fn set_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
-        self.options.has_header = has_header;
         self.options.table.set_header_row(has_header);
         self
     }
@@ -964,6 +963,88 @@ impl PolarsXlsxWriter {
         self.options.use_autofit = autofit;
         self
     }
+
+    /// Set the worksheet table for the output dataframe.
+    ///
+    /// By default, and by convention with the Polars [`write_excel()`] method,
+    /// `PolarsXlsxWriter` adds an Excel worksheet table to each exported
+    /// dataframe.
+    ///
+    /// Tables in Excel are a way of grouping a range of cells into a single
+    /// entity that has common formatting or that can be referenced from
+    /// formulas. Tables can have column headers, autofilters, total rows,
+    /// column formulas and different formatting styles.
+    ///
+    /// The image below shows a default table in Excel with the default
+    /// properties shown in the ribbon bar.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_intro.png">
+    ///
+    /// The `set_table()` method allows you to pass a pre-configured
+    /// `rust_xlsxwriter` table and override any of the default [`Table`]
+    /// properties.
+    ///
+    /// [`write_excel()`]:
+    ///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `table` - A `rust_xlsxwriter` [`Table`] reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting properties of the worksheet table that wraps the
+    /// output dataframe.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_table.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use rust_xlsxwriter::*;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Add a `rust_xlsxwriter` table and set the style.
+    ///     let mut table = Table::new();
+    ///     table.set_style(TableStyle::Medium4);
+    ///
+    ///     // Add the table to the Excel writer.
+    ///     xlsx_writer.set_table(&table);
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_set_table.png">
+    ///
+    pub fn set_table(&mut self, table: &Table) -> &mut PolarsXlsxWriter {
+        self.options.table = table.clone();
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Internal functions/methods.
     // -----------------------------------------------------------------------
@@ -1009,14 +1090,14 @@ impl PolarsXlsxWriter {
         col_offset: u16,
         options: &WriterOptions,
     ) -> Result<(), PolarsError> {
-        let header_offset = u32::from(options.has_header);
+        let header_offset = u32::from(options.table.has_header_row());
 
         // Iterate through the dataframe column by column.
         for (col_num, column) in df.get_columns().iter().enumerate() {
             let col_num = col_offset + col_num as u16;
 
             // Store the column names for use as table headers.
-            if options.has_header {
+            if options.table.has_header_row() {
                 worksheet.write(row_offset, col_num, column.name())?;
             }
 
@@ -1118,8 +1199,11 @@ impl PolarsXlsxWriter {
 
         // Create a table for the dataframe range.
         let (mut max_row, max_col) = df.shape();
-        if !options.has_header {
+        if !options.table.has_header_row() {
             max_row -= 1;
+        }
+        if options.table.has_total_row() {
+            max_row += 1;
         }
 
         // Add the table to the worksheet.
@@ -1147,7 +1231,6 @@ impl PolarsXlsxWriter {
 // A struct for storing and passing configuration settings.
 #[derive(Clone)]
 pub(crate) struct WriterOptions {
-    pub(crate) has_header: bool,
     pub(crate) use_autofit: bool,
     pub(crate) date_format: Format,
     pub(crate) time_format: Format,
@@ -1166,7 +1249,6 @@ impl Default for WriterOptions {
 impl WriterOptions {
     fn new() -> WriterOptions {
         WriterOptions {
-            has_header: true,
             use_autofit: false,
             time_format: "hh:mm:ss;@".into(),
             date_format: "yyyy\\-mm\\-dd;@".into(),
