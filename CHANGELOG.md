@@ -14,7 +14,7 @@ More worksheet utility methods.
 
 - Added support for renaming worksheets via the [`set_worksheet_name()`] method.
 
-- Added support for adding worksheets via the [`add_worksheet`] method. This
+- Added support for adding worksheets via the [`add_worksheet()`] method. This
   allows you to add dataframes to several different worksheets in a workbook.
 
 - Added support for accessing the current worksheets via the [`worksheet()`] method.
