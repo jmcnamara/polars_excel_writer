@@ -234,8 +234,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Errors
     ///
-    /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
-    /// errors in a string.
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
     ///
     /// # Examples
     ///
@@ -269,7 +269,7 @@ impl PolarsXlsxWriter {
     ///
     pub fn write_dataframe(&mut self, df: &DataFrame) -> PolarsResult<()> {
         let options = self.options.clone();
-        let worksheet = self.last_worksheet()?;
+        let worksheet = self.worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
 
@@ -295,8 +295,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Errors
     ///
-    /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
-    /// errors in a string.
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
     ///
     /// # Examples
     ///
@@ -343,7 +343,7 @@ impl PolarsXlsxWriter {
         col: u16,
     ) -> PolarsResult<()> {
         let options = self.options.clone();
-        let worksheet = self.last_worksheet()?;
+        let worksheet = self.worksheet()?;
 
         Self::write_dataframe_internal(df, worksheet, row, col, &options)?;
 
@@ -372,8 +372,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Errors
     ///
-    /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
-    /// errors in a string.
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
     ///
     /// # Examples
     ///
@@ -461,8 +461,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Errors
     ///
-    /// A [`PolarsError`] `ComputeError` error that wraps any `rust_xlsxwriter`
-    /// errors in a string.
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
     ///
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> PolarsResult<()> {
         self.workbook.save(path)?;
@@ -1045,27 +1045,205 @@ impl PolarsXlsxWriter {
         self
     }
 
-    // -----------------------------------------------------------------------
-    // Internal functions/methods.
-    // -----------------------------------------------------------------------
-
-    // Method to support writing to ExcelWriter writer<W>.
-    pub(crate) fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
-    where
-        W: Write + Seek + Send,
-    {
-        let options = self.options.clone();
-        let worksheet = self.last_worksheet()?;
-
-        Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
-
-        self.workbook.save_to_writer(writer)?;
-
-        Ok(())
+    /// Set the worksheet name for the output dataframe.
+    ///
+    /// Set the name of the worksheet that the dataframe is written to. If the
+    /// name isn't set then it will be the default Excel name of `Sheet1` (or
+    /// `Sheet2`, `Sheet3`, etc. if more than one worksheet is added).
+    ///
+    /// # Parameters
+    ///
+    /// * `name` - The worksheet name. It must follow the Excel rules, shown
+    ///   below.
+    ///
+    ///   * The name must be less than 32 characters.
+    ///   * The name cannot be blank.
+    ///   * The name cannot contain any of the characters: `[ ] : * ? / \`.
+    ///   * The name cannot start or end with an apostrophe.
+    ///   * The name shouldn't be "History" (case-insensitive) since that is
+    ///     reserved by Excel.
+    ///   * It must not be a duplicate of another worksheet name used in the
+    ///     workbook.
+    ///
+    /// # Errors
+    ///
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
+    ///
+    /// Excel has several rules that govern what a worksheet name can be. See
+    /// [`set_name()` errors] for more details.
+    ///
+    /// [`set_name()` errors]:
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#errors
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting the name for the output worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_worksheet_name.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     xlsx_writer.set_worksheet_name("Polars Data")?;
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_set_worksheet_name.png">
+    ///
+    pub fn set_worksheet_name(
+        &mut self,
+        name: impl Into<String>,
+    ) -> PolarsResult<&mut PolarsXlsxWriter> {
+        let worksheet = self.worksheet()?;
+        worksheet.set_name(name)?;
+        Ok(self)
     }
 
-    // Get the last (and generally only) worksheet in the workbook for writing.
-    fn last_worksheet(&mut self) -> PolarsResult<&mut Worksheet> {
+    /// Add a new worksheet to the output workbook.
+    ///
+    /// Add a worksheet to the workbook so that dataframes can be written to
+    /// more than one worksheet. This is useful when you have several dataframes
+    /// that you wish to have on separate worksheets.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframes to separate worksheets in
+    /// an Excel workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_add_worksheet.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     let df1: DataFrame = df!(
+    ///         "Data 1" => &[10, 11, 12, 13, 14, 15],
+    ///     )?;
+    ///
+    ///     let df2: DataFrame = df!(
+    ///         "Data 2" => &[20, 21, 22, 23, 24, 25],
+    ///     )?;
+    ///
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Write the first dataframe to the first/default worksheet.
+    ///     xlsx_writer.write_dataframe(&df1)?;
+    ///
+    ///     // Add another worksheet and write the second dataframe to it.
+    ///     xlsx_writer.add_worksheet();
+    ///     xlsx_writer.write_dataframe(&df2)?;
+    ///
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_add_worksheet.png">
+    ///
+    pub fn add_worksheet(&mut self) -> &mut PolarsXlsxWriter {
+        self.workbook.add_worksheet();
+
+        self
+    }
+
+    /// Get the current worksheet in the workbook.
+    ///
+    /// Get a reference to the current/last worksheet in the workbook in order
+    /// to manipulate it with a `rust_xlsxwriter` [`Worksheet`] method. This is
+    /// occasionally useful when you need to access some feature of the
+    /// worksheet APIs that isn't supported directly by `PolarsXlsxWriter`.
+    ///
+    /// Note, it is also possible to create a [`Worksheet`] separately and then
+    /// write the Polar dataframe to it using the
+    /// [`write_dataframe_to_worksheet()`](PolarsXlsxWriter::write_dataframe_to_worksheet)
+    /// method. That latter is more useful if you need to do a lot of
+    /// manipulation of the worksheet.
+    ///
+    /// # Errors
+    ///
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates getting a reference to the worksheet used to write the
+    /// dataframe and setting its tab color.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_worksheet.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Get the worksheet that the dataframe will be written to.
+    ///     let worksheet = xlsx_writer.worksheet()?;
+    ///
+    ///     // Set the tab color for the worksheet using a `rust_xlsxwriter` worksheet
+    ///     // method.
+    ///     worksheet.set_tab_color("#FF9900");
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_worksheet.png">
+    ///
+    pub fn worksheet(&mut self) -> PolarsResult<&mut Worksheet> {
         let mut last_index = self.workbook.worksheets().len();
 
         // Add a worksheet if there isn't one already.
@@ -1078,6 +1256,25 @@ impl PolarsXlsxWriter {
         let worksheet = self.workbook.worksheet_from_index(last_index)?;
 
         Ok(worksheet)
+    }
+
+    // -----------------------------------------------------------------------
+    // Internal functions/methods.
+    // -----------------------------------------------------------------------
+
+    // Method to support writing to ExcelWriter writer<W>.
+    pub(crate) fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
+    where
+        W: Write + Seek + Send,
+    {
+        let options = self.options.clone();
+        let worksheet = self.worksheet()?;
+
+        Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
+
+        self.workbook.save_to_writer(writer)?;
+
+        Ok(())
     }
 
     // Write the dataframe to a `rust_xlsxwriter` Worksheet. It is structured as
