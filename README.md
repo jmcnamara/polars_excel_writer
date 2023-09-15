@@ -15,8 +15,8 @@ It provides two interfaces for writing a dataframe to an Excel Xlsx file:
 `ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
 turn uses the [`rust_xlsxwriter`] crate.
 
-[`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/struct.ExcelWriter.html
-[`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/struct.PolarsXlsxWriter.html
+[`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/write/struct.ExcelWriter.html
+[`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html
 
 [`SerWriter`]:
     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
