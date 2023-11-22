@@ -9,12 +9,11 @@
 //! The `polars_excel_writer` crate provides two interfaces for writing a
 //! dataframe to an Excel Xlsx file:
 //!
-//! - [`ExcelWriter`](crate::ExcelWriter) a simple Excel serializer that
-//! implements the Polars [`SerWriter`] trait to write a dataframe to an Excel
-//! Xlsx file.
-//! - [`PolarsXlsxWriter`](crate::PolarsXlsxWriter) a more configurable Excel
-//!   serializer that more closely resembles the interface options provided by
-//!   the Polars Python [`write_excel()`] dataframe method.
+//! - [`ExcelWriter`] a simple Excel serializer that implements the Polars
+//!   [`SerWriter`] trait to write a dataframe to an Excel Xlsx file.
+//! - [`PolarsXlsxWriter`] a more configurable Excel serializer that more
+//!   closely resembles the interface options provided by the Polars Python
+//!   [`write_excel()`] dataframe method.
 //!
 //! `ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
 //! turn uses the [`rust_xlsxwriter`] crate.
@@ -98,8 +97,8 @@
 //!
 //! ## Performance
 //!
-//! The table below shows the performance of writing a dataframe using
-//! Python Polars, Python Pandas and `PolarsXlsxWriter`.
+//! The table below shows the performance of writing a dataframe using Python
+//! Polars, Python Pandas and `PolarsXlsxWriter`.
 //!
 //! - Performance data:
 //!

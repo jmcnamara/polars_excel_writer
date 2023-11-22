@@ -20,8 +20,7 @@ use crate::PolarsXlsxWriter;
 /// similar to Polars [`CsvWriter`].
 ///
 /// For a more configurable dataframe to Excel serializer see
-/// [`PolarsXlsxWriter`](crate::PolarsXlsxWriter) which is also part of this
-/// crate.
+/// [`PolarsXlsxWriter`] which is also part of this crate.
 ///
 /// `ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
 /// turn uses the [`rust_xlsxwriter`] crate.

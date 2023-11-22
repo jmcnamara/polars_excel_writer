@@ -52,6 +52,9 @@ documentation and generally show how an individual function works.
 * `perf_test.rs` - Simple performance test to compare with the Python
   Polars example in `perf_test.py`.
 
+* `write_excel_add_worksheet.rs` - An example of writing a Polar Rust
+  dataframes to separate worksheets in an Excel workbook.
+
 * `write_excel_autofit.rs` - An example of writing a Polar Rust dataframe
   to an Excel file. This example demonstrates autofitting column widths in
   the output worksheet.
@@ -95,9 +98,17 @@ documentation and generally show how an individual function works.
   to an Excel file. This demonstrates setting properties of the worksheet
   table that wraps the output dataframe.
 
+* `write_excel_set_worksheet_name.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This demonstrates setting the name for the
+  output worksheet.
+
 * `write_excel_time_format.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This example demonstrates how to change the
   default format for Polars time types.
+
+* `write_excel_worksheet.rs` - An example of writing a Polar Rust dataframe
+  to an Excel file. This demonstrates getting a reference to the worksheet
+  used to write the dataframe and setting its tab color.
 
 * `write_excel_write_dataframe.rs` - An example of writing a Polar Rust
   dataframe to an Excel file.
