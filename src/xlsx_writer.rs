@@ -1323,6 +1323,16 @@ impl PolarsXlsxWriter {
                     AnyValue::UInt32(value) => {
                         worksheet.write_number(row_num, col_num, value)?;
                     }
+                    AnyValue::Int64(value) => {
+                        // Allow u64 conversion within Excel's limits.
+                        #[allow(clippy::cast_precision_loss)]
+                        worksheet.write_number(row_num, col_num, value as f64)?;
+                    }
+                    AnyValue::UInt64(value) => {
+                        // Allow u64 conversion within Excel's limits.
+                        #[allow(clippy::cast_precision_loss)]
+                        worksheet.write_number(row_num, col_num, value as f64)?;
+                    }
                     AnyValue::Float32(value) => {
                         worksheet.write_number_with_format(
                             row_num,
@@ -1359,7 +1369,7 @@ impl PolarsXlsxWriter {
                         worksheet.write_datetime_with_format(
                             row_num,
                             col_num,
-                            &datetime,
+                            datetime,
                             &options.datetime_format,
                         )?;
                         worksheet.set_column_width(col_num, 18)?;
@@ -1369,7 +1379,7 @@ impl PolarsXlsxWriter {
                         worksheet.write_datetime_with_format(
                             row_num,
                             col_num,
-                            &date,
+                            date,
                             &options.date_format,
                         )?;
                         worksheet.set_column_width(col_num, 10)?;
@@ -1379,7 +1389,7 @@ impl PolarsXlsxWriter {
                         worksheet.write_datetime_with_format(
                             row_num,
                             col_num,
-                            &time,
+                            time,
                             &options.time_format,
                         )?;
                     }

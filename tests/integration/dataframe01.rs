@@ -58,6 +58,21 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Check CSV input which should default to u64.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let csv_string = "Foo,Bar\n1,2\n1,2\n1,2\n";
+    let buffer = std::io::Cursor::new(csv_string);
+    let mut df = CsvReader::new(buffer)
+        .with_null_values(NullValues::AllColumnsSingle("NULL".to_string()).into())
+        .finish()?;
+
+    let mut file = std::fs::File::create(filename)?;
+
+    ExcelWriter::new(&mut file).finish(&mut df)?;
+
+    Ok(())
+}
+
 #[test]
 fn dataframe_excelwriter01() {
     let test_runner = common::TestRunner::new()
@@ -88,6 +103,18 @@ fn dataframe_to_worksheet01() {
         .set_name("dataframe01")
         .set_function(create_new_xlsx_file_3)
         .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn dataframe_from_csv01() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dataframe01")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();
