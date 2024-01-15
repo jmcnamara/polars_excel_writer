@@ -5,6 +5,15 @@ All notable changes to `polars_excel_writer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2024-01-15
+
+### Added
+
+- Added support for writing `u64` and `i64` number within Excel's limitations.
+  This implies a loss of precision outside Excel's integer range of +/-
+  999,999,999,999,999 (15 digits).
+
+
 ## [0.4.0] - 2023-11-22
 
 ### Added
