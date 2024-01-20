@@ -1349,7 +1349,7 @@ impl PolarsXlsxWriter {
                             &options.float_format,
                         )?;
                     }
-                    AnyValue::Utf8(value) => {
+                    AnyValue::String(value) => {
                         worksheet.write_string(row_num, col_num, value)?;
                     }
                     AnyValue::Boolean(value) => {
