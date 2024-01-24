@@ -521,7 +521,8 @@ impl PolarsXlsxWriter {
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
     ///
     pub fn set_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
-        self.options.table.set_header_row(has_header);
+        let table = self.options.table.clone().set_header_row(has_header);
+        self.options.table = table;
         self
     }
 
@@ -1022,8 +1023,7 @@ impl PolarsXlsxWriter {
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Add a `rust_xlsxwriter` table and set the style.
-    ///     let mut table = Table::new();
-    ///     table.set_style(TableStyle::Medium4);
+    ///     let table = Table::new().set_style(TableStyle::Medium4);
     ///
     ///     // Add the table to the Excel writer.
     ///     xlsx_writer.set_table(&table);

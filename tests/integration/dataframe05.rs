@@ -25,8 +25,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Sum),
     ];
 
-    let mut table = Table::new();
-    table
+    let table = Table::new()
         .set_style(TableStyle::None)
         .set_first_column(true)
         .set_last_column(true)

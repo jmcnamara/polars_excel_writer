@@ -53,8 +53,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     )?;
 
     let mut xlsx_writer = PolarsXlsxWriter::new();
-    let mut table = Table::new();
-    table.set_header_row(false);
+    let table = Table::new().set_header_row(false);
 
     xlsx_writer.set_table(&table);
     xlsx_writer.set_autofit(true);
