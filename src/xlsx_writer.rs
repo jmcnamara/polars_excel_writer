@@ -965,6 +965,59 @@ impl PolarsXlsxWriter {
         self
     }
 
+    /// Set the worksheet zoom factor.
+    ///
+    /// Set the worksheet zoom factor in the range 10 <= zoom <= 400.
+    ///
+    /// # Parameters
+    ///
+    /// * `zoom` - The worksheet zoom level. The default zoom level is 100.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting the worksheet zoom level.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_zoom.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     xlsx_writer.set_zoom(200);
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_zoom.png">
+    ///
+    pub fn set_zoom(&mut self, zoom: u16) -> &mut PolarsXlsxWriter {
+        self.options.zoom = zoom;
+        self
+    }
+
     /// Set the worksheet table for the output dataframe.
     ///
     /// By default, and by convention with the Polars [`write_excel()`] method,
@@ -1427,6 +1480,9 @@ impl PolarsXlsxWriter {
             worksheet.autofit();
         }
 
+        // Set the zoom level.
+        worksheet.set_zoom(options.zoom);
+
         Ok(())
     }
 }
@@ -1445,6 +1501,7 @@ pub(crate) struct WriterOptions {
     pub(crate) datetime_format: Format,
     pub(crate) null_string: Option<String>,
     pub(crate) table: Table,
+    pub(crate) zoom: u16,
 }
 
 impl Default for WriterOptions {
@@ -1463,6 +1520,7 @@ impl WriterOptions {
             null_string: None,
             float_format: Format::default(),
             table: Table::new(),
+            zoom: 100,
         }
     }
 }
