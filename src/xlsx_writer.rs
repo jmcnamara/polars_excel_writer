@@ -912,7 +912,7 @@ impl PolarsXlsxWriter {
     /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
     ///
     /// [`worksheet.autofit()`]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
     ///
     /// # Parameters
     ///
@@ -1015,6 +1015,62 @@ impl PolarsXlsxWriter {
     ///
     pub fn set_zoom(&mut self, zoom: u16) -> &mut PolarsXlsxWriter {
         self.options.zoom = zoom;
+        self
+    }
+
+    /// Set the option to turn on/off the screen gridlines.
+    ///
+    /// The `set_screen_gridlines()` method is use to turn on/off gridlines on
+    /// displayed worksheet. It is on by default.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates turning off the screen gridlines.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_screen_gridlines.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     xlsx_writer.set_screen_gridlines(false);
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_screen_gridlines.png">
+    ///
+    pub fn set_screen_gridlines(&mut self, enable: bool) -> &mut PolarsXlsxWriter {
+        self.options.screen_gridlines = enable;
+
         self
     }
 
@@ -1127,7 +1183,7 @@ impl PolarsXlsxWriter {
     /// [`set_name()` errors] for more details.
     ///
     /// [`set_name()` errors]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#errors
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#errors
     ///
     /// # Examples
     ///
@@ -1483,6 +1539,9 @@ impl PolarsXlsxWriter {
         // Set the zoom level.
         worksheet.set_zoom(options.zoom);
 
+        // Set the screen gridlines.
+        worksheet.set_screen_gridlines(options.screen_gridlines);
+
         Ok(())
     }
 }
@@ -1502,6 +1561,7 @@ pub(crate) struct WriterOptions {
     pub(crate) null_string: Option<String>,
     pub(crate) table: Table,
     pub(crate) zoom: u16,
+    pub(crate) screen_gridlines: bool,
 }
 
 impl Default for WriterOptions {
@@ -1521,6 +1581,7 @@ impl WriterOptions {
             float_format: Format::default(),
             table: Table::new(),
             zoom: 100,
+            screen_gridlines: true,
         }
     }
 }

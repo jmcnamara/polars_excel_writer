@@ -544,7 +544,7 @@ where
     /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
     ///
     /// [`worksheet.autofit()`]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
+    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
     ///
     /// # Examples
     ///

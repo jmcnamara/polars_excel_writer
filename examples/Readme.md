@@ -94,6 +94,10 @@ documentation and generally show how an individual function works.
   dataframe to an Excel file. This demonstrates saving the dataframe
   without a header.
 
+* `write_excel_set_screen_gridlines.rs` - An example of writing a Polar
+  Rust dataframe to an Excel file. This demonstrates turning off the screen
+  gridlines.
+
 * `write_excel_set_table.rs` - An example of writing a Polar Rust dataframe
   to an Excel file. This demonstrates setting properties of the worksheet
   table that wraps the output dataframe.
@@ -101,6 +105,9 @@ documentation and generally show how an individual function works.
 * `write_excel_set_worksheet_name.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This demonstrates setting the name for the
   output worksheet.
+
+* `write_excel_set_zoom.rs` - An example of writing a Polar Rust dataframe
+  to an Excel file. This demonstrates setting the worksheet zoom level.
 
 * `write_excel_time_format.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This example demonstrates how to change the
