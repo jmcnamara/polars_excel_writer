@@ -1074,6 +1074,137 @@ impl PolarsXlsxWriter {
         self
     }
 
+    /// Freeze panes in a worksheet.
+    ///
+    /// The `set_freeze_panes()` method can be used to divide a worksheet into
+    /// horizontal or vertical regions known as panes and to “freeze” these
+    /// panes so that the splitter bars are not visible.
+    ///
+    /// As with Excel the split is to the top and left of the cell. So to freeze
+    /// the top row and leftmost column you would use `(1, 1)` (zero-indexed).
+    ///
+    /// You can set one of the row and col parameters as 0 if you do not want
+    /// either the vertical or horizontal split. For example a common
+    /// requirement is to freeze the top row which is done with the arguments
+    /// `(1, 0)` see below.
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates freezing the top row.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_freeze_panes.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     xlsx_writer.set_freeze_panes(1, 0);
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_set_freeze_panes.png">
+    ///
+    pub fn set_freeze_panes(&mut self, row: u32, col: u16) -> &mut PolarsXlsxWriter {
+        self.options.freeze_cell = (row, col);
+
+        self
+    }
+
+    /// Set the top most cell in the scrolling area of a freeze pane.
+    ///
+    /// This method is used in conjunction with the
+    /// [`PolarsXlsxWriter::set_freeze_panes()`] method to set the top most
+    /// visible cell in the scrolling range. For example you may want to freeze
+    /// the top row but have the worksheet pre-scrolled so that a cell other
+    /// than `(0, 0)` is visible in the scrolled area.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates freezing the top row and setting a non-default first row
+    /// within the pane.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_freeze_panes_top_cell.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # fn main() {
+    /// #     // Create a sample dataframe for the example.
+    /// #     let df: DataFrame = df!(
+    /// #         "String" => &["North", "South", "East", "West"],
+    /// #         "Int" => &[1, 2, 3, 4],
+    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    /// #     )
+    /// #     .unwrap();
+    /// #
+    /// #     example(&df).unwrap();
+    /// # }
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     xlsx_writer.set_freeze_panes(1, 0);
+    ///     xlsx_writer.set_freeze_panes_top_cell(3, 0);
+    ///
+    ///     xlsx_writer.write_dataframe(df)?;
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_set_freeze_panes_top_cell.png">
+    ///
+    pub fn set_freeze_panes_top_cell(&mut self, row: u32, col: u16) -> &mut PolarsXlsxWriter {
+        self.options.top_cell = (row, col);
+
+        self
+    }
+
     /// Set the worksheet table for the output dataframe.
     ///
     /// By default, and by convention with the Polars [`write_excel()`] method,
@@ -1542,6 +1673,10 @@ impl PolarsXlsxWriter {
         // Set the screen gridlines.
         worksheet.set_screen_gridlines(options.screen_gridlines);
 
+        // Set the worksheet panes.
+        worksheet.set_freeze_panes(options.freeze_cell.0, options.freeze_cell.1)?;
+        worksheet.set_freeze_panes_top_cell(options.top_cell.0, options.top_cell.1)?;
+
         Ok(())
     }
 }
@@ -1562,6 +1697,8 @@ pub(crate) struct WriterOptions {
     pub(crate) table: Table,
     pub(crate) zoom: u16,
     pub(crate) screen_gridlines: bool,
+    pub(crate) freeze_cell: (u32, u16),
+    pub(crate) top_cell: (u32, u16),
 }
 
 impl Default for WriterOptions {
@@ -1582,6 +1719,8 @@ impl WriterOptions {
             table: Table::new(),
             zoom: 100,
             screen_gridlines: true,
+            freeze_cell: (0, 0),
+            top_cell: (0, 0),
         }
     }
 }
