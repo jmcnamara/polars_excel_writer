@@ -1205,6 +1205,25 @@ impl PolarsXlsxWriter {
         self
     }
 
+    /// Turn on/off the autofilter for the table header.
+    ///
+    /// By default Excel adds an autofilter to the header of a table. This
+    /// method can be used to turn it off if necessary.
+    ///
+    /// Note, you can call this method directly on a [`Table`] object which is
+    /// passed to [`PolarsXlsxWriter::set_table()`].
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn set_autofilter(&mut self, enable: bool) -> &mut PolarsXlsxWriter {
+        let table = self.options.table.clone().set_autofilter(enable);
+        self.options.table = table;
+
+        self
+    }
+
     /// Set the worksheet table for the output dataframe.
     ///
     /// By default, and by convention with the Polars [`write_excel()`] method,
