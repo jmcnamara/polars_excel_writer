@@ -62,8 +62,11 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let csv_string = "Foo,Bar\n1,2\n1,2\n1,2\n";
     let buffer = std::io::Cursor::new(csv_string);
-    let mut df = CsvReader::new(buffer)
-        .with_null_values(NullValues::AllColumnsSingle("NULL".to_string()).into())
+    let mut df = CsvReadOptions::default()
+        .map_parse_options(|parse_options| {
+            parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".to_string())))
+        })
+        .into_reader_with_file_handle(buffer)
         .finish()?;
 
     let mut file = std::fs::File::create(filename)?;

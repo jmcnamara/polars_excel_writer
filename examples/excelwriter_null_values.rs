@@ -12,8 +12,11 @@ fn main() {
     // Create a dataframe with Null values.
     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
     let buffer = std::io::Cursor::new(csv_string);
-    let mut df = CsvReader::new(buffer)
-        .with_null_values(NullValues::AllColumnsSingle("NULL".to_string()).into())
+    let mut df = CsvReadOptions::default()
+        .map_parse_options(|parse_options| {
+            parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".to_string())))
+        })
+        .into_reader_with_file_handle(buffer)
         .finish()
         .unwrap();
 

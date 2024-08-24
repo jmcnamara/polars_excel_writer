@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2023-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 #[macro_export]
 macro_rules! assert_result {
@@ -13,6 +13,13 @@ macro_rules! assert_result {
             Err(e) => panic!("\n!\n! XlsxError:\n! {:?}\n!\n", e),
         }
     };
+}
+
+macro_rules! static_regex {
+    ($re:literal) => {{
+        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+        RE.get_or_init(|| regex::Regex::new($re).unwrap())
+    }};
 }
 
 #[cfg(test)]
@@ -38,6 +45,7 @@ where
     test_name: &'a str,
     test_function: Option<F>,
     unique: &'a str,
+    has_macros: bool,
     input_filename: String,
     output_filename: String,
     ignore_files: HashSet<&'a str>,
@@ -53,6 +61,7 @@ where
             test_name: "",
             test_function: None,
             unique: "",
+            has_macros: false,
             input_filename: String::new(),
             output_filename: String::new(),
             ignore_files: HashSet::new(),
@@ -96,6 +105,13 @@ where
         self
     }
 
+    // Take different naming for xlsm files into account.
+    #[allow(dead_code)]
+    pub fn has_macros(mut self) -> TestRunner<'a, F> {
+        self.has_macros = true;
+        self
+    }
+
     // Ignore certain elements with xml files.
     #[allow(dead_code)]
     pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a, F> {
@@ -105,13 +121,17 @@ where
 
     // Initialize the in/out filenames once other properties have been set.
     pub fn initialize(mut self) -> TestRunner<'a, F> {
-        self.input_filename = format!("tests/input/{}.xlsx", self.test_name);
+        let extension = if self.has_macros { ".xlsm" } else { ".xlsx" };
+
+        self.input_filename = format!("tests/input/{}{}", self.test_name, extension);
 
         if self.unique.is_empty() {
-            self.output_filename = format!("tests/output/rs_{}.xlsx", self.test_name);
+            self.output_filename = format!("tests/output/rs_{}{}", self.test_name, extension);
         } else {
-            self.output_filename =
-                format!("tests/output/rs_{}_{}.xlsx", self.test_name, self.unique);
+            self.output_filename = format!(
+                "tests/output/rs_{}_{}{}",
+                self.test_name, self.unique, extension
+            );
         }
 
         self
@@ -268,6 +288,18 @@ fn compare_xlsx_files(
             // Read XML data from non-binary files.
             let mut xml_data = String::new();
             file.read_to_string(&mut xml_data).unwrap();
+
+            // Check for test generator XML error.
+            if xml_data.contains("<<") {
+                return (
+                    vec![file.name().to_string()],
+                    vec![
+                        "Generated XML contains double start tag".to_string(),
+                        String::new(),
+                    ],
+                );
+            }
+
             got_xml.insert(file.name().to_string(), xml_data);
         }
     }
@@ -290,42 +322,35 @@ fn compare_xlsx_files(
             exp_xml_string = exp_xml_string.replace("John", "");
 
             // Remove creation date from core.xml file.
-            lazy_static! {
-                static ref UTC_DATE: Regex =
-                    Regex::new(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z").unwrap();
-            }
-            exp_xml_string = UTC_DATE.replace_all(&exp_xml_string, "").to_string();
-            got_xml_string = UTC_DATE.replace_all(&got_xml_string, "").to_string();
+            let utc_date = static_regex!(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z");
+            exp_xml_string = utc_date.replace_all(&exp_xml_string, "").to_string();
+            got_xml_string = utc_date.replace_all(&got_xml_string, "").to_string();
         }
 
         // Remove workbookView dimensions which are almost always different and
         // calcPr which can have different Excel version ids.
         if filename == "xl/workbook.xml" {
-            lazy_static! {
-                static ref WORKBOOK_VIEW: Regex = Regex::new(r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#).unwrap();
-            }
-            exp_xml_string = WORKBOOK_VIEW
+            let workbook_view = static_regex!(
+                r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#
+            );
+            exp_xml_string = workbook_view
                 .replace(&exp_xml_string, "<workbookView")
                 .to_string();
-            got_xml_string = WORKBOOK_VIEW
+            got_xml_string = workbook_view
                 .replace(&got_xml_string, "<workbookView")
                 .to_string();
 
-            lazy_static! {
-                static ref CALC_PARA: Regex = Regex::new(r"<calcPr[^>]*>").unwrap();
-            }
-            exp_xml_string = CALC_PARA.replace(&exp_xml_string, "<calcPr/>").to_string();
-            got_xml_string = CALC_PARA.replace(&got_xml_string, "<calcPr/>").to_string();
+            let calc_para = static_regex!(r"<calcPr[^>]*>");
+            exp_xml_string = calc_para.replace(&exp_xml_string, "<calcPr/>").to_string();
+            got_xml_string = calc_para.replace(&got_xml_string, "<calcPr/>").to_string();
         }
 
         // The pageMargins element in chart files often contain values like
         // "0.75000000000000011" instead of "0.75". We simplify/round these to
         // make comparison easier.
         if filename.starts_with("xl/charts/chart") {
-            lazy_static! {
-                static ref DIGITS: Regex = Regex::new(r"000000000000\d+").unwrap();
-            }
-            exp_xml_string = DIGITS.replace_all(&exp_xml_string, "").to_string();
+            let digits = static_regex!(r"000000000000\d+");
+            exp_xml_string = digits.replace_all(&exp_xml_string, "").to_string();
         }
 
         // Convert the xml strings to vectors for easier comparison.
@@ -382,12 +407,10 @@ fn compare_xlsx_files(
 
 // Convert XML string/doc into a vector for comparison testing.
 fn xml_to_vec(xml_string: &str) -> Vec<String> {
-    lazy_static! {
-        static ref ELEMENT_DIVIDES: Regex = Regex::new(r">\s*<").unwrap();
-    }
+    let element_dividers = static_regex!(r">\s*<");
 
     let mut xml_elements: Vec<String> = Vec::new();
-    let tokens: Vec<&str> = ELEMENT_DIVIDES.split(xml_string).collect();
+    let tokens: Vec<&str> = element_dividers.split(xml_string).collect();
 
     for token in &tokens {
         let mut element = token.trim().to_string();
@@ -409,12 +432,10 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
 // Convert VML string/doc into a vector for comparison testing. Excel VML tends
 // to be less structured than other XML so it needs more massaging.
 pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
-    lazy_static! {
-        static ref WHITESPACE: Regex = Regex::new(r"\s+").unwrap();
-    }
+    let whitespace = static_regex!(r"\s+");
 
     let mut vml_string = vml_string.replace(['\r', '\n'], "");
-    vml_string = WHITESPACE.replace_all(&vml_string, " ").into();
+    vml_string = whitespace.replace_all(&vml_string, " ").into();
 
     vml_string = vml_string
         .replace("; ", ";")
@@ -471,4 +492,62 @@ fn is_binary_file(filename: &str) -> bool {
         || filename.ends_with(".jpeg")
         || filename.ends_with(".bmp")
         || filename.ends_with(".gif")
+        || filename.ends_with(".bin")
+}
+
+// Create the data structure used in the autofilter tests.
+#[allow(dead_code)]
+pub fn get_autofilter_data() -> Vec<(&'static str, &'static str, u16, &'static str)> {
+    vec![
+        ("East", "Apple", 9000, "July"),
+        ("East", "Apple", 5000, "July"),
+        ("South", "Orange", 9000, "September"),
+        ("North", "Apple", 2000, "November"),
+        ("West", "Apple", 9000, "November"),
+        ("South", "Pear", 7000, "October"),
+        ("North", "Pear", 9000, "August"),
+        ("West", "Orange", 1000, "December"),
+        ("West", "Grape", 1000, "November"),
+        ("South", "Pear", 10000, "April"),
+        ("West", "Grape", 6000, "January"),
+        ("South", "Orange", 3000, "May"),
+        ("North", "Apple", 3000, "December"),
+        ("South", "Apple", 7000, "February"),
+        ("West", "Grape", 1000, "December"),
+        ("East", "Grape", 8000, "February"),
+        ("South", "Grape", 10000, "June"),
+        ("West", "Pear", 7000, "December"),
+        ("South", "Apple", 2000, "October"),
+        ("East", "Grape", 7000, "December"),
+        ("North", "Grape", 6000, "April"),
+        ("East", "Pear", 8000, "February"),
+        ("North", "Apple", 7000, "August"),
+        ("North", "Orange", 7000, "July"),
+        ("North", "Apple", 6000, "June"),
+        ("South", "Grape", 8000, "September"),
+        ("West", "Apple", 3000, "October"),
+        ("South", "Orange", 10000, "November"),
+        ("West", "Grape", 4000, "July"),
+        ("North", "Orange", 5000, "August"),
+        ("East", "Orange", 1000, "November"),
+        ("East", "Orange", 4000, "October"),
+        ("North", "Grape", 5000, "August"),
+        ("East", "Apple", 1000, "December"),
+        ("South", "Apple", 10000, "March"),
+        ("East", "Grape", 7000, "October"),
+        ("West", "Grape", 1000, "September"),
+        ("East", "Grape", 10000, "October"),
+        ("South", "Orange", 8000, "March"),
+        ("North", "Apple", 4000, "July"),
+        ("South", "Orange", 5000, "July"),
+        ("West", "Apple", 4000, "June"),
+        ("East", "Apple", 5000, "April"),
+        ("North", "Pear", 3000, "August"),
+        ("East", "Grape", 9000, "November"),
+        ("North", "Orange", 8000, "October"),
+        ("East", "Apple", 10000, "June"),
+        ("South", "Pear", 1000, "December"),
+        ("North", "Grape", 10000, "July"),
+        ("East", "Grape", 6000, "February"),
+    ]
 }
