@@ -873,7 +873,7 @@ impl PolarsXlsxWriter {
     /// #     let buffer = std::io::Cursor::new(csv_string);
     /// #     let df = CsvReadOptions::default()
     /// #         .map_parse_options(|parse_options| {
-    /// #             parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".to_string())))
+    /// #             parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".into())))
     /// #         })
     /// #         .into_reader_with_file_handle(buffer)
     /// #         .finish()
@@ -1557,7 +1557,7 @@ impl PolarsXlsxWriter {
 
             // Store the column names for use as table headers.
             if options.table.has_header_row() {
-                worksheet.write(row_offset, col_num, column.name())?;
+                worksheet.write(row_offset, col_num, column.name().as_str())?;
             }
 
             // Write the row data for each column/type.
@@ -1613,6 +1613,9 @@ impl PolarsXlsxWriter {
                     }
                     AnyValue::String(value) => {
                         worksheet.write_string(row_num, col_num, value)?;
+                    }
+                    AnyValue::StringOwned(value) => {
+                        worksheet.write_string(row_num, col_num, value.as_str())?;
                     }
                     AnyValue::Boolean(value) => {
                         worksheet.write_boolean(row_num, col_num, value)?;

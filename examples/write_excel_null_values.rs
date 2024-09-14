@@ -14,7 +14,7 @@ fn main() {
     let buffer = std::io::Cursor::new(csv_string);
     let df = CsvReadOptions::default()
         .map_parse_options(|parse_options| {
-            parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".to_string())))
+            parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".into())))
         })
         .into_reader_with_file_handle(buffer)
         .finish()
