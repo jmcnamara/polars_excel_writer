@@ -1561,7 +1561,7 @@ impl PolarsXlsxWriter {
             }
 
             // Write the row data for each column/type.
-            for (row_num, data) in column.iter().enumerate() {
+            for (row_num, data) in column.as_materialized_series().iter().enumerate() {
                 let row_num = header_offset + row_offset + row_num as u32;
 
                 // Map the Polars Series AnyValue types to Excel/rust_xlsxwriter
