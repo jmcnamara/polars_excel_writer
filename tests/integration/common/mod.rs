@@ -46,6 +46,7 @@ where
     test_function: Option<F>,
     unique: &'a str,
     has_macros: bool,
+    ignore_spans: bool,
     input_filename: String,
     output_filename: String,
     ignore_files: HashSet<&'a str>,
@@ -62,6 +63,7 @@ where
             test_function: None,
             unique: "",
             has_macros: false,
+            ignore_spans: false,
             input_filename: String::new(),
             output_filename: String::new(),
             ignore_files: HashSet::new(),
@@ -70,7 +72,7 @@ where
     }
 
     // Set the testcase name.
-    pub fn set_name(mut self, testcase: &'a str) -> TestRunner<F> {
+    pub fn set_name(mut self, testcase: &'a str) -> TestRunner<'a, F> {
         self.test_name = testcase;
         self
     }
@@ -84,7 +86,7 @@ where
     // Set string to add to the default output filename to make it unique so
     // that the multiple tests can be run in parallel.
     #[allow(dead_code)]
-    pub fn unique(mut self, unique_string: &'a str) -> TestRunner<F> {
+    pub fn unique(mut self, unique_string: &'a str) -> TestRunner<'a, F> {
         self.unique = unique_string;
         self
     }
@@ -116,6 +118,13 @@ where
     #[allow(dead_code)]
     pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a, F> {
         self.ignore_elements.insert(filename, pattern);
+        self
+    }
+
+    // Ignore row span attributes in sheet.xml files, in "constant memory" mode.
+    #[allow(dead_code)]
+    pub fn ignore_worksheet_spans(mut self) -> TestRunner<'a, F> {
+        self.ignore_spans = true;
         self
     }
 
@@ -154,6 +163,7 @@ where
             &self.output_filename,
             &self.ignore_files,
             &self.ignore_elements,
+            self.ignore_spans,
         );
 
         assert_eq!(exp, got);
@@ -174,6 +184,7 @@ fn compare_xlsx_files(
     got_file: &str,
     ignore_files: &HashSet<&str>,
     ignore_elements: &HashMap<&str, &str>,
+    ignore_spans: bool,
 ) -> (Vec<String>, Vec<String>) {
     // Open the xlsx files.
     let exp_fh = match File::open(exp_file) {
@@ -351,6 +362,13 @@ fn compare_xlsx_files(
         if filename.starts_with("xl/charts/chart") {
             let digits = static_regex!(r"000000000000\d+");
             exp_xml_string = digits.replace_all(&exp_xml_string, "").to_string();
+        }
+
+        // Ignore/remove span elements for "constant mode" comparison.
+        if ignore_spans && filename.starts_with("xl/worksheets/sheet") {
+            let spans = static_regex!(r#" spans="\d+:\d+""#);
+            exp_xml_string = spans.replace_all(&exp_xml_string, "").to_string();
+            got_xml_string = spans.replace_all(&got_xml_string, "").to_string();
         }
 
         // Convert the xml strings to vectors for easier comparison.
