@@ -8,22 +8,18 @@
 
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::PolarsXlsxWriter;
+use rust_xlsxwriter::{Table, TableStyle};
+
+fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
     let df: DataFrame = df!(
         "String" => &["North", "South", "East", "West"],
         "Int" => &[1, 2, 3, 4],
         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    )
-    .unwrap();
+    )?;
 
-    example(&df).unwrap();
-}
-
-use polars_excel_writer::PolarsXlsxWriter;
-use rust_xlsxwriter::*;
-
-fn example(df: &DataFrame) -> PolarsResult<()> {
+    // Write the dataframe to an Excel file.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
     // Add a `rust_xlsxwriter` table and set the style.
@@ -32,7 +28,10 @@ fn example(df: &DataFrame) -> PolarsResult<()> {
     // Add the table to the Excel writer.
     xlsx_writer.set_table(&table);
 
-    xlsx_writer.write_dataframe(df)?;
+    // Write the dataframe to Excel.
+    xlsx_writer.write_dataframe(&df)?;
+
+    // Save the file to disk.
     xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())

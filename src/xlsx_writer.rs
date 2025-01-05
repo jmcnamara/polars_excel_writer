@@ -16,26 +16,16 @@ use polars::export::arrow::temporal_conversions::{
 use polars::prelude::*;
 use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 
-/// `PolarsXlsxWriter` provides an Excel Xlsx serializer that works with Polars
-/// dataframes and which can also interact with the [`rust_xlsxwriter`] writing
-/// engine that it wraps. This allows simple Excel serialization of worksheets
+/// `PolarsXlsxWriter` provides an interface to serialize Polars dataframes to
+/// Excel via the [`rust_xlsxwriter`] library. This allows Excel serialization
 /// with a straightforward interface but also a high degree of configurability
-/// over the output when required.
+/// over the output, when required.
 ///
-/// It is a complimentary interface to the much simpler
-/// [`ExcelWriter`](crate::ExcelWriter) which implements the Polars
-/// [`SerWriter`] trait to serialize dataframes, and which is also part of this
-/// crate.
-///
-/// `ExcelWriter` and `PolarsXlsxWriter` both use the [`rust_xlsxwriter`] crate.
-/// The `rust_xlsxwriter` library can only create new files. It cannot read or
-/// modify existing files.
+/// For ease of use, and portability, `PolarsXlsxWriter` tries to replicate the
+/// interface options provided by the Polars Python [`write_excel()`] dataframe
+/// method.
 ///
 /// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
-///
-/// `PolarsXlsxWriter` tries to replicate the interface options provided by the
-///  Polars Python [`write_excel()`] dataframe method.
-///
 /// [`write_excel()`]:
 ///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
 ///
@@ -45,12 +35,14 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// `PolarsXlsxWriter`.
 ///
 /// ```
-/// # // This code is available in examples/excelwriter_intro.rs
+/// # // This code is available in examples/write_excel_intro.rs
 /// #
 /// use chrono::prelude::*;
 /// use polars::prelude::*;
 ///
-/// fn main() {
+/// use polars_excel_writer::PolarsXlsxWriter;
+///
+/// fn main() -> PolarsResult<()> {
 ///     // Create a sample dataframe for the example.
 ///     let df: DataFrame = df!(
 ///         "String" => &["North", "South", "East", "West"],
@@ -74,18 +66,15 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 ///             NaiveDate::from_ymd_opt(2022, 1, 3).unwrap().and_hms_opt(3, 0, 0).unwrap(),
 ///             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 ///         ],
-///     )
-///     .unwrap();
+///     )?;
 ///
-///     example(&df).unwrap();
-/// }
-///
-/// use polars_excel_writer::PolarsXlsxWriter;
-///
-/// fn example(df: &DataFrame) -> PolarsResult<()> {
+///     // Create a new Excel writer.
 ///     let mut xlsx_writer = PolarsXlsxWriter::new();
 ///
-///     xlsx_writer.write_dataframe(df)?;
+///     // Write the dataframe to Excel.
+///     xlsx_writer.write_dataframe(&df)?;
+///
+///     // Save the file to disk.
 ///     xlsx_writer.save("dataframe.xlsx")?;
 ///
 ///     Ok(())
@@ -165,11 +154,11 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// The example demonstrates using three different crates to get the required
 /// result:
 ///
-/// - 1: `polars` to create/manipulate the dataframe.
-/// - 2a: `rust_xlsxwriter` to create an Excel workbook and worksheet.
-/// - 3: `polars_excel_writer::PolarsXlsxWriter` to write the Polars dataframe
-///   to the worksheet.
-/// - 2b: `rust_xlsxwriter` to add other features to the worksheet.
+/// 1. `polars` to create/manipulate the dataframe.
+/// 2. `rust_xlsxwriter` to create an Excel workbook and worksheet and
+///     optionally add other features to the worksheet.
+/// 3. `polars_excel_writer::PolarsXlsxWriter` to write the Polars dataframe to
+///     the worksheet.
 ///
 /// This may seem initially complicated but it divides the solution into
 /// specialized libraries that are best suited for their task and it allow you
@@ -188,9 +177,9 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// type maps to (and from) the `PolarsError` type.
 ///
 /// That is why in the previous example we were able to use two different error
-/// types within the same result/error context of `PolarsError`. Note, the error
-/// type is not explicit in the previous example but `PolarsResult<T>` expands
-/// to `Result<T, PolarsError>`.
+/// types within the same result/error context of `PolarsError`. The error type
+/// is not explicit in the previous example but `PolarsResult<T>` expands to
+/// `Result<T, PolarsError>`.
 ///
 /// In order for this to be enabled you must use the `rust_xlsxwriter` `polars`
 /// crate feature, however, this is turned on automatically when you use
@@ -223,7 +212,8 @@ impl PolarsXlsxWriter {
     /// Write a dataframe to a worksheet.
     ///
     /// Writes the supplied dataframe to cell `(0, 0)` in the first sheet of a
-    /// new Excel workbook.
+    /// new Excel workbook. See [`PolarsXlsxWriter::write_dataframe_to_cell()`]
+    /// below to write to a specific cell in the worksheet.
     ///
     /// The worksheet must be written to a file using
     /// [`save()`](PolarsXlsxWriter::save).
@@ -245,9 +235,11 @@ impl PolarsXlsxWriter {
     /// # // This code is available in examples/write_excel_write_dataframe.rs
     /// #
     /// # use polars::prelude::*;
+    /// #
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Data" => &[10, 20, 15, 25, 30, 20],
     ///     )?;
@@ -256,6 +248,8 @@ impl PolarsXlsxWriter {
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -276,13 +270,11 @@ impl PolarsXlsxWriter {
         Ok(())
     }
 
-    /// Write a dataframe to a user defined cell in a worksheet.
-    ///
     /// Writes the supplied dataframe to a user defined cell in the first sheet
     /// of a new Excel workbook.
     ///
-    /// Since the dataframe can be positioned within the worksheet it is possible
-    /// to write more than one to the same worksheet (without overlapping).
+    /// Using this method it is possible to write more than one dataframe to the
+    /// same worksheet, at different positions and without overlapping.
     ///
     /// The worksheet must be written to a file using
     /// [`save()`](PolarsXlsxWriter::save).
@@ -307,9 +299,11 @@ impl PolarsXlsxWriter {
     /// # // This code is available in examples/write_excel_write_dataframe_to_cell.rs
     /// #
     /// # use polars::prelude::*;
+    /// #
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
     /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
     ///     let df1: DataFrame = df!(
     ///         "Data 1" => &[10, 20, 15, 25, 30, 20],
     ///     )?;
@@ -325,6 +319,7 @@ impl PolarsXlsxWriter {
     ///     xlsx_writer.write_dataframe_to_cell(&df1, 0, 0)?;
     ///     xlsx_writer.write_dataframe_to_cell(&df2, 0, 2)?;
     ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -470,8 +465,6 @@ impl PolarsXlsxWriter {
         Ok(())
     }
 
-    /// Turn on/off the dataframe header in the exported Excel file.
-    ///
     /// Turn on/off the dataframe header row in the Excel table. It is on by
     /// default.
     ///
@@ -489,26 +482,27 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
     /// use polars_excel_writer::PolarsXlsxWriter;
     ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "String" => &["North", "South", "East", "West"],
+    ///         "Int" => &[1, 2, 3, 4],
+    ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )
+    ///     .unwrap();
+    ///
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Turn off the default header.
     ///     xlsx_writer.set_header(false);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -552,7 +546,9 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// fn main() {
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Time" => &[
@@ -561,20 +557,18 @@ impl PolarsXlsxWriter {
     ///             NaiveTime::from_hms_milli_opt(2, 37, 3, 456).unwrap(),
     ///             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
     ///         ],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the time format.
     ///     xlsx_writer.set_time_format("hh:mm");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -617,7 +611,9 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// fn main() {
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Date" => &[
@@ -626,20 +622,18 @@ impl PolarsXlsxWriter {
     ///             NaiveDate::from_ymd_opt(2023, 1, 13),
     ///             NaiveDate::from_ymd_opt(2023, 1, 14),
     ///         ],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Create a new Excel writer.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the date format.
     ///     xlsx_writer.set_date_format("mmm d yyyy");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -681,7 +675,9 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// fn main() {
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Datetime" => &[
@@ -690,20 +686,18 @@ impl PolarsXlsxWriter {
     ///             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
     ///             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
     ///         ],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the datetime format.
     ///     xlsx_writer.set_datetime_format("hh::mm - mmm d yyyy");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -748,26 +742,27 @@ impl PolarsXlsxWriter {
     /// ```
     /// # // This code is available in examples/write_excel_float_format.rs
     /// #
-    /// use polars::prelude::*;
+    /// # use polars::prelude::*;
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
     ///
-    /// fn main() {
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
     ///     )
     ///     .unwrap();
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the float format.
     ///     xlsx_writer.set_float_format("#,##0.00");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -807,26 +802,27 @@ impl PolarsXlsxWriter {
     /// ```
     /// # // This code is available in examples/write_excel_float_precision.rs
     /// #
-    /// use polars::prelude::*;
+    /// # use polars::prelude::*;
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
     ///
-    /// fn main() {
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     ///     )
     ///     .unwrap();
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the float precision.
     ///     xlsx_writer.set_float_precision(3);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -867,7 +863,9 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a dataframe with Null values.
     /// #     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
     /// #     let buffer = std::io::Cursor::new(csv_string);
@@ -879,21 +877,20 @@ impl PolarsXlsxWriter {
     /// #         .finish()
     /// #         .unwrap();
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set an output string value for Null.
     ///     xlsx_writer.set_null_value("Null");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -912,9 +909,9 @@ impl PolarsXlsxWriter {
     /// string or number widths.
     ///
     /// **Note**: There are several limitations to this autofit method, see the
-    /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
+    /// `rust_xlsxwriter` docs on [`Worksheet::autofit()`] for details.
     ///
-    /// [`worksheet.autofit()`]:
+    /// [`Worksheet::autofit()`]:
     ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
     ///
     /// # Parameters
@@ -929,29 +926,29 @@ impl PolarsXlsxWriter {
     /// ```
     /// # // This code is available in examples/write_excel_autofit.rs
     /// #
-    /// use polars::prelude::*;
+    /// # use polars::prelude::*;
+    /// #
+    /// use polars_excel_writer::PolarsXlsxWriter;
     ///
-    /// fn main() {
+    /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Col 1" => &["A", "B", "C", "D"],
     ///         "Column 2" => &["A", "B", "C", "D"],
     ///         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
     ///         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
-    ///     example(&df).unwrap();
-    /// }
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Create a new Excel writer.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Autofit the output data.
     ///     xlsx_writer.set_autofit(true);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -970,7 +967,7 @@ impl PolarsXlsxWriter {
 
     /// Set the worksheet zoom factor.
     ///
-    /// Set the worksheet zoom factor in the range 10 <= zoom <= 400.
+    /// Set the worksheet zoom factor in the range `10 <= zoom <= 400`.
     ///
     /// # Parameters
     ///
@@ -986,30 +983,30 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the worksheet zoom level.
     ///     xlsx_writer.set_zoom(200);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1041,30 +1038,30 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Turn off the screen gridlines.
     ///     xlsx_writer.set_screen_gridlines(false);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1108,30 +1105,30 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Freeze the top row.
     ///     xlsx_writer.set_freeze_panes(1, 0);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1170,31 +1167,31 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Freeze the top row and set the first row in the range.
     ///     xlsx_writer.set_freeze_panes(1, 0);
     ///     xlsx_writer.set_freeze_panes_top_cell(3, 0);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1266,22 +1263,18 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use rust_xlsxwriter::{Table, TableStyle};
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    /// use rust_xlsxwriter::*;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Add a `rust_xlsxwriter` table and set the style.
@@ -1290,11 +1283,14 @@ impl PolarsXlsxWriter {
     ///     // Add the table to the Excel writer.
     ///     xlsx_writer.set_table(&table);
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1348,30 +1344,30 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
+    ///     // Set the worksheet name.
     ///     xlsx_writer.set_worksheet_name("Polars Data")?;
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -1423,6 +1419,7 @@ impl PolarsXlsxWriter {
     ///     xlsx_writer.add_worksheet();
     ///     xlsx_writer.write_dataframe(&df2)?;
     ///
+    ///     // Save the file to disk.
     ///     xlsx_writer.save("dataframe.xlsx")?;
     ///
     ///     Ok(())
@@ -1469,21 +1466,17 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
     /// #     let df: DataFrame = df!(
     /// #         "String" => &["North", "South", "East", "West"],
     /// #         "Int" => &[1, 2, 3, 4],
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
+    /// #     )?;
     /// #
-    /// #     example(&df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn example(df: &DataFrame) -> PolarsResult<()> {
+    ///     // Write the dataframe to an Excel file.
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Get the worksheet that the dataframe will be written to.
@@ -1493,11 +1486,14 @@ impl PolarsXlsxWriter {
     ///     // method.
     ///     worksheet.set_tab_color("#FF9900");
     ///
-    ///     xlsx_writer.write_dataframe(df)?;
-    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
     ///
-    ///     Ok(())
-    /// }
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:

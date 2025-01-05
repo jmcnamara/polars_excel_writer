@@ -7,27 +7,27 @@
 
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::PolarsXlsxWriter;
+
+fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
     let df: DataFrame = df!(
         "Col 1" => &["A", "B", "C", "D"],
         "Column 2" => &["A", "B", "C", "D"],
         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
-    )
-    .unwrap();
+    )?;
 
-    example(&df).unwrap();
-}
-
-use polars_excel_writer::PolarsXlsxWriter;
-
-fn example(df: &DataFrame) -> PolarsResult<()> {
+    // Create a new Excel writer.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
+    // Autofit the output data.
     xlsx_writer.set_autofit(true);
 
-    xlsx_writer.write_dataframe(df)?;
+    // Write the dataframe to Excel.
+    xlsx_writer.write_dataframe(&df)?;
+
+    // Save the file to disk.
     xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())

@@ -8,7 +8,9 @@
 use chrono::prelude::*;
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::PolarsXlsxWriter;
+
+fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
     let df: DataFrame = df!(
         "Datetime" => &[
@@ -17,20 +19,18 @@ fn main() {
             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
         ],
-    )
-    .unwrap();
+    )?;
 
-    example(&df).unwrap();
-}
-
-use polars_excel_writer::PolarsXlsxWriter;
-
-fn example(df: &DataFrame) -> PolarsResult<()> {
+    // Write the dataframe to an Excel file.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
+    // Set the datetime format.
     xlsx_writer.set_datetime_format("hh::mm - mmm d yyyy");
 
-    xlsx_writer.write_dataframe(df)?;
+    // Write the dataframe to Excel.
+    xlsx_writer.write_dataframe(&df)?;
+
+    // Save the file to disk.
     xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())

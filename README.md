@@ -3,26 +3,26 @@
 The `polars_excel_writer` crate is a library for serializing Polars dataframes
 to Excel Xlsx files.
 
-It provides two interfaces for writing a dataframe to an Excel Xlsx file:
+It provides a primary interface [`PolarsXlsxWriter`] which is a configurable
+Excel serializer that resembles the interface options provided by the Polars
+[`write_excel()`] dataframe method.
 
-- [`ExcelWriter`] a simple Excel serializer that implements the Polars
-  [`SerWriter`] trait to write a dataframe to an Excel Xlsx file.
+It also provides a secondary [`ExcelWriter`] interface which is a simpler
+Excel serializer that implements the Polars [`SerWriter`] trait to write a
+dataframe to an Excel Xlsx file. However, unless you have existing code that
+uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`]
+interface.
 
-- [`PolarsXlsxWriter`] a more configurable Excel serializer that more closely
-  resembles the interface options provided by the Polars [`write_excel()`]
-  dataframe method.
+Unless you have existing code that uses the Polars [`SerWriter`] trait you
+should use the primary [`PolarsXlsxWriter`] interface.
 
-`ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
-turn uses the [`rust_xlsxwriter`] crate.
+This crate uses [`rust_xlsxwriter`] to do the Excel serialization.
 
 [`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/write/struct.ExcelWriter.html
 [`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html
 
 [`SerWriter`]:
     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
-
-[`CsvWriter`]:
-    https://docs.rs/polars/latest/polars/prelude/struct.CsvWriter.html
 
 [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 
@@ -32,15 +32,17 @@ turn uses the [`rust_xlsxwriter`] crate.
 ## Example
 
 An example of writing a Polar Rust dataframe to an Excel file using the
-`ExcelWriter` interface.
+`PolarsXlsxWriter` interface.
 
 ```rust
 use chrono::prelude::*;
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::PolarsXlsxWriter;
+
+fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
-    let mut df: DataFrame = df!(
+    let df: DataFrame = df!(
         "String" => &["North", "South", "East", "West"],
         "Integer" => &[1, 2, 3, 4],
         "Float" => &[4.0, 5.0, 6.0, 7.0],
@@ -62,38 +64,22 @@ fn main() {
             NaiveDate::from_ymd_opt(2022, 1, 3).unwrap().and_hms_opt(3, 0, 0).unwrap(),
             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
         ],
-    )
-    .unwrap();
+    )?;
 
-    example1(&mut df).unwrap();
-    example2(&df).unwrap();
-}
-
-// The ExcelWriter interface.
-use polars_excel_writer::ExcelWriter;
-
-fn example1(df: &mut DataFrame) -> PolarsResult<()> {
-    let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
-
-    ExcelWriter::new(&mut file).finish(df)
-}
-
-// The PolarsXlsxWriter interface. For this simple case it is
-// similar to the ExcelWriter interface but it has additional
-// options to support more complex use cases.
-use polars_excel_writer::PolarsXlsxWriter;
-
-fn example2(df: &DataFrame) -> PolarsResult<()> {
+    // Create a new Excel writer.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
-    xlsx_writer.write_dataframe(df)?;
-    xlsx_writer.save("dataframe2.xlsx")?;
+    // Write the dataframe to Excel.
+    xlsx_writer.write_dataframe(&df)?;
+
+    // Save the file to disk.
+    xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }
 ```
 
-Second output file (same as the first):
+Output file:
 
 <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 

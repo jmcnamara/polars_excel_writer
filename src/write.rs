@@ -17,10 +17,9 @@ use crate::PolarsXlsxWriter;
 /// dataframe to an Excel Xlsx file.
 ///
 /// `ExcelWriter` provides a simple interface for writing to an Excel file
-/// similar to Polars [`CsvWriter`].
-///
-/// For a more configurable dataframe to Excel serializer see
-/// [`PolarsXlsxWriter`] which is also part of this crate.
+/// similar to Polars [`CsvWriter`]. However, unless you specifically need to
+/// use the `SerWriter` trait you should instead use the more configurable
+/// [`PolarsXlsxWriter`] serializer interface, which is also part of this crate.
 ///
 /// `ExcelWriter` uses `PolarsXlsxWriter` to do the Excel serialization which in
 /// turn uses the [`rust_xlsxwriter`] crate.
@@ -32,10 +31,12 @@ use crate::PolarsXlsxWriter;
 /// ```
 /// # // This code is available in examples/excelwriter_intro.rs
 /// #
-/// use polars::prelude::*;
 /// use chrono::prelude::*;
+/// use polars::prelude::*;
 ///
-/// fn main() {
+/// use polars_excel_writer::ExcelWriter;
+///
+/// fn main() -> PolarsResult<()> {
 ///     // Create a sample dataframe for the example.
 ///     let mut df: DataFrame = df!(
 ///         "String" => &["North", "South", "East", "West"],
@@ -59,19 +60,15 @@ use crate::PolarsXlsxWriter;
 ///             NaiveDate::from_ymd_opt(2022, 1, 3).unwrap().and_hms_opt(3, 0, 0).unwrap(),
 ///             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 ///         ],
-///     )
-///     .unwrap();
+///     )?;
 ///
-///     example(&mut df).unwrap();
-/// }
-///
-/// use polars_excel_writer::ExcelWriter;
-///
-/// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+///     // Create a new file object.
 ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 ///
-///     ExcelWriter::new(&mut file)
-///         .finish(df)
+///     // Write the dataframe to an Excel file using the Polars SerWriter interface.
+///     ExcelWriter::new(&mut file).finish(&mut df)?;
+///
+///     Ok(())
 /// }
 /// ```
 ///
@@ -122,28 +119,28 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_has_header_on.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "String" => &["North", "South", "East", "West"],
+    ///         "Int" => &[1, 2, 3, 4],
+    ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also turns off the default header.
     ///     ExcelWriter::new(&mut file)
-    ///         .has_header(true)
-    ///         .finish(df)
+    ///         .has_header(false)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -158,28 +155,28 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_has_header_off.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "String" => &["North", "South", "East", "West"],
+    ///         "Int" => &[1, 2, 3, 4],
+    ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also turns on the header (this is the default).
     ///     ExcelWriter::new(&mut file)
     ///         .has_header(false)
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -212,32 +209,32 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_time_format.rs
     /// #
-    /// # use polars::prelude::*;
-    /// # use chrono::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "Time" => &[
-    /// #             NaiveTime::from_hms_milli_opt(2, 00, 3, 456).unwrap(),
-    /// #             NaiveTime::from_hms_milli_opt(2, 18, 3, 456).unwrap(),
-    /// #             NaiveTime::from_hms_milli_opt(2, 37, 3, 456).unwrap(),
-    /// #             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
-    /// #         ],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Time" => &[
+    ///             NaiveTime::from_hms_milli_opt(2, 00, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 18, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 37, 3, 456).unwrap(),
+    ///             NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap(),
+    ///         ],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also adds a time format.
     ///     ExcelWriter::new(&mut file)
     ///         .with_time_format("hh:mm")
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -269,36 +266,32 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_date_format.rs
     /// #
-    /// # use polars::prelude::*;
-    /// # use chrono::prelude::*;
-    /// #
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #         "Date" => &[
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 11),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 12),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 13),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 14),
-    /// #         ],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Date" => &[
+    ///             NaiveDate::from_ymd_opt(2023, 1, 11),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 12),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 13),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 14),
+    ///         ],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also adds a date format.
     ///     ExcelWriter::new(&mut file)
     ///         .with_date_format("mmm d yyyy")
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -330,33 +323,32 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_datetime_format.rs
     /// #
-    /// # use polars::prelude::*;
-    /// # use chrono::prelude::*;
-    /// #
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "Datetime" => &[
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
-    /// #             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
-    /// #         ],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Datetime" => &[
+    ///             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
+    ///         ],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also adds a datetime format.
     ///     ExcelWriter::new(&mut file)
     ///         .with_datetime_format("hh::mm - mmm d yyyy")
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -392,28 +384,26 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_float_format.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also adds a float format.
     ///     ExcelWriter::new(&mut file)
     ///         .with_float_format("#,##0.00")
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -450,28 +440,26 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_float_precision.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "String" => &["North", "South", "East", "West"],
-    /// #         "Int" => &[1, 2, 3, 4],
-    /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also adds a float precision.
     ///     ExcelWriter::new(&mut file)
     ///         .with_float_precision(3)
-    ///         .finish(df)
+    ///         .finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -502,7 +490,9 @@ where
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # fn main() {
+    /// # use polars_excel_writer::ExcelWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
     /// #     // Create a dataframe with Null values.
     /// #     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
     /// #     let buffer = std::io::Cursor::new(csv_string);
@@ -514,18 +504,17 @@ where
     /// #         .finish()
     /// #         .unwrap();
     /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
-    /// use polars_excel_writer::ExcelWriter;
-    ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also sets a string value for Null values.
     ///     ExcelWriter::new(&mut file)
     ///         .with_null_value("Null")
-    ///         .finish(df)
-    /// }
+    ///         .finish(&mut df)?;
+    /// #
+    /// #     Ok(())
+    /// # }
     /// ```
     ///
     /// Output file:
@@ -557,29 +546,27 @@ where
     /// ```
     /// # // This code is available in examples/excelwriter_autofit.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
-    /// # fn main() {
-    /// #     // Create a sample dataframe for the example.
-    /// #     let mut df: DataFrame = df!(
-    /// #         "Col 1" => &["A", "B", "C", "D"],
-    /// #         "Column 2" => &["A", "B", "C", "D"],
-    /// #         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
-    /// #         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
-    /// #     )
-    /// #     .unwrap();
-    /// #
-    /// #     example(&mut df).unwrap();
-    /// # }
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::ExcelWriter;
     ///
-    /// fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let mut df: DataFrame = df!(
+    ///         "Col 1" => &["A", "B", "C", "D"],
+    ///         "Column 2" => &["A", "B", "C", "D"],
+    ///         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
+    ///         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
+    ///     )?;
+    ///
+    ///     // Create a new file object.
     ///     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
     ///
-    ///     ExcelWriter::new(&mut file)
-    ///         .with_autofit()
-    ///         .finish(df)
+    ///     // Write the dataframe to an Excel file using the Polars SerWriter
+    ///     // interface. This example also autofits the output.
+    ///     ExcelWriter::new(&mut file).with_autofit().finish(&mut df)?;
+    ///
+    ///     Ok(())
     /// }
     /// ```
     ///

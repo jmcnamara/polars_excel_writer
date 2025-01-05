@@ -6,6 +6,7 @@
 //! Excel workbook.
 
 use polars::prelude::*;
+
 use polars_excel_writer::PolarsXlsxWriter;
 
 fn main() -> PolarsResult<()> {
@@ -17,6 +18,7 @@ fn main() -> PolarsResult<()> {
         "Data 2" => &[20, 21, 22, 23, 24, 25],
     )?;
 
+    // Create a new Excel writer.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
     // Write the first dataframe to the first/default worksheet.
@@ -26,6 +28,7 @@ fn main() -> PolarsResult<()> {
     xlsx_writer.add_worksheet();
     xlsx_writer.write_dataframe(&df2)?;
 
+    // Save the file to disk.
     xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())

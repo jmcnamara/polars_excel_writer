@@ -5,9 +5,11 @@
 //! An example of writing more than one Polar dataframes to an Excel worksheet.
 
 use polars::prelude::*;
+
 use polars_excel_writer::PolarsXlsxWriter;
 
 fn main() -> PolarsResult<()> {
+    // Create a sample dataframe for the example.
     let df1: DataFrame = df!(
         "Data 1" => &[10, 20, 15, 25, 30, 20],
     )?;
@@ -23,6 +25,7 @@ fn main() -> PolarsResult<()> {
     xlsx_writer.write_dataframe_to_cell(&df1, 0, 0)?;
     xlsx_writer.write_dataframe_to_cell(&df2, 0, 2)?;
 
+    // Save the file to disk.
     xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())

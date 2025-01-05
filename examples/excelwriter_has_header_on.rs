@@ -7,22 +7,24 @@
 
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::ExcelWriter;
+
+fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
     let mut df: DataFrame = df!(
         "String" => &["North", "South", "East", "West"],
         "Int" => &[1, 2, 3, 4],
         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    )
-    .unwrap();
+    )?;
 
-    example(&mut df).unwrap();
-}
-
-use polars_excel_writer::ExcelWriter;
-
-fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    // Create a new file object.
     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 
-    ExcelWriter::new(&mut file).has_header(true).finish(df)
+    // Write the dataframe to an Excel file using the Polars SerWriter
+    // interface. This example also turns off the default header.
+    ExcelWriter::new(&mut file)
+        .has_header(false)
+        .finish(&mut df)?;
+
+    Ok(())
 }

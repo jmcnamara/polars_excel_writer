@@ -8,7 +8,9 @@
 
 use polars::prelude::*;
 
-fn main() {
+use polars_excel_writer::ExcelWriter;
+
+fn main() -> PolarsResult<()> {
     // Create a dataframe with Null values.
     let csv_string = "Foo,Bar\nNULL,B\nA,B\nA,NULL\nA,B\n";
     let buffer = std::io::Cursor::new(csv_string);
@@ -20,15 +22,14 @@ fn main() {
         .finish()
         .unwrap();
 
-    example(&mut df).unwrap();
-}
-
-use polars_excel_writer::ExcelWriter;
-
-fn example(df: &mut DataFrame) -> PolarsResult<()> {
+    // Create a new file object.
     let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
 
+    // Write the dataframe to an Excel file using the Polars SerWriter
+    // interface. This example also sets a string value for Null values.
     ExcelWriter::new(&mut file)
         .with_null_value("Null")
-        .finish(df)
+        .finish(&mut df)?;
+
+    Ok(())
 }

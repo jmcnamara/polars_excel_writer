@@ -5,10 +5,11 @@
 //! Simple performance test to compare with the Python Polars example in
 //! `perf_test.py`.
 
+use std::time::Instant;
+
 use chrono::prelude::*;
 use polars::prelude::*;
 use polars_excel_writer::PolarsXlsxWriter;
-use std::time::Instant;
 
 const DATA_SIZE: usize = 250_000;
 
