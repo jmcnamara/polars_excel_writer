@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2023-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of using `polars_excel_writer` in conjunction with
 //! `rust_xlsxwriter` to write a Polars dataframe to a worksheet and then add a
