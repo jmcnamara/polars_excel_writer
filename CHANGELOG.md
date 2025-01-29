@@ -5,18 +5,33 @@ All notable changes to `polars_excel_writer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2025-01-29
+
+### Added
+
+- Update dependencies to `rust_xlsxwriter` 0.82.0 and `polars` 0.46.
+
+- Added support for overriding the default handling of NaN and Infinity numbers.
+  These aren't supported by Excel so they are replaced with default or custom
+  string values. See:
+
+  - `PolarsXlsxWriter::set_nan_value()`
+  - `PolarsXlsxWriter::set_infinity_value()`
+  - `PolarsXlsxWriter::set_neg_infinity_value()`
+
+
 ## [0.11.0] - 2025-01-18
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.81.0 and `Polars` 0.45.
+- Update dependencies to `rust_xlsxwriter` 0.81.0 and `polars` 0.45.
 
 
 ## [0.10.0] - 2025-01-05
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.80.0 and `Polars` 0.44.
+- Update dependencies to `rust_xlsxwriter` 0.80.0 and `polars` 0.44.
 
 - Changed documentation to highlight `write_xlsx` as the primary interface,
   since that will be the main interface in future releases.
@@ -26,28 +41,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.77.0 and `Polars` 0.43.
+- Update dependencies to `rust_xlsxwriter` 0.77.0 and `polars` 0.43.
 
 
 ## [0.8.0] - 2024-08-24
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.74.0 and `Polars` 0.42.0.
+- Update dependencies to `rust_xlsxwriter` 0.74.0 and `polars` 0.42.0.
 
 
 ## [0.7.0] - 2024-03-25
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.63.0 and `Polars` 0.37.0.
+- Update dependencies to `rust_xlsxwriter` 0.63.0 and `polars` 0.37.0.
 
 
 ## [0.6.0] - 2024-01-24
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.62.0 and `Polars` 0.36.2.
+- Update dependencies to `rust_xlsxwriter` 0.62.0 and `polars` 0.36.2.
 
 
 ## [0.5.0] - 2024-01-15

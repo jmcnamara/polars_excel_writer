@@ -101,6 +101,10 @@ documentation and generally show how an individual function works.
   dataframe to an Excel file. This demonstrates saving the dataframe
   without a header.
 
+* `write_excel_set_nan_value.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This demonstrates handling NaN and Infinity
+  values with custom string representations.
+
 * `write_excel_set_screen_gridlines.rs` - An example of writing a Polar
   Rust dataframe to an Excel file. This demonstrates turning off the screen
   gridlines.

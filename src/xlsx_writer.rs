@@ -918,7 +918,8 @@ impl PolarsXlsxWriter {
     /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
-    /// demonstrates TODO
+    /// demonstrates handling NaN and Infinity values with custom string
+    /// representations.
     ///
     /// ```
     /// # // This code is available in examples/write_excel_set_nan_value.rs
