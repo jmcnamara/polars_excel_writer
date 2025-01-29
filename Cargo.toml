@@ -12,8 +12,9 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.39"
-polars = {version = "0.45", features = ["lazy"]}
-rust_xlsxwriter = { version = "0.81.0", features = ["chrono", "polars"] }
+polars = {version = "0.46", features = ["lazy"]}
+polars-arrow = {version = "0.46"}
+rust_xlsxwriter = {version = "0.82.0", features = ["chrono", "polars"]}
 
 
 [dev-dependencies]

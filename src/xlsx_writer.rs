@@ -9,11 +9,11 @@
 use std::io::{Seek, Write};
 use std::path::Path;
 
-use polars::export::arrow::temporal_conversions::{
+use polars::prelude::*;
+use polars_arrow::temporal_conversions::{
     date32_to_date, time64ns_to_time, timestamp_ms_to_datetime, timestamp_ns_to_datetime,
     timestamp_us_to_datetime,
 };
-use polars::prelude::*;
 use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 
 /// `PolarsXlsxWriter` provides an interface to serialize Polars dataframes to
@@ -850,7 +850,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `null_value` - A replacement string for Null values.
+    /// * `value` - A replacement string for Null values.
     ///
     /// # Examples
     ///
@@ -898,8 +898,104 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
     ///
-    pub fn set_null_value(&mut self, null_value: impl Into<String>) -> &mut PolarsXlsxWriter {
-        self.options.null_string = Some(null_value.into());
+    pub fn set_null_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+        self.options.null_value = Some(value.into());
+        self
+    }
+
+    /// Replace NaN values in the exported dataframe with string values.
+    ///
+    /// By default [`f64::NAN`] values in a dataframe are exported as the string
+    /// "NAN" since Excel does not support NaN values.
+    ///
+    /// This method can be used to supply an alternative string value. See the
+    /// example below.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - A replacement string for Null values.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates TODO
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_nan_value.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Default" => &["NAN", "INF", "-INF"],
+    ///         "Custom" => &[f64::NAN, f64::INFINITY, f64::NEG_INFINITY],
+    ///     )?;
+    ///
+    ///     // Write the dataframe to an Excel file.
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Set custom values for NaN, Infinity, and -Infinity.
+    ///     xlsx_writer.set_nan_value("NaN");
+    ///     xlsx_writer.set_infinity_value("Infinity");
+    ///     xlsx_writer.set_neg_infinity_value("-Infinity");
+    ///
+    ///     // Autofit the output data, for clarity.
+    ///     xlsx_writer.set_autofit(true);
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_nan_value.png">
+    ///
+    pub fn set_nan_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+        self.options.nan_value = Some(value.into());
+        self
+    }
+
+    /// Replace Infinity values in the exported dataframe with string values.
+    ///
+    /// By default [`f64::INFINITY`] values in a dataframe are exported as the
+    /// string "INF" since Excel does not support Infinity values.
+    ///
+    /// This method can be used to supply an alternative string value. See the
+    /// `set_nan_value()` example above.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - A replacement string for Null values.
+    ///
+    pub fn set_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+        self.options.infinity_value = Some(value.into());
+        self
+    }
+
+    /// Replace Negative Infinity values in the exported dataframe with string
+    /// values.
+    ///
+    /// By default [`f64::NEG_INFINITY`] values in a dataframe are exported as
+    /// the string "-INF" since Excel does not support Infinity values.
+    ///
+    /// This method can be used to supply an alternative string value. See the
+    /// `set_nan_value()` example above.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - A replacement string for Null values.
+    ///
+    pub fn set_neg_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+        self.options.neg_infinity_value = Some(value.into());
         self
     }
 
@@ -1547,6 +1643,17 @@ impl PolarsXlsxWriter {
     ) -> Result<(), PolarsError> {
         let header_offset = u32::from(options.table.has_header_row());
 
+        // Set NaN and Infinity values, if required.
+        if let Some(nan_value) = &options.nan_value {
+            worksheet.set_nan_value(nan_value);
+        }
+        if let Some(infinity_value) = &options.infinity_value {
+            worksheet.set_infinity_value(infinity_value);
+        }
+        if let Some(neg_infinity_value) = &options.neg_infinity_value {
+            worksheet.set_neg_infinity_value(neg_infinity_value);
+        }
+
         // Iterate through the dataframe column by column.
         for (col_num, column) in df.get_columns().iter().enumerate() {
             let col_num = col_offset + col_num as u16;
@@ -1617,7 +1724,7 @@ impl PolarsXlsxWriter {
                         worksheet.write_boolean(row_num, col_num, value)?;
                     }
                     AnyValue::Null => {
-                        if let Some(null_string) = &options.null_string {
+                        if let Some(null_string) = &options.null_value {
                             worksheet.write_string(row_num, col_num, null_string)?;
                         }
                     }
@@ -1714,7 +1821,10 @@ pub(crate) struct WriterOptions {
     pub(crate) time_format: Format,
     pub(crate) float_format: Format,
     pub(crate) datetime_format: Format,
-    pub(crate) null_string: Option<String>,
+    pub(crate) null_value: Option<String>,
+    pub(crate) nan_value: Option<String>,
+    pub(crate) infinity_value: Option<String>,
+    pub(crate) neg_infinity_value: Option<String>,
     pub(crate) table: Table,
     pub(crate) zoom: u16,
     pub(crate) screen_gridlines: bool,
@@ -1735,7 +1845,10 @@ impl WriterOptions {
             time_format: "hh:mm:ss;@".into(),
             date_format: "yyyy\\-mm\\-dd;@".into(),
             datetime_format: "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
-            null_string: None,
+            null_value: None,
+            nan_value: None,
+            infinity_value: None,
+            neg_infinity_value: None,
             float_format: Format::default(),
             table: Table::new(),
             zoom: 100,
