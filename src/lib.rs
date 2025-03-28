@@ -17,7 +17,9 @@
 //! uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`]
 //! interface.
 //!
-//! This crate uses [`rust_xlsxwriter`] to do the Excel serialization.
+//! This crate uses [`rust_xlsxwriter`] to do the Excel serialization and is
+//! typically 5x faster than Polars when exporting large dataframes to Excel,
+//! see the Performance data below.
 //!
 //! [`SerWriter`]:
 //!     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html

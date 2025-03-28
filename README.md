@@ -3,20 +3,18 @@
 The `polars_excel_writer` crate is a library for serializing Polars dataframes
 to Excel Xlsx files.
 
+The crate uses [`rust_xlsxwriter`] to do the Excel serialization and is
+typically 5x faster than Polars when exporting large dataframes to Excel.
+
 It provides a primary interface [`PolarsXlsxWriter`] which is a configurable
 Excel serializer that resembles the interface options provided by the Polars
 [`write_excel()`] dataframe method.
 
-It also provides a secondary [`ExcelWriter`] interface which is a simpler
+The crate also provides a secondary [`ExcelWriter`] interface which is a simpler
 Excel serializer that implements the Polars [`SerWriter`] trait to write a
 dataframe to an Excel Xlsx file. However, unless you have existing code that
-uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`]
-interface.
+uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`] interface.
 
-Unless you have existing code that uses the Polars [`SerWriter`] trait you
-should use the primary [`PolarsXlsxWriter`] interface.
-
-This crate uses [`rust_xlsxwriter`] to do the Excel serialization.
 
 [`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/write/struct.ExcelWriter.html
 [`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html
@@ -83,10 +81,32 @@ Output file:
 
 <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 
+
+## Performance
+
+The table below shows the performance of writing a dataframe using Python
+Polars, Python Pandas and `PolarsXlsxWriter`.
+
+  | Test Case                     | Time (s) | Relative (%) |
+  | :---------------------------- | :------- | :----------- |
+  | `Polars`                      |     6.49 |         100% |
+  | `Pandas`                      |    10.92 |         168% |
+  | `polars_excel_writer`         |     1.22 |          19% |
+  | `polars_excel_writer` + `zlib`|     1.08 |          17% |
+
+See the [Performance] section of the docs for more detail.
+
+[Performance]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/#performance
+
 ## See also
 
-- [Changelog]: Recent additions and fixes.
-- [Performance]: Performance comparison with Python based methods.
+- [The `polars_excel_writer` crate].
+- [The `polars_excel_writer` API docs at docs.rs].
+- [The `polars_excel_writer` repository].
+- [Roadmap of planned features].
 
-[Changelog]: https://github.com/jmcnamara/polars_excel_writer/blob/main/CHANGELOG.md
-[Performance]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/#performance
+[The `polars_excel_writer` crate]: https://crates.io/crates/polars_excel_writer
+[The `polars_excel_writer` API docs at docs.rs]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/
+[The `polars_excel_writer` repository]: https://github.com/jmcnamara/polars_excel_writer
+[Release Notes and Changelog]: https://github.com/jmcnamara/polars_excel_writer/blob/main/CHANGELOG.md
+[Roadmap of planned features]: https://github.com/jmcnamara/polars_excel_writer/issues/1
