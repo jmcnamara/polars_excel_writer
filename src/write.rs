@@ -111,6 +111,10 @@ where
     /// Turn on/off the dataframe header row in the Excel table. It is on by
     /// default.
     ///
+    /// # Parameters
+    ///
+    /// - `has_header` - Export dataframe with/without header.
+    ///
     /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
@@ -198,7 +202,12 @@ where
     /// defined format.
     ///
     /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///     ../../rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
     ///
     /// # Examples
     ///
@@ -244,7 +253,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_time_format.png">
     ///
     pub fn with_time_format(mut self, format: impl Into<Format>) -> Self {
-        self.xlsx_writer.set_time_format(format);
+        self.xlsx_writer.set_dtype_format(DataType::Time, format);
         self
     }
 
@@ -256,7 +265,12 @@ where
     /// defined format.
     ///
     /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///     ../../rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
     ///
     /// # Examples
     ///
@@ -300,7 +314,7 @@ where
     /// <img src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
     ///
     pub fn with_date_format(mut self, format: impl Into<Format>) -> Self {
-        self.xlsx_writer.set_date_format(format);
+        self.xlsx_writer.set_dtype_format(DataType::Date, format);
         self
     }
 
@@ -312,7 +326,12 @@ where
     /// user defined format.
     ///
     /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///     ../../rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
     ///
     /// # Examples
     ///
@@ -358,7 +377,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
     ///
     pub fn with_datetime_format(mut self, format: impl Into<Format>) -> Self {
-        self.xlsx_writer.set_datetime_format(format);
+        self.xlsx_writer.set_dtype_datetime_format(format);
         self
     }
 
@@ -372,10 +391,16 @@ where
     /// sections in the `rust_xlsxwriter` documentation.
     ///
     /// [Number Format Categories]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#number-format-categories
+    ///     ../../rust_xlsxwriter/struct.Format.html#number-format-categories
     ///
     /// Note, the numeric values aren't truncated in Excel, this option just
     /// controls the display of the number.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
     /// # Examples
     ///
     /// An example of writing a Polar Rust dataframe to an Excel file. This
@@ -413,7 +438,7 @@ where
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
     ///
     pub fn with_float_format(mut self, format: impl Into<Format>) -> Self {
-        self.xlsx_writer.set_float_format(format);
+        self.xlsx_writer.set_dtype_float_format(format);
         self
     }
 
@@ -429,6 +454,9 @@ where
     /// Note, the numeric values aren't truncated in Excel, this option just
     /// controls the display of the number.
     ///
+    /// # Parameters
+    ///
+    /// - `precision` - The floating point precision in the Excel range 1-30.
     ///
     /// # Examples
     ///
@@ -478,6 +506,10 @@ where
     /// By default Null values in a dataframe aren't exported to Excel and will
     /// appear as empty cells. If you wish you can specify a string such as
     /// "Null", "NULL" or "N/A" as an alternative.
+    ///
+    /// # Parameters
+    ///
+    /// - `value` - A replacement string for Null values.
     ///
     /// # Examples
     ///
@@ -536,7 +568,7 @@ where
     /// `rust_xlsxwriter` docs on [`worksheet.autofit()`] for details.
     ///
     /// [`worksheet.autofit()`]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
+    ///     ../../rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
     ///
     /// # Examples
     ///

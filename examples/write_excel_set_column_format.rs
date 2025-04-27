@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of writing a Polar Rust dataframe to an Excel file. This
-//! demonstrates setting an Excel number format for floats.
+//! demonstrates setting formats for different columns.
 
 use polars::prelude::*;
 
@@ -12,14 +12,16 @@ use polars_excel_writer::PolarsXlsxWriter;
 fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
     let df: DataFrame = df!(
-        "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
+        "East" => &[1.0, 2.22, 3.333, 4.4444],
+        "West" => &[1.0, 2.22, 3.333, 4.4444],
     )?;
 
     // Write the dataframe to an Excel file.
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
-    // Set the float format.
-    xlsx_writer.set_dtype_float_format("#,##0.00");
+    // Set the number formats for the columns.
+    xlsx_writer.set_column_format("East", "0.00");
+    xlsx_writer.set_column_format("West", "0.0000");
 
     // Write the dataframe to Excel.
     xlsx_writer.write_dataframe(&df)?;

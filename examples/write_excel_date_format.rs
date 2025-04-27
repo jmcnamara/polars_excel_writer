@@ -25,7 +25,7 @@ fn main() -> PolarsResult<()> {
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
     // Set the date format.
-    xlsx_writer.set_date_format("mmm d yyyy");
+    xlsx_writer.set_dtype_format(DataType::Date, "mmm d yyyy");
 
     // Write the dataframe to Excel.
     xlsx_writer.write_dataframe(&df)?;

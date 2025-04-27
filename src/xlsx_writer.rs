@@ -6,6 +6,7 @@
 
 #![warn(missing_docs)]
 
+use std::collections::HashMap;
 use std::io::{Seek, Write};
 use std::path::Path;
 
@@ -14,7 +15,8 @@ use polars_arrow::temporal_conversions::{
     date32_to_date, time64ns_to_time, timestamp_ms_to_datetime, timestamp_ns_to_datetime,
     timestamp_us_to_datetime,
 };
-use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
+use rust_xlsxwriter::worksheet::IntoExcelData;
+use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 
 /// `PolarsXlsxWriter` provides an interface to serialize Polars dataframes to
 /// Excel via the [`rust_xlsxwriter`] library. This allows Excel serialization
@@ -25,7 +27,7 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 /// interface options provided by the Polars Python [`write_excel()`] dataframe
 /// method.
 ///
-/// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
+/// [`rust_xlsxwriter`]: ../../rust_xlsxwriter/
 /// [`write_excel()`]:
 ///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
 ///
@@ -103,7 +105,7 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 ///
 /// Here is an example that demonstrate this:
 ///
-/// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
+/// [`rust_xlsxwriter`]: ../../rust_xlsxwriter/
 ///
 /// ```
 /// # // This code is available in examples/write_excel_chart.rs
@@ -156,9 +158,9 @@ use rust_xlsxwriter::{Format, Table, Workbook, Worksheet};
 ///
 /// 1. `polars` to create/manipulate the dataframe.
 /// 2. `rust_xlsxwriter` to create an Excel workbook and worksheet and
-///     optionally add other features to the worksheet.
+///    optionally add other features to the worksheet.
 /// 3. `polars_excel_writer::PolarsXlsxWriter` to write the Polars dataframe to
-///     the worksheet.
+///    the worksheet.
 ///
 /// This may seem initially complicated but it divides the solution into
 /// specialized libraries that are best suited for their task and it allow you
@@ -220,7 +222,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `df` - A Polars dataframe.
+    /// - `df` - A Polars dataframe.
     ///
     /// # Errors
     ///
@@ -281,9 +283,9 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `df` - A Polars dataframe.
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `df` - A Polars dataframe.
+    /// - `row` - The zero indexed row number.
+    /// - `col` - The zero indexed column number.
     ///
     /// # Errors
     ///
@@ -359,10 +361,10 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `df` - A Polars dataframe.
-    /// * `worksheet` - A `rust_xlsxwriter` [`Worksheet`].
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `df` - A Polars dataframe.
+    /// - `worksheet` - A `rust_xlsxwriter` [`Worksheet`].
+    /// - `row` - The zero indexed row number.
+    /// - `col` - The zero indexed column number.
     ///
     ///
     /// # Errors
@@ -451,7 +453,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `path` - The path of the new Excel file to create as a `&str` or as a
+    /// - `path` - The path of the new Excel file to create as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
@@ -470,7 +472,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `has_header` - Export dataframe with/without header.
+    /// - `has_header` - Export dataframe with/without header.
     ///
     /// # Examples
     ///
@@ -520,25 +522,97 @@ impl PolarsXlsxWriter {
         self
     }
 
-    /// Set the Excel number format for time values.
+    /// Set an Excel format for a specific Polars data type.
     ///
-    /// [Datetimes in Excel] are stored as f64 floats with a format used to
-    /// display them. The default time format used by this library is
-    /// `hh:mm:ss;@`. This method can be used to specify an alternative user
-    /// defined format.
+    /// Sets a cell format to be applied to a Polar [`DataType`] type in a
+    /// dataframe. The Polar's data types supported by Excel are:
     ///
-    /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
+    /// - [`DataType::Boolean`]
+    /// - [`DataType::Int8`]
+    /// - [`DataType::Int16`]
+    /// - [`DataType::Int32`]
+    /// - [`DataType::Int64`]
+    /// - [`DataType::UInt8`]
+    /// - [`DataType::UInt16`]
+    /// - [`DataType::UInt32`]
+    /// - [`DataType::UInt64`]
+    /// - [`DataType::Float32`]
+    /// - [`DataType::Float64`]
+    /// - [`DataType::Date`]
+    /// - [`DataType::Time`]
+    /// - [`DataType::Datetime`]
+    /// - [`DataType::String`]
+    /// - [`DataType::Null`]
+    ///
+    /// **Formats**
+    ///
+    /// For more information on the formatting that is supported see the
+    /// documentation for the `rust_xlsxwriter` [`Format`]. The majority of
+    /// Excel cell formatting is available.
+    ///
+    /// See also the [Number Format Categories] section and the [Number Formats
+    /// in different locales] sections in the `rust_xlsxwriter` documentation.
+    ///
+    /// [Number Format Categories]:
+    ///     ../../rust_xlsxwriter/struct.Format.html#number-format-categories
+    /// [Number Formats in different locales]:
+    ///     ../../rust_xlsxwriter/struct.Format.html#number-formats-in-different-locales
+    ///
+    ///
+    /// **Integer and Float types**
+    ///
+    /// Excel stores all integer and float types as [`f64`] floats without an
+    /// explicit cell number format. It does, however, display them using a
+    /// "printf"-like format of `%.16G` so that integers appear as integers and
+    /// floats have the minimum required numbers of decimal places to maintain
+    /// precision.
+    ///
+    /// Since there are many similar integer and float types in Polars, this
+    /// library provides additional helper methods to set the format for related
+    /// types:
+    ///
+    /// - [`set_dtype_int_format()`](PolarsXlsxWriter::set_dtype_int_format):
+    ///   All the integer types.
+    /// - [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format):
+    ///   Both float types.
+    /// - [`set_dtype_number_format()`](PolarsXlsxWriter::set_dtype_number_format):
+    ///   All the integer and float types.
+    ///
+    /// **Date and Time types**
+    ///
+    /// Datetimes in Excel are serial dates with days counted from an epoch
+    /// (usually 1900-01-01) and the time is a percentage/decimal of the
+    /// milliseconds in the day. Both the date and time are stored in the same
+    /// `f64` value. For example, the date and time "2026/01/01 12:00:00" is
+    /// stored as 46023.5.
+    ///
+    /// Datetimes in Excel must also be formatted with a number format like
+    /// `"yyyy/mm/dd hh:mm"` or otherwise they will appear as numbers (which
+    /// technically they are). By default the following formats are used for
+    /// dates and times to match Polars `write_excel`:
+    ///
+    /// - Time: `hh:mm:ss;@`
+    /// - Date: `yyyy-mm-dd;@`
+    /// - Datetime: `yyyy-mm-dd hh:mm:ss`
+    ///
+    /// Alternative date and time formats can be specified as shown in the
+    /// examples below and in the
+    /// [`PolarsXlsxWriter::set_dtype_datetime_format()`] method.
+    ///
+    /// Note, Excel doesn't use timezones or try to convert or encode timezone
+    /// information in any way so they aren't supported by this library.
     ///
     /// # Parameters
     ///
-    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    /// - `dtype` - A Polars [`DataType`] type.
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
     ///   string that can be converted to a `Format`.
     ///
     /// # Examples
     ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This example
-    /// demonstrates how to change the default format for Polars time types.
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates how to change the default format for Polars time
+    /// types.
     ///
     /// ```
     /// # // This code is available in examples/write_excel_time_format.rs
@@ -563,7 +637,7 @@ impl PolarsXlsxWriter {
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Set the time format.
-    ///     xlsx_writer.set_time_format("hh:mm");
+    ///     xlsx_writer.set_dtype_format(DataType::Time, "hh:mm");
     ///
     ///     // Write the dataframe to Excel.
     ///     xlsx_writer.write_dataframe(&df)?;
@@ -580,30 +654,8 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_time_format.png">
     ///
-    pub fn set_time_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
-        self.options.time_format = format.into();
-        self
-    }
-
-    /// Set the Excel number format for date values.
-    ///
-    /// [Datetimes in Excel] are stored as f64 floats with a format used to
-    /// display them. The default date format used by this library is
-    /// `yyyy-mm-dd;@`. This method can be used to specify an alternative user
-    /// defined format.
-    ///
-    /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
-    ///
-    /// # Parameters
-    ///
-    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
-    ///   string that can be converted to a `Format`.
-    ///
-    /// # Examples
-    ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This example
-    /// demonstrates how to change the default format for Polars date types.
+    /// This example demonstrates how to change the default format for Polars
+    /// date types.
     ///
     /// ```
     /// # // This code is available in examples/write_excel_date_format.rs
@@ -628,71 +680,7 @@ impl PolarsXlsxWriter {
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Set the date format.
-    ///     xlsx_writer.set_date_format("mmm d yyyy");
-    ///
-    ///     // Write the dataframe to Excel.
-    ///     xlsx_writer.write_dataframe(&df)?;
-    ///
-    ///     // Save the file to disk.
-    ///     xlsx_writer.save("dataframe.xlsx")?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
-    ///
-    pub fn set_date_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
-        self.options.date_format = format.into();
-        self
-    }
-
-    /// Set the Excel number format for datetime values.
-    ///
-    /// [Datetimes in Excel] are stored as f64 floats with a format used to
-    /// display them. The default datetime format used by this library is
-    /// `yyyy-mm-dd hh:mm:ss`. This method can be used to specify an alternative
-    /// user defined format.
-    ///
-    /// [Datetimes in Excel]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html#datetimes-in-excel
-    ///
-    /// # Parameters
-    ///
-    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
-    ///   string that can be converted to a `Format`.
-    ///
-    /// # Examples
-    ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This example
-    /// demonstrates how to change the default format for Polars datetime types.
-    ///
-    /// ```
-    /// # // This code is available in examples/write_excel_datetime_format.rs
-    /// #
-    /// use chrono::prelude::*;
-    /// use polars::prelude::*;
-    ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
-    ///
-    /// fn main() -> PolarsResult<()> {
-    ///     // Create a sample dataframe for the example.
-    ///     let df: DataFrame = df!(
-    ///         "Datetime" => &[
-    ///             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
-    ///             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
-    ///             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
-    ///             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
-    ///         ],
-    ///     )?;
-    ///
-    ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
-    ///
-    ///     // Set the datetime format.
-    ///     xlsx_writer.set_datetime_format("hh::mm - mmm d yyyy");
+    ///     xlsx_writer.set_dtype_format(DataType::Date, "mmm d yyyy");
     ///
     ///     // Write the dataframe to Excel.
     ///     xlsx_writer.write_dataframe(&df)?;
@@ -707,31 +695,72 @@ impl PolarsXlsxWriter {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_date_format.png">
     ///
-    pub fn set_datetime_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
-        self.options.datetime_format = format.into();
+    pub fn set_dtype_format(
+        &mut self,
+        dtype: DataType,
+        format: impl Into<Format>,
+    ) -> &mut PolarsXlsxWriter {
+        self.options.dtype_formats.insert(dtype, format.into());
         self
     }
 
-    /// Set the Excel number format for floats.
+    /// Set an Excel format for the Polars integer data types.
     ///
-    /// Set the Excel number format for f32/f64 float types using an Excel
-    /// number format string. These format strings can be obtained from the
-    /// `Format Cells -> Number` dialog in Excel.
+    /// Sets a cell format to be applied to Polar [`DataType`] integer types in
+    /// a dataframe. This is a shortcut for setting the format for all the
+    /// following integer types with
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
     ///
-    /// See the [Number Format Categories] section and subsequent Number Format
-    /// sections in the `rust_xlsxwriter` documentation.
+    /// - [`DataType::Int8`]
+    /// - [`DataType::Int16`]
+    /// - [`DataType::Int32`]
+    /// - [`DataType::Int64`]
+    /// - [`DataType::UInt8`]
+    /// - [`DataType::UInt16`]
+    /// - [`DataType::UInt32`]
+    /// - [`DataType::UInt64`]
     ///
-    /// [Number Format Categories]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#number-format-categories
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    pub fn set_dtype_int_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        let format = format.into();
+
+        self.set_dtype_format(DataType::Int8, format.clone());
+        self.set_dtype_format(DataType::Int16, format.clone());
+        self.set_dtype_format(DataType::Int32, format.clone());
+        self.set_dtype_format(DataType::Int64, format.clone());
+        self.set_dtype_format(DataType::UInt8, format.clone());
+        self.set_dtype_format(DataType::UInt16, format.clone());
+        self.set_dtype_format(DataType::UInt32, format.clone());
+        self.set_dtype_format(DataType::UInt64, format.clone());
+
+        self
+    }
+
+    /// Set an Excel format for the Polars float data types.
+    ///
+    /// Sets a cell format to be applied to Polar [`DataType`] float types in a
+    /// dataframe. This method is a shortcut for setting the format for the
+    /// following `f32`/`f64` float types with
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    ///
+    /// - [`DataType::Float32`]
+    /// - [`DataType::Float64`]
+    ///
+    /// The required format strings can be obtained from the `Format Cells ->
+    /// Number` dialog in Excel.
     ///
     /// Note, the numeric values aren't truncated in Excel, this option just
     /// controls the display of the number.
     ///
     /// # Parameters
     ///
-    /// * `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
     ///   string that can be converted to a `Format`.
     ///
     /// # Examples
@@ -757,7 +786,7 @@ impl PolarsXlsxWriter {
     ///     let mut xlsx_writer = PolarsXlsxWriter::new();
     ///
     ///     // Set the float format.
-    ///     xlsx_writer.set_float_format("#,##0.00");
+    ///     xlsx_writer.set_dtype_float_format("#,##0.00");
     ///
     ///     // Write the dataframe to Excel.
     ///     xlsx_writer.write_dataframe(&df)?;
@@ -774,8 +803,140 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
     ///
-    pub fn set_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
-        self.options.float_format = format.into();
+    pub fn set_dtype_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        let format = format.into();
+
+        self.set_dtype_format(DataType::Float32, format.clone());
+        self.set_dtype_format(DataType::Float64, format.clone());
+
+        self
+    }
+
+    /// Add a format for the Polars number data types.
+    ///
+    /// Sets a cell format to be applied to Polar [`DataType`] number types in a
+    /// dataframe. This is a shortcut for setting the format for all the
+    /// following types with
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    /// - [`DataType::Int8`]
+    /// - [`DataType::Int16`]
+    /// - [`DataType::Int32`]
+    /// - [`DataType::Int64`]
+    /// - [`DataType::UInt8`]
+    /// - [`DataType::UInt16`]
+    /// - [`DataType::UInt32`]
+    /// - [`DataType::UInt64`]
+    /// - [`DataType::Float32`]
+    /// - [`DataType::Float64`]
+    ///
+    /// Note, excel treats all of these types as a [`f64`] float type.
+    ///
+    pub fn set_dtype_number_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        let format = format.into();
+
+        self.set_dtype_int_format(format.clone());
+        self.set_dtype_float_format(format.clone());
+        self
+    }
+
+    /// Set an Excel format for the Polars datetime variants.
+    ///
+    /// Sets a cell format to be applied to Polar [`DataType::Datetime`]
+    /// variants in a dataframe.
+    ///
+    /// The type signature for `DataType::Datetime` is `Datetime(TimeUnit,
+    /// Option<TimeZone>)` with 3 possible [`TimeUnit`] variants and an optional
+    /// [`TimeZone`] type.
+    ///
+    /// This method is a shortcut for setting the format for the following
+    /// [`DataType::Datetime`] types with
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    ///
+    /// - [`DataType::Datetime(TimeUnit::Nanoseconds, None)`]
+    /// - [`DataType::Datetime(TimeUnit::Microseconds, None)`]
+    /// - [`DataType::Datetime(TimeUnit::Milliseconds, None)`]
+    ///
+    /// Excel doesn't use timezones or try to convert or encode timezone
+    /// information in any way so they aren't supported by this library.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates how to change the default format for Polars
+    /// datetime types.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_datetime_format.rs
+    /// #
+    /// use chrono::prelude::*;
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Datetime" => &[
+    ///             NaiveDate::from_ymd_opt(2023, 1, 11).unwrap().and_hms_opt(1, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 12).unwrap().and_hms_opt(2, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 13).unwrap().and_hms_opt(3, 0, 0).unwrap(),
+    ///             NaiveDate::from_ymd_opt(2023, 1, 14).unwrap().and_hms_opt(4, 0, 0).unwrap(),
+    ///         ],
+    ///     )?;
+    ///
+    ///     // Write the dataframe to an Excel file.
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Set the datetime format.
+    ///     xlsx_writer.set_dtype_datetime_format("hh::mm - mmm d yyyy");
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/excelwriter_datetime_format.png">
+    ///
+    ///
+    pub fn set_dtype_datetime_format(
+        &mut self,
+        format: impl Into<Format>,
+    ) -> &mut PolarsXlsxWriter {
+        let format = format.into();
+
+        self.set_dtype_format(
+            DataType::Datetime(TimeUnit::Nanoseconds, None),
+            format.clone(),
+        );
+        self.set_dtype_format(
+            DataType::Datetime(TimeUnit::Microseconds, None),
+            format.clone(),
+        );
+        self.set_dtype_format(
+            DataType::Datetime(TimeUnit::Milliseconds, None),
+            format.clone(),
+        );
+
         self
     }
 
@@ -783,7 +944,7 @@ impl PolarsXlsxWriter {
     ///
     /// Set the number precision of all floats exported from the dataframe to
     /// Excel. The precision is converted to an Excel number format (see
-    /// [`set_float_format()`](PolarsXlsxWriter::set_float_format) above), so for
+    /// [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format) above), so for
     /// example 3 is converted to the Excel format `0.000`.
     ///
     /// Note, the numeric values aren't truncated in Excel, this option just
@@ -791,7 +952,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `precision` - The floating point precision in the Excel range 1-30.
+    /// - `precision` - The floating point precision in the Excel range 1-30.
     ///
     /// # Examples
     ///
@@ -837,8 +998,138 @@ impl PolarsXlsxWriter {
     pub fn set_float_precision(&mut self, precision: usize) -> &mut PolarsXlsxWriter {
         if (1..=30).contains(&precision) {
             let precision = "0".repeat(precision);
-            self.options.float_format = Format::new().set_num_format(format!("0.{precision}"));
+            let format = Format::new().set_num_format(format!("0.{precision}"));
+            self.set_dtype_float_format(format);
         }
+        self
+    }
+
+    /// Add a format for a named column in the dataframe.
+    ///
+    /// Set an Excel format for a specific column in the dataframe. This is
+    /// similar to the
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) method expect
+    /// that is gives a different level of granularity. For example you could
+    /// use this to format tow `f64` columns with different formats.
+    ///
+    /// # Parameters
+    ///
+    /// - `column_name` - The name of the column in the dataframe. Unknown
+    ///   column names are silently ignored.
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting formats for different columns.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_column_format.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "East" => &[1.0, 2.22, 3.333, 4.4444],
+    ///         "West" => &[1.0, 2.22, 3.333, 4.4444],
+    ///     )?;
+    ///
+    ///     // Write the dataframe to an Excel file.
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Set the number formats for the columns.
+    ///     xlsx_writer.set_column_format("East", "0.00");
+    ///     xlsx_writer.set_column_format("West", "0.0000");
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_column_format.png">
+    ///
+    ///
+    pub fn set_column_format(
+        &mut self,
+        column_name: &str,
+        format: impl Into<Format>,
+    ) -> &mut PolarsXlsxWriter {
+        self.options
+            .column_formats
+            .insert(column_name.to_string(), format.into());
+        self
+    }
+
+    /// Set the format for the header row.
+    ///
+    /// Set the format for the header row in the Excel table.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`].
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// demonstrates setting the format for the header row.
+    ///
+    /// ```
+    /// # // This code is available in examples/write_excel_set_header_format.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use rust_xlsxwriter::Format;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "East" => &[1, 1, 1, 1],
+    ///         "West" => &[2, 2, 2, 2],
+    ///         "North" => &[3, 3, 3, 3],
+    ///         "South" => &[4, 4, 4, 4],
+    ///     )?;
+    ///
+    ///     // Write the dataframe to an Excel file.
+    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///
+    ///     // Create an set the header format.
+    ///     let header_format = Format::new()
+    ///         .set_background_color("#C6EFCE")
+    ///         .set_font_color("#006100")
+    ///         .set_bold();
+    ///
+    ///     // Set the number formats for the columns.
+    ///     xlsx_writer.set_header_format(&header_format);
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     xlsx_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     xlsx_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_header_format.png">
+    ///
+    pub fn set_header_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.options.header_format = Some(format.into());
         self
     }
 
@@ -850,7 +1141,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `value` - A replacement string for Null values.
+    /// - `value` - A replacement string for Null values.
     ///
     /// # Examples
     ///
@@ -913,7 +1204,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `value` - A replacement string for Null values.
+    /// - `value` - A replacement string for Null values.
     ///
     /// # Examples
     ///
@@ -975,7 +1266,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `value` - A replacement string for Null values.
+    /// - `value` - A replacement string for Null values.
     ///
     pub fn set_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
         self.options.infinity_value = Some(value.into());
@@ -993,7 +1284,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `value` - A replacement string for Null values.
+    /// - `value` - A replacement string for Null values.
     ///
     pub fn set_neg_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
         self.options.neg_infinity_value = Some(value.into());
@@ -1009,11 +1300,11 @@ impl PolarsXlsxWriter {
     /// `rust_xlsxwriter` docs on [`Worksheet::autofit()`] for details.
     ///
     /// [`Worksheet::autofit()`]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
+    ///     ../../rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
     ///
     /// # Parameters
     ///
-    /// * `autofit` - Turn autofit on/off. It is off by default.
+    /// - `autofit` - Turn autofit on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -1068,7 +1359,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `zoom` - The worksheet zoom level. The default zoom level is 100.
+    /// - `zoom` - The worksheet zoom level. The default zoom level is 100.
     ///
     /// # Examples
     ///
@@ -1122,7 +1413,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable` - Turn the property on/off. It is on by default.
     ///
     ///
     /// # Examples
@@ -1188,8 +1479,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row` - The zero indexed row number.
+    /// - `col` - The zero indexed column number.
     ///
     ///
     /// # Examples
@@ -1249,8 +1540,8 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row` - The zero indexed row number.
+    /// - `col` - The zero indexed column number.
     ///
     ///
     /// # Examples
@@ -1312,7 +1603,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable` - Turn the property on/off. It is on by default.
     ///
     pub fn set_autofilter(&mut self, enable: bool) -> &mut PolarsXlsxWriter {
         let table = self.options.table.clone().set_autofilter(enable);
@@ -1347,7 +1638,7 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `table` - A `rust_xlsxwriter` [`Table`] reference.
+    /// - `table` - A `rust_xlsxwriter` [`Table`] reference.
     ///
     /// # Examples
     ///
@@ -1408,16 +1699,16 @@ impl PolarsXlsxWriter {
     ///
     /// # Parameters
     ///
-    /// * `name` - The worksheet name. It must follow the Excel rules, shown
+    /// - `name` - The worksheet name. It must follow the Excel rules, shown
     ///   below.
     ///
-    ///   * The name must be less than 32 characters.
-    ///   * The name cannot be blank.
-    ///   * The name cannot contain any of the characters: `[ ] : * ? / \`.
-    ///   * The name cannot start or end with an apostrophe.
-    ///   * The name shouldn't be "History" (case-insensitive) since that is
+    ///   - The name must be less than 32 characters.
+    ///   - The name cannot be blank.
+    ///   - The name cannot contain any of the characters: `[ ] : * ? / \`.
+    ///   - The name cannot start or end with an apostrophe.
+    ///   - The name shouldn't be "History" (case-insensitive) since that is
     ///     reserved by Excel.
-    ///   * It must not be a duplicate of another worksheet name used in the
+    ///   - It must not be a duplicate of another worksheet name used in the
     ///     workbook.
     ///
     /// # Errors
@@ -1429,7 +1720,7 @@ impl PolarsXlsxWriter {
     /// [`set_name()` errors] for more details.
     ///
     /// [`set_name()` errors]:
-    ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#errors
+    ///     ../../rust_xlsxwriter/worksheet/struct.Worksheet.html#errors
     ///
     /// # Examples
     ///
@@ -1613,6 +1904,77 @@ impl PolarsXlsxWriter {
         Ok(worksheet)
     }
 
+    /// Set the Excel number format for floats.
+    ///
+    /// This method is deprecated. Use
+    /// [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format)
+    /// instead.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    #[deprecated(
+        since = "0.14.0",
+        note = "use `set_dtype_format()` or `set_dtype_float_format()` instead"
+    )]
+    pub fn set_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.set_dtype_float_format(format);
+        self
+    }
+
+    /// Set the Excel number format for time values.
+    ///
+    /// This method is deprecated. Use
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) instead.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    #[deprecated(since = "0.14.0", note = "use `set_dtype_format()` instead")]
+    pub fn set_time_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.set_dtype_format(DataType::Time, format);
+        self
+    }
+
+    /// Set the Excel number format for date values.
+    ///
+    /// This method is deprecated. Use
+    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) instead.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    #[deprecated(since = "0.14.0", note = "use `set_dtype_format()` instead")]
+    pub fn set_date_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.set_dtype_format(DataType::Date, format);
+        self
+    }
+
+    /// Set the Excel number format for datetime values.
+    ///
+    /// This method is deprecated. Use
+    /// [`PolarsXlsxWriter::set_dtype_datetime_format()`] instead.
+    ///
+    /// # Parameters
+    ///
+    /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
+    ///   string that can be converted to a `Format`.
+    ///
+    #[deprecated(
+        since = "0.14.0",
+        note = "use `set_dtype_format()` or `set_dtype_datetime_format()` instead"
+    )]
+    pub fn set_datetime_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+        self.set_dtype_datetime_format(format);
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Internal functions/methods.
     // -----------------------------------------------------------------------
@@ -1643,6 +2005,7 @@ impl PolarsXlsxWriter {
         options: &WriterOptions,
     ) -> Result<(), PolarsError> {
         let header_offset = u32::from(options.table.has_header_row());
+        let mut table_columns = vec![];
 
         // Set NaN and Infinity values, if required.
         if let Some(nan_value) = &options.nan_value {
@@ -1657,116 +2020,98 @@ impl PolarsXlsxWriter {
 
         // Iterate through the dataframe column by column.
         for (col_num, column) in df.get_columns().iter().enumerate() {
-            let col_num = col_offset + col_num as u16;
+            let col = col_offset + col_num as u16;
+
+            // Add the header format to the table columns
+            if let Some(header_format) = &options.header_format {
+                let table_column = TableColumn::new().set_header_format(header_format);
+
+                table_columns.push(table_column);
+            }
 
             // Store the column names for use as table headers.
             if options.table.has_header_row() {
-                worksheet.write(row_offset, col_num, column.name().as_str())?;
+                worksheet.write(row_offset, col, column.name().as_str())?;
+            }
+
+            // Check for a custom dtype or column format.
+            let mut format = None;
+            if let Some(dtype_format) = options.dtype_formats.get(column.dtype()) {
+                format = Some(dtype_format);
+            }
+
+            // Column format takes precedence over dtype format since it is more specific.
+            if let Some(column_format) = options.column_formats.get(&column.name().to_string()) {
+                format = Some(column_format);
             }
 
             // Write the row data for each column/type.
-            for (row_num, data) in column.as_materialized_series().iter().enumerate() {
-                let row_num = header_offset + row_offset + row_num as u32;
+            for (row_num, any_value) in column.as_materialized_series().iter().enumerate() {
+                let row = header_offset + row_offset + row_num as u32;
 
-                // Map the Polars Series AnyValue types to Excel/rust_xlsxwriter
-                // types.
-                match data {
-                    AnyValue::Int8(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::UInt8(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::Int16(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::UInt16(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::Int32(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::UInt32(value) => {
-                        worksheet.write_number(row_num, col_num, value)?;
-                    }
-                    AnyValue::Int64(value) => {
-                        // Allow u64 conversion within Excel's limits.
-                        #[allow(clippy::cast_precision_loss)]
-                        worksheet.write_number(row_num, col_num, value as f64)?;
-                    }
-                    AnyValue::UInt64(value) => {
-                        // Allow u64 conversion within Excel's limits.
-                        #[allow(clippy::cast_precision_loss)]
-                        worksheet.write_number(row_num, col_num, value as f64)?;
-                    }
-                    AnyValue::Float32(value) => {
-                        worksheet.write_number_with_format(
-                            row_num,
-                            col_num,
-                            value,
-                            &options.float_format,
-                        )?;
-                    }
-                    AnyValue::Float64(value) => {
-                        worksheet.write_number_with_format(
-                            row_num,
-                            col_num,
-                            value,
-                            &options.float_format,
-                        )?;
-                    }
-                    AnyValue::String(value) => {
-                        worksheet.write_string(row_num, col_num, value)?;
-                    }
+                // Map Polars AnyValue types to Excel/rust_xlsxwriter types.
+                match any_value {
+                    // Write the number types to the worksheet.
+                    AnyValue::Int8(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::Int16(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::Int32(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::Int64(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::UInt8(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::UInt16(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::UInt32(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::UInt64(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::Float32(value) => write_value(worksheet, row, col, value, format)?,
+                    AnyValue::Float64(value) => write_value(worksheet, row, col, value, format)?,
+
+                    // Write the string types to the worksheet.
+                    AnyValue::String(value) => write_value(worksheet, row, col, value, format)?,
                     AnyValue::StringOwned(value) => {
-                        worksheet.write_string(row_num, col_num, value.as_str())?;
+                        write_value(worksheet, row, col, value.as_str(), format)?;
                     }
-                    AnyValue::Boolean(value) => {
-                        worksheet.write_boolean(row_num, col_num, value)?;
-                    }
-                    AnyValue::Null => {
-                        if let Some(null_string) = &options.null_value {
-                            worksheet.write_string(row_num, col_num, null_string)?;
-                        }
-                    }
+
                     AnyValue::Datetime(value, time_units, _) => {
-                        let datetime = match time_units {
+                        let value = match time_units {
                             TimeUnit::Nanoseconds => timestamp_ns_to_datetime(value),
                             TimeUnit::Microseconds => timestamp_us_to_datetime(value),
                             TimeUnit::Milliseconds => timestamp_ms_to_datetime(value),
                         };
-                        worksheet.write_datetime_with_format(
-                            row_num,
-                            col_num,
-                            datetime,
-                            &options.datetime_format,
-                        )?;
-                        worksheet.set_column_width(col_num, 18)?;
+
+                        write_value(worksheet, row, col, &value, format)?;
+                        worksheet.set_column_width(col, 18)?;
                     }
+
                     AnyValue::Date(value) => {
-                        let date = date32_to_date(value);
-                        worksheet.write_datetime_with_format(
-                            row_num,
-                            col_num,
-                            date,
-                            &options.date_format,
-                        )?;
-                        worksheet.set_column_width(col_num, 10)?;
+                        let value = date32_to_date(value);
+
+                        write_value(worksheet, row, col, &value, format)?;
+                        worksheet.set_column_width(col, 10)?;
                     }
+
                     AnyValue::Time(value) => {
-                        let time = time64ns_to_time(value);
-                        worksheet.write_datetime_with_format(
-                            row_num,
-                            col_num,
-                            time,
-                            &options.time_format,
-                        )?;
+                        let value = time64ns_to_time(value);
+
+                        write_value(worksheet, row, col, &value, format)?;
                     }
+
+                    // Write the boolean type to the worksheet.
+                    AnyValue::Boolean(value) => write_value(worksheet, row, col, value, format)?,
+
+                    // Write null type to the worksheet.
+                    AnyValue::Null => {
+                        if let Some(value) = &options.null_value {
+                            // Use user defined null value.
+                            write_value(worksheet, row, col, value, format)?;
+                        } else if format.is_some() {
+                            // If a format is set then write a blank cell.
+                            write_value(worksheet, row, col, "", format)?;
+                        }
+                    }
+
                     _ => {
                         polars_bail!(
                             ComputeError:
                             "Polars AnyValue data type '{}' is not supported by Excel",
-                            data.dtype()
+                            any_value.dtype()
                         );
                     }
                 }
@@ -1782,13 +2127,19 @@ impl PolarsXlsxWriter {
             max_row += 1;
         }
 
+        // Add a column header format via table columns.
+        let mut table = options.table.clone();
+        if !table_columns.is_empty() {
+            table = table.set_columns(&table_columns);
+        }
+
         // Add the table to the worksheet.
         worksheet.add_table(
             row_offset,
             col_offset,
             row_offset + max_row as u32,
             col_offset + max_col as u16 - 1,
-            &options.table,
+            &table,
         )?;
 
         // Autofit the columns.
@@ -1810,6 +2161,23 @@ impl PolarsXlsxWriter {
     }
 }
 
+// Generic function to write a Polars typed value to the worksheet with an
+// optional format.
+fn write_value(
+    worksheet: &mut Worksheet,
+    row: u32,
+    col: u16,
+    value: impl IntoExcelData,
+    format: Option<&Format>,
+) -> Result<(), PolarsError> {
+    match format {
+        Some(format) => worksheet.write_with_format(row, col, value, format)?,
+        None => worksheet.write(row, col, value)?,
+    };
+
+    Ok(())
+}
+
 // -----------------------------------------------------------------------
 // Helper structs.
 // -----------------------------------------------------------------------
@@ -1818,10 +2186,6 @@ impl PolarsXlsxWriter {
 #[derive(Clone)]
 pub(crate) struct WriterOptions {
     pub(crate) use_autofit: bool,
-    pub(crate) date_format: Format,
-    pub(crate) time_format: Format,
-    pub(crate) float_format: Format,
-    pub(crate) datetime_format: Format,
     pub(crate) null_value: Option<String>,
     pub(crate) nan_value: Option<String>,
     pub(crate) infinity_value: Option<String>,
@@ -1831,6 +2195,9 @@ pub(crate) struct WriterOptions {
     pub(crate) screen_gridlines: bool,
     pub(crate) freeze_cell: (u32, u16),
     pub(crate) top_cell: (u32, u16),
+    pub(crate) header_format: Option<Format>,
+    pub(crate) column_formats: HashMap<String, Format>,
+    pub(crate) dtype_formats: HashMap<DataType, Format>,
 }
 
 impl Default for WriterOptions {
@@ -1843,19 +2210,33 @@ impl WriterOptions {
     fn new() -> WriterOptions {
         WriterOptions {
             use_autofit: false,
-            time_format: "hh:mm:ss;@".into(),
-            date_format: "yyyy\\-mm\\-dd;@".into(),
-            datetime_format: "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
             null_value: None,
             nan_value: None,
             infinity_value: None,
             neg_infinity_value: None,
-            float_format: Format::default(),
             table: Table::new(),
             zoom: 100,
             screen_gridlines: true,
             freeze_cell: (0, 0),
             top_cell: (0, 0),
+            header_format: None,
+            column_formats: HashMap::new(),
+            dtype_formats: HashMap::from([
+                (DataType::Time, "hh:mm:ss;@".into()),
+                (DataType::Date, "yyyy\\-mm\\-dd;@".into()),
+                (
+                    DataType::Datetime(TimeUnit::Nanoseconds, None),
+                    "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
+                ),
+                (
+                    DataType::Datetime(TimeUnit::Microseconds, None),
+                    "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
+                ),
+                (
+                    DataType::Datetime(TimeUnit::Milliseconds, None),
+                    "yyyy\\-mm\\-dd\\ hh:mm:ss".into(),
+                ),
+            ]),
         }
     }
 }

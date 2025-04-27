@@ -90,12 +90,20 @@ documentation and generally show how an individual function works.
   dataframe to an Excel file. This demonstrates setting a value for Null
   values in the dataframe. The default is to write them as blank cells.
 
-* `write_excel_set_freeze_panes.rs` - An example of writing a Polar Rust
-  dataframe to an Excel file. This demonstrates freezing the top row.
+* `write_excel_set_column_format.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This demonstrates setting formats for
+  different columns.
 
 * `write_excel_set_freeze_panes_top_cell.rs` - An example of writing a
   Polar Rust dataframe to an Excel file. This demonstrates freezing the top
   row and setting a non-default first row within the pane.
+
+* `write_excel_set_freeze_panes.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This demonstrates freezing the top row.
+
+* `write_excel_set_header_format.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This demonstrates setting the format for the
+  header row.
 
 * `write_excel_set_header.rs` - An example of writing a Polar Rust
   dataframe to an Excel file. This demonstrates saving the dataframe
@@ -128,9 +136,9 @@ documentation and generally show how an individual function works.
   to an Excel file. This demonstrates getting a reference to the worksheet
   used to write the dataframe and setting its tab color.
 
-* `write_excel_write_dataframe.rs` - An example of writing a Polar Rust
-  dataframe to an Excel file.
-
 * `write_excel_write_dataframe_to_cell.rs` - An example of writing more
   than one Polar dataframes to an Excel worksheet.
+
+* `write_excel_write_dataframe.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file.
 
