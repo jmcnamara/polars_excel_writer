@@ -525,7 +525,7 @@ impl PolarsXlsxWriter {
     /// Set an Excel format for a specific Polars data type.
     ///
     /// Sets a cell format to be applied to a Polar [`DataType`] type in a
-    /// dataframe. The Polar's data types supported by Excel are:
+    /// dataframe. The Polars' data types supported by Excel are:
     ///
     /// - [`DataType::Boolean`]
     /// - [`DataType::Int8`]

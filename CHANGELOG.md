@@ -5,6 +5,36 @@ All notable changes to `polars_excel_writer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2025-05-03
+
+**Deprecation Notice**: The next version of this crate will drop support for the
+Polars `SerWriter` interface or move it to another crate in order to maximize
+compatibility with the Polars `write_excel` interface. This may also break
+backward compatibility with some APIs or interfaces. See the
+[`polars_excel_writer` Roadmap].
+
+[`polars_excel_writer` Roadmap]: https://github.com/jmcnamara/polars_excel_writer/issues/1
+
+### Added
+
+- Added support for setting dataframe formatting based on data types or columns.
+  It also adds header formatting. See:
+
+  - `PolarsXlsxWriter::set_dtype_format()`
+  - `PolarsXlsxWriter::set_column_format()`
+  - `PolarsXlsxWriter::set_header_format()`
+
+### Deprecated
+
+- The following functions are deprecated in favour of
+  `PolarsXlsxWriter::set_dtype_format()` and variants:
+
+  - `PolarsXlsxWriter::set_float_format()`
+  - `PolarsXlsxWriter::set_time_format()`
+  - `PolarsXlsxWriter::set_date_format()`
+  - `PolarsXlsxWriter::set_datetime_format()`
+
+
 ## [0.13.0] - 2025-03-15
 
 ### Added
@@ -112,7 +142,7 @@ More worksheet utility methods.
 
 ### Added
 
-- Added support for setting worksheet table properties via the PolarsXlsxWriter
+- Added support for setting worksheet table properties via the `PolarsXlsxWriter`
   [`set_table()`] method.
 
 [`set_table()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html#method.set_table

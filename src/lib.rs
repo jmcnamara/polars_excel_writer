@@ -120,10 +120,18 @@
 //! https://github.com/jmcnamara/polars_excel_writer/blob/main/examples/perf_test.rs
 //! [`to_excel()`]:
 //! https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
+//!
+//!
+//!
+//! ## See also
+//!
+//!  - [`Changelog`](crate::changelog): Release notes and changelog.
+//!
 
 /// A module that exports the `PolarsXlsxWriter` struct which provides the
 /// primary Excel Xlsx serializer that works with Polars dataframes and which
 /// can also interact with the [`rust_xlsxwriter`] writing engine that it wraps.
+///
 pub mod xlsx_writer;
 
 /// A module that exports the `ExcelWriter` struct which implements the
@@ -139,3 +147,5 @@ pub use xlsx_writer::*;
 
 pub use ExcelWriter;
 pub use PolarsXlsxWriter;
+
+pub mod changelog;
