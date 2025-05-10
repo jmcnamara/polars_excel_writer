@@ -21,13 +21,13 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
-    xlsx_writer.set_dtype_format(DataType::Int32, format);
+    excel_writer.set_dtype_format(DataType::Int32, format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -39,14 +39,14 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
-    xlsx_writer.set_dtype_format(DataType::Int32, &format);
-    xlsx_writer.set_column_format("Foo", &format);
+    excel_writer.set_dtype_format(DataType::Int32, &format);
+    excel_writer.set_column_format("Foo", &format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -58,13 +58,13 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
-    xlsx_writer.set_column_format("Foo", format);
+    excel_writer.set_column_format("Foo", format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -76,13 +76,13 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
-    xlsx_writer.set_dtype_int_format(format);
+    excel_writer.set_dtype_int_format(format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -94,17 +94,17 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let num_format = Format::new().set_bold();
     let default_format = Format::new();
 
-    xlsx_writer.set_dtype_number_format(num_format);
+    excel_writer.set_dtype_number_format(num_format);
 
     // Override the number format for the "Bar" column.
-    xlsx_writer.set_column_format("Bar", default_format);
+    excel_writer.set_column_format("Bar", default_format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

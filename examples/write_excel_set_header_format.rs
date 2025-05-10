@@ -20,7 +20,7 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Create an set the header format.
     let header_format = Format::new()
@@ -28,13 +28,13 @@ fn main() -> PolarsResult<()> {
         .set_font_color("#006100")
         .set_bold();
 
-    xlsx_writer.set_header_format(&header_format);
+    excel_writer.set_header_format(&header_format);
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

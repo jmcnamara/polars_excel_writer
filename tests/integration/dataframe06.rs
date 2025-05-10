@@ -18,10 +18,10 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2, 2, 2],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
-    xlsx_writer.set_worksheet_name("Data")?;
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.set_worksheet_name("Data")?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -33,13 +33,13 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2, 2, 2],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
-    let worksheet = xlsx_writer.worksheet()?;
+    let worksheet = excel_writer.worksheet()?;
     worksheet.set_name("Data")?;
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

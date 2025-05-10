@@ -18,12 +18,12 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Column2" => &["Bar", "Bar", "Bar"],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
-    xlsx_writer.set_header(false);
-    xlsx_writer.set_autofit(true);
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.set_header(false);
+    excel_writer.set_autofit(true);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -35,14 +35,14 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Column2" => &["Bar", "Bar", "Bar"],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let table = Table::new().set_header_row(false);
 
-    xlsx_writer.set_table(&table);
-    xlsx_writer.set_autofit(true);
+    excel_writer.set_table(&table);
+    excel_writer.set_autofit(true);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

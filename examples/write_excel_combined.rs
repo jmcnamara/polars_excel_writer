@@ -41,10 +41,10 @@ fn main() {
 use polars_excel_writer::PolarsExcelWriter;
 
 fn example(df: &DataFrame) -> PolarsResult<()> {
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
-    xlsx_writer.write_dataframe(df)?;
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.write_dataframe(df)?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

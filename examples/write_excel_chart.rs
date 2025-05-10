@@ -25,8 +25,8 @@ fn main() -> PolarsResult<()> {
     let worksheet = workbook.add_worksheet();
 
     // Write the dataframe to the worksheet using `PolarsExcelWriter`.
-    let mut xlsx_writer = PolarsExcelWriter::new();
-    xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 
     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
     // range of the dataframe in the worksheet.

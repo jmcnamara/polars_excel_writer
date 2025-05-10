@@ -15,12 +15,12 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

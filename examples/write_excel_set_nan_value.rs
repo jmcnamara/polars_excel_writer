@@ -17,21 +17,21 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Set custom values for NaN, Infinity, and -Infinity.
-    xlsx_writer.set_nan_value("NaN");
-    xlsx_writer.set_infinity_value("Infinity");
-    xlsx_writer.set_neg_infinity_value("-Infinity");
+    excel_writer.set_nan_value("NaN");
+    excel_writer.set_infinity_value("Infinity");
+    excel_writer.set_neg_infinity_value("-Infinity");
 
     // Autofit the output data, for clarity.
-    xlsx_writer.set_autofit(true);
+    excel_writer.set_autofit(true);
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

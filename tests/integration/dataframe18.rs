@@ -22,21 +22,21 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Column3" => &[0.5, 0.5, 0.5],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format1 = Format::new().set_num_format("yyyy/mm/dd\\ hh:mm");
     let format2 = Format::new().set_num_format("yyyy/mm/dd");
     let format3 = Format::new().set_num_format("hh\\ mm");
 
-    xlsx_writer.set_column_format("Column1", &format1);
-    xlsx_writer.set_column_format("Column2", &format2);
-    xlsx_writer.set_column_format("Column3", &format3);
+    excel_writer.set_column_format("Column1", &format1);
+    excel_writer.set_column_format("Column2", &format2);
+    excel_writer.set_column_format("Column3", &format3);
 
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
-    let worksheet = xlsx_writer.worksheet()?;
+    let worksheet = excel_writer.worksheet()?;
     worksheet.set_column_range_width_pixels(0, 2, 120)?;
 
-    xlsx_writer.save(filename)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }
@@ -62,21 +62,21 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         ],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
     let format1 = Format::new().set_num_format("yyyy/mm/dd\\ hh:mm");
     let format2 = Format::new().set_num_format("yyyy/mm/dd");
     let format3 = Format::new().set_num_format("hh\\ mm");
 
-    xlsx_writer.set_dtype_format(DataType::Datetime(TimeUnit::Milliseconds, None), &format1);
-    xlsx_writer.set_dtype_format(DataType::Date, &format2);
-    xlsx_writer.set_dtype_format(DataType::Time, &format3);
+    excel_writer.set_dtype_format(DataType::Datetime(TimeUnit::Milliseconds, None), &format1);
+    excel_writer.set_dtype_format(DataType::Date, &format2);
+    excel_writer.set_dtype_format(DataType::Time, &format3);
 
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
-    let worksheet = xlsx_writer.worksheet()?;
+    let worksheet = excel_writer.worksheet()?;
     worksheet.set_column_range_width_pixels(0, 2, 120)?;
 
-    xlsx_writer.save(filename)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

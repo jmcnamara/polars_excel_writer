@@ -22,16 +22,16 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Set the date format.
-    xlsx_writer.set_dtype_format(DataType::Date, "mmm d yyyy");
+    excel_writer.set_dtype_format(DataType::Date, "mmm d yyyy");
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

@@ -19,17 +19,17 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Write the first dataframe to the first/default worksheet.
-    xlsx_writer.write_dataframe(&df1)?;
+    excel_writer.write_dataframe(&df1)?;
 
     // Add another worksheet and write the second dataframe to it.
-    xlsx_writer.add_worksheet();
-    xlsx_writer.write_dataframe(&df2)?;
+    excel_writer.add_worksheet();
+    excel_writer.write_dataframe(&df2)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

@@ -58,13 +58,13 @@
 //!     .unwrap();
 //!
 //!     // Create a new Excel writer.
-//!     let mut xlsx_writer = PolarsExcelWriter::new();
+//!     let mut excel_writer = PolarsExcelWriter::new();
 //!
 //!     // Write the dataframe to Excel.
-//!     xlsx_writer.write_dataframe(&df)?;
+//!     excel_writer.write_dataframe(&df)?;
 //!
 //!     // Save the file to disk.
-//!     xlsx_writer.save("dataframe.xlsx")?;
+//!     excel_writer.save("dataframe.xlsx")?;
 //!
 //!     Ok(())
 //! }
@@ -123,10 +123,10 @@
 /// primary Excel Xlsx serializer that works with Polars dataframes and which
 /// can also interact with the [`rust_xlsxwriter`] writing engine that it wraps.
 ///
-pub mod xlsx_writer;
+pub mod excel_writer;
 
 #[doc(hidden)]
-pub use xlsx_writer::*;
+pub use excel_writer::*;
 
 pub use PolarsExcelWriter;
 

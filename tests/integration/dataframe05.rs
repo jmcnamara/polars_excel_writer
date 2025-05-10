@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2, 2, -4],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     let columns = vec![
         TableColumn::new().set_total_function(TableFunction::Sum),
@@ -32,10 +32,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_total_row(true)
         .set_columns(&columns);
 
-    xlsx_writer.set_table(&table);
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.set_table(&table);
+    excel_writer.write_dataframe(&df)?;
 
-    xlsx_writer.save(filename)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

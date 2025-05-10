@@ -131,11 +131,11 @@ More worksheet utility methods.
 
 - Added support for accessing the current worksheets via the [`worksheet()`] method.
 
-[`set_worksheet_name()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.set_worksheet_name
+[`set_worksheet_name()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/excel_writer/struct.PolarsExcelWriter.html#method.set_worksheet_name
 
-[`add_worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.add_worksheet
+[`add_worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/excel_writer/struct.PolarsExcelWriter.html#method.add_worksheet
 
-[`worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.worksheet
+[`worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/excel_writer/struct.PolarsExcelWriter.html#method.worksheet
 
 
 ## [0.2.0] - 2023-09-04
@@ -145,7 +145,7 @@ More worksheet utility methods.
 - Added support for setting worksheet table properties via the `PolarsExcelWriter`
   [`set_table()`] method.
 
-[`set_table()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.set_table
+[`set_table()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/excel_writer/struct.PolarsExcelWriter.html#method.set_table
 
 ## [0.1.0] - 2023-08-20
 

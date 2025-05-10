@@ -11,7 +11,7 @@ Excel serializer that resembles the interface options provided by the Polars
 [`write_excel()`] dataframe method.
 
 
-[`PolarsExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html
+[`PolarsExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/excel_writer/struct.PolarsExcelWriter.html
 
 [`SerWriter`]:
     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
@@ -59,13 +59,13 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

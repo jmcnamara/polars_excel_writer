@@ -35,11 +35,11 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         ],
     )?;
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
-    xlsx_writer.save(filename)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

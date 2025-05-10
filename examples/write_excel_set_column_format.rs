@@ -17,17 +17,17 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Set the number formats for the columns.
-    xlsx_writer.set_column_format("East", "0.00");
-    xlsx_writer.set_column_format("West", "0.0000");
+    excel_writer.set_column_format("East", "0.00");
+    excel_writer.set_column_format("West", "0.0000");
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

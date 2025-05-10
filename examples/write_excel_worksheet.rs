@@ -19,20 +19,20 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Get the worksheet that the dataframe will be written to.
-    let worksheet = xlsx_writer.worksheet()?;
+    let worksheet = excel_writer.worksheet()?;
 
     // Set the tab color for the worksheet using a `rust_xlsxwriter` worksheet
     // method.
     worksheet.set_tab_color("#FF9900");
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

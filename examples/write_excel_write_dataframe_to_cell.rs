@@ -19,14 +19,14 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Write two dataframes to the same worksheet.
-    xlsx_writer.write_dataframe_to_cell(&df1, 0, 0)?;
-    xlsx_writer.write_dataframe_to_cell(&df2, 0, 2)?;
+    excel_writer.write_dataframe_to_cell(&df1, 0, 0)?;
+    excel_writer.write_dataframe_to_cell(&df2, 0, 2)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

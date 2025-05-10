@@ -29,9 +29,9 @@ fn main() {
 }
 
 fn example(df: &DataFrame) -> PolarsResult<()> {
-    let mut xlsx_writer = PolarsExcelWriter::new();
-    xlsx_writer.write_dataframe(df)?;
-    xlsx_writer.save("dataframe_rs.xlsx")?;
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.write_dataframe(df)?;
+    excel_writer.save("dataframe_rs.xlsx")?;
 
     Ok(())
 }

@@ -20,11 +20,11 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let format = rust_xlsxwriter::Format::new().set_font_color("#FF0000");
 
-    let mut xlsx_writer = PolarsExcelWriter::new();
-    xlsx_writer.set_header_format(&format);
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.set_header_format(&format);
 
-    xlsx_writer.write_dataframe(&df)?;
-    xlsx_writer.save(filename)?;
+    excel_writer.write_dataframe(&df)?;
+    excel_writer.save(filename)?;
 
     Ok(())
 }

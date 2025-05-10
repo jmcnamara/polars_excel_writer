@@ -20,19 +20,19 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsExcelWriter::new();
+    let mut excel_writer = PolarsExcelWriter::new();
 
     // Add a `rust_xlsxwriter` table and set the style.
     let table = Table::new().set_style(TableStyle::Medium4);
 
     // Add the table to the Excel writer.
-    xlsx_writer.set_table(&table);
+    excel_writer.set_table(&table);
 
     // Write the dataframe to Excel.
-    xlsx_writer.write_dataframe(&df)?;
+    excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.
-    xlsx_writer.save("dataframe.xlsx")?;
+    excel_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }
