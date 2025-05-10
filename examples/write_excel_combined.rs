@@ -9,7 +9,7 @@ use polars::prelude::*;
 
 fn main() {
     // Create a sample dataframe for the example.
-    let mut df: DataFrame = df!(
+    let df: DataFrame = df!(
         "String" => &["North", "South", "East", "West"],
         "Integer" => &[1, 2, 3, 4],
         "Float" => &[4.0, 5.0, 6.0, 7.0],
@@ -34,29 +34,17 @@ fn main() {
     )
     .unwrap();
 
-    example1(&mut df).unwrap();
-    example2(&df).unwrap();
+    example(&df).unwrap();
 }
 
-// The ExcelWriter interface.
-use polars_excel_writer::ExcelWriter;
-
-fn example1(df: &mut DataFrame) -> PolarsResult<()> {
-    let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
-
-    ExcelWriter::new(&mut file).finish(df)
-}
-
-// The PolarsXlsxWriter interface. For this simple case it is similar to the
-// ExcelWriter interface but it has additional options to support more complex
-// use cases.
+// The PolarsXlsxWriter interface.
 use polars_excel_writer::PolarsXlsxWriter;
 
-fn example2(df: &DataFrame) -> PolarsResult<()> {
+fn example(df: &DataFrame) -> PolarsResult<()> {
     let mut xlsx_writer = PolarsXlsxWriter::new();
 
     xlsx_writer.write_dataframe(df)?;
-    xlsx_writer.save("dataframe2.xlsx")?;
+    xlsx_writer.save("dataframe.xlsx")?;
 
     Ok(())
 }

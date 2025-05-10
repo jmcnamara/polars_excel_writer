@@ -10,13 +10,7 @@ It provides a primary interface [`PolarsXlsxWriter`] which is a configurable
 Excel serializer that resembles the interface options provided by the Polars
 [`write_excel()`] dataframe method.
 
-The crate also provides a secondary [`ExcelWriter`] interface which is a simpler
-Excel serializer that implements the Polars [`SerWriter`] trait to write a
-dataframe to an Excel Xlsx file. However, unless you have existing code that
-uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`] interface.
 
-
-[`ExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/write/struct.ExcelWriter.html
 [`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html
 
 [`SerWriter`]:

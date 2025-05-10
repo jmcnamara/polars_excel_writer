@@ -12,7 +12,7 @@ use polars::prelude::*;
 use polars_excel_writer::PolarsXlsxWriter;
 use rust_xlsxwriter::{Format, XlsxError};
 
-// Compare output against target Excel file using ExcelWriter.
+// Compare output against target Excel file using PolarsXlsxWriter.
 
 // The test case uses numbers and formats instead of dates/times.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {

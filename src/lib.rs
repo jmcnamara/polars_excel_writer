@@ -11,18 +11,9 @@
 //! the interface options provided by the Polars [`write_excel()`] dataframe
 //! method.
 //!
-//! It also provides a secondary [`ExcelWriter`] interface which is a simpler
-//! Excel serializer that implements the Polars [`SerWriter`] trait to write a
-//! dataframe to an Excel Xlsx file. However, unless you have existing code that
-//! uses the [`SerWriter`] trait you should use the [`PolarsXlsxWriter`]
-//! interface.
-//!
 //! This crate uses [`rust_xlsxwriter`] to do the Excel serialization and is
 //! typically 5x faster than Polars when exporting large dataframes to Excel,
 //! see the Performance data below.
-//!
-//! [`SerWriter`]:
-//!     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
 //!
 //![`write_excel()`]:
 //!    https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
@@ -134,18 +125,9 @@
 ///
 pub mod xlsx_writer;
 
-/// A module that exports the `ExcelWriter` struct which implements the
-/// secondary Polars `SerWriter` trait to serialize a dataframe to an Excel Xlsx
-/// file. Use [`xlsx_writer`] unless you have existing code that uses the
-/// `SerWriter` trait.
-pub mod write;
-
-#[doc(hidden)]
-pub use write::*;
 #[doc(hidden)]
 pub use xlsx_writer::*;
 
-pub use ExcelWriter;
 pub use PolarsXlsxWriter;
 
 pub mod changelog;

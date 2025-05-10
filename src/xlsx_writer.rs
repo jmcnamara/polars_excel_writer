@@ -1975,12 +1975,24 @@ impl PolarsXlsxWriter {
         self
     }
 
-    // -----------------------------------------------------------------------
-    // Internal functions/methods.
-    // -----------------------------------------------------------------------
-
-    // Method to support writing to ExcelWriter writer<W>.
-    pub(crate) fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
+    /// Method to support writing to `ExcelWriter` writer<W>.
+    ///
+    /// This is a hidden method to support the deprecated `ExcelWriter` module.
+    /// Support for `ExcelWriter` may be moved to a separate crate in the
+    /// future.
+    ///
+    /// # Parameters
+    ///
+    /// - `df` - A Polars dataframe.
+    /// - `writer` - A generic type that supports the Write trait.
+    ///
+    /// # Errors
+    ///
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
+    ///
+    #[doc(hidden)]
+    pub fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
     where
         W: Write + Seek + Send,
     {
@@ -1993,6 +2005,10 @@ impl PolarsXlsxWriter {
 
         Ok(())
     }
+
+    // -----------------------------------------------------------------------
+    // Internal functions/methods.
+    // -----------------------------------------------------------------------
 
     // Write the dataframe to a `rust_xlsxwriter` Worksheet. It is structured as
     // an associated method to allow it to handle external worksheets.

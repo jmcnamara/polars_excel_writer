@@ -8,25 +8,11 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::{ExcelWriter, PolarsXlsxWriter};
+use polars_excel_writer::PolarsXlsxWriter;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
-// Compare output against target Excel file using ExcelWriter.
-fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
-    let mut df: DataFrame = df!(
-        "Foo" => &[1, 1, 1],
-        "Bar" => &[2, 2, 2],
-    )?;
-
-    let mut file = std::fs::File::create(filename)?;
-
-    ExcelWriter::new(&mut file).finish(&mut df)?;
-
-    Ok(())
-}
-
 // Compare output against target Excel file using PolarsXlsxWriter.
-fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
@@ -40,7 +26,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Compare output against target Excel file using rust_xlsxwriter.
-fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
@@ -59,40 +45,33 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Check CSV input which should default to u64.
-fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let csv_string = "Foo,Bar\n1,2\n1,2\n1,2\n";
     let buffer = std::io::Cursor::new(csv_string);
-    let mut df = CsvReadOptions::default()
+    let df = CsvReadOptions::default()
         .map_parse_options(|parse_options| {
             parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".into())))
         })
         .into_reader_with_file_handle(buffer)
         .finish()?;
 
-    let mut file = std::fs::File::create(filename)?;
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
 
-    ExcelWriter::new(&mut file).finish(&mut df)?;
+    let mut xlsx_writer = PolarsXlsxWriter::new();
+
+    xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
+
+    workbook.save(filename)?;
 
     Ok(())
-}
-
-#[test]
-fn dataframe_excelwriter01() {
-    let test_runner = common::TestRunner::new()
-        .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_1)
-        .unique("1")
-        .initialize();
-
-    test_runner.assert_eq();
-    test_runner.cleanup();
 }
 
 #[test]
 fn dataframe_write_excel01() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_2)
+        .set_function(create_new_xlsx_file_1)
         .unique("2")
         .initialize();
 
@@ -104,7 +83,7 @@ fn dataframe_write_excel01() {
 fn dataframe_to_worksheet01() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_3)
+        .set_function(create_new_xlsx_file_2)
         .unique("3")
         .initialize();
 
@@ -116,7 +95,7 @@ fn dataframe_to_worksheet01() {
 fn dataframe_from_csv01() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_4)
+        .set_function(create_new_xlsx_file_3)
         .unique("4")
         .initialize();
 

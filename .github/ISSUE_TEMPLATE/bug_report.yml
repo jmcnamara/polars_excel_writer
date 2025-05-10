@@ -34,24 +34,26 @@ body:
         ```rust
         use polars::prelude::*;
 
-        fn main() {
+        use polars_excel_writer::PolarsXlsxWriter;
+
+        fn main() -> PolarsResult<()> {
             // Create a sample dataframe for the example.
-            let mut df: DataFrame = df!(
+            let df: DataFrame = df!(
                 "String" => &["North", "South", "East", "West"],
-                "Int" => &[1, 2, 3, 4],
-                "Float" => &[1.0, 2.22, 3.333, 4.4444],
-            )
-            .unwrap();
+                "Integer" => &[1, 2, 3, 4],
+                "Float" => &[4.0, 5.0, 6.0, 7.0],
+            )?;
 
-            example(&mut df).unwrap();
-        }
+            // Create a new Excel writer.
+            let mut xlsx_writer = PolarsXlsxWriter::new();
 
-        use polars_excel_writer::ExcelWriter;
+            // Write the dataframe to Excel.
+            xlsx_writer.write_dataframe(&df)?;
 
-        fn example(df: &mut DataFrame) -> PolarsResult<()> {
-            let mut file = std::fs::File::create("dataframe.xlsx").unwrap();
+            // Save the file to disk.
+            xlsx_writer.save("dataframe.xlsx")?;
 
-            ExcelWriter::new(&mut file).finish(df)
+            Ok(())
         }
         ```
     render: markdown
