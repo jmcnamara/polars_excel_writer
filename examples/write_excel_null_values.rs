@@ -8,7 +8,7 @@
 
 use polars::prelude::*;
 
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 fn main() -> PolarsResult<()> {
     // Create a dataframe with Null values.
@@ -23,7 +23,7 @@ fn main() -> PolarsResult<()> {
         .unwrap();
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     // Set an output string value for Null.
     xlsx_writer.set_null_value("Null");

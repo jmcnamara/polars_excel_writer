@@ -8,10 +8,10 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::XlsxError;
 
-// Compare output against target Excel file using PolarsXlsxWriter.
+// Compare output against target Excel file using PolarsExcelWriter.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
@@ -20,7 +20,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let format = rust_xlsxwriter::Format::new().set_font_color("#FF0000");
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.set_header_format(&format);
 
     xlsx_writer.write_dataframe(&df)?;

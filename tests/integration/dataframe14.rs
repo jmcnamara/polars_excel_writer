@@ -8,10 +8,10 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Format, XlsxError};
 
-// Compare output against target Excel file using PolarsXlsxWriter. This file
+// Compare output against target Excel file using PolarsExcelWriter. This file
 // has bold integers in the first column.
 
 // Use dtype formatting.
@@ -21,7 +21,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_num_format("0.0000");
 
     xlsx_writer.set_dtype_format(DataType::Float64, format);
@@ -39,7 +39,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_num_format("0.0000");
 
     xlsx_writer.set_dtype_format(DataType::Float64, &format);
@@ -58,7 +58,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_num_format("0.0000");
 
     xlsx_writer.set_column_format("Bar", format);
@@ -76,7 +76,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_num_format("0.0000");
 
     xlsx_writer.set_dtype_float_format(format);
@@ -94,7 +94,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let num_format = Format::new().set_num_format("0.0000");
     let default_format = Format::new();
 
@@ -116,7 +116,7 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
         "Bar" => &[2.4, 2.4, 2.4],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.set_float_precision(4);
 
     xlsx_writer.write_dataframe(&df)?;

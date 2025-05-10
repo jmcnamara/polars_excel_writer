@@ -8,7 +8,7 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Format, XlsxError};
 
 // Test setting a format for strings with dtype.
@@ -18,7 +18,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Col2" => &[1, 2,  3],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
     xlsx_writer.set_dtype_format(DataType::String, format);
@@ -36,7 +36,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         "Col2" => &[1, 2,  3],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format = Format::new().set_bold();
 
     xlsx_writer.set_column_format("Col1", format);

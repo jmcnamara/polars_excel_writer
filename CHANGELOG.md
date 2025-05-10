@@ -20,19 +20,19 @@ backward compatibility with some APIs or interfaces. See the
 - Added support for setting dataframe formatting based on data types or columns.
   It also adds header formatting. See:
 
-  - `PolarsXlsxWriter::set_dtype_format()`
-  - `PolarsXlsxWriter::set_column_format()`
-  - `PolarsXlsxWriter::set_header_format()`
+  - `PolarsExcelWriter::set_dtype_format()`
+  - `PolarsExcelWriter::set_column_format()`
+  - `PolarsExcelWriter::set_header_format()`
 
 ### Deprecated
 
 - The following functions are deprecated in favour of
-  `PolarsXlsxWriter::set_dtype_format()` and variants:
+  `PolarsExcelWriter::set_dtype_format()` and variants:
 
-  - `PolarsXlsxWriter::set_float_format()`
-  - `PolarsXlsxWriter::set_time_format()`
-  - `PolarsXlsxWriter::set_date_format()`
-  - `PolarsXlsxWriter::set_datetime_format()`
+  - `PolarsExcelWriter::set_float_format()`
+  - `PolarsExcelWriter::set_time_format()`
+  - `PolarsExcelWriter::set_date_format()`
+  - `PolarsExcelWriter::set_datetime_format()`
 
 
 ## [0.13.0] - 2025-03-15
@@ -52,9 +52,9 @@ backward compatibility with some APIs or interfaces. See the
   These aren't supported by Excel so they are replaced with default or custom
   string values. See:
 
-  - `PolarsXlsxWriter::set_nan_value()`
-  - `PolarsXlsxWriter::set_infinity_value()`
-  - `PolarsXlsxWriter::set_neg_infinity_value()`
+  - `PolarsExcelWriter::set_nan_value()`
+  - `PolarsExcelWriter::set_infinity_value()`
+  - `PolarsExcelWriter::set_neg_infinity_value()`
 
 
 ## [0.11.0] - 2025-01-18
@@ -131,21 +131,21 @@ More worksheet utility methods.
 
 - Added support for accessing the current worksheets via the [`worksheet()`] method.
 
-[`set_worksheet_name()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html#method.set_worksheet_name
+[`set_worksheet_name()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.set_worksheet_name
 
-[`add_worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html#method.add_worksheet
+[`add_worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.add_worksheet
 
-[`worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html#method.worksheet
+[`worksheet()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.worksheet
 
 
 ## [0.2.0] - 2023-09-04
 
 ### Added
 
-- Added support for setting worksheet table properties via the `PolarsXlsxWriter`
+- Added support for setting worksheet table properties via the `PolarsExcelWriter`
   [`set_table()`] method.
 
-[`set_table()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html#method.set_table
+[`set_table()`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html#method.set_table
 
 ## [0.1.0] - 2023-08-20
 

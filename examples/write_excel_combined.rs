@@ -37,11 +37,11 @@ fn main() {
     example(&df).unwrap();
 }
 
-// The PolarsXlsxWriter interface.
-use polars_excel_writer::PolarsXlsxWriter;
+// The PolarsExcelWriter interface.
+use polars_excel_writer::PolarsExcelWriter;
 
 fn example(df: &DataFrame) -> PolarsResult<()> {
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     xlsx_writer.write_dataframe(df)?;
     xlsx_writer.save("dataframe.xlsx")?;

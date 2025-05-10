@@ -7,7 +7,7 @@
 
 use polars::prelude::*;
 
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 fn main() -> PolarsResult<()> {
     let df1: DataFrame = df!(
@@ -19,7 +19,7 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     // Write the first dataframe to the first/default worksheet.
     xlsx_writer.write_dataframe(&df1)?;

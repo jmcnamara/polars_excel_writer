@@ -8,17 +8,17 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Table, XlsxError};
 
-// Compare output against target Excel file using PolarsXlsxWriter.
+// Compare output against target Excel file using PolarsExcelWriter.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],
         "Column2" => &["Bar", "Bar", "Bar"],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.set_header(false);
     xlsx_writer.set_autofit(true);
 
@@ -28,14 +28,14 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Compare using PolarsXlsxWriter and set_table().
+// Compare using PolarsExcelWriter and set_table().
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Column1" => &["Foo", "Foo", "Foo"],
         "Column2" => &["Bar", "Bar", "Bar"],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let table = Table::new().set_header_row(false);
 
     xlsx_writer.set_table(&table);

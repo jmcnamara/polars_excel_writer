@@ -7,7 +7,7 @@
 
 use polars::prelude::*;
 
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
@@ -18,7 +18,7 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Write the dataframe to an Excel file.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     // Set the worksheet name.
     xlsx_writer.set_worksheet_name("Polars Data")?;

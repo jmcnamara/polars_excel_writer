@@ -9,7 +9,7 @@ use std::time::Instant;
 
 use chrono::prelude::*;
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 const DATA_SIZE: usize = 250_000;
 
@@ -29,7 +29,7 @@ fn main() {
 }
 
 fn example(df: &DataFrame) -> PolarsResult<()> {
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.write_dataframe(df)?;
     xlsx_writer.save("dataframe_rs.xlsx")?;
 

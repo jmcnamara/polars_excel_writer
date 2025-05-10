@@ -18,12 +18,12 @@ use polars_arrow::temporal_conversions::{
 use rust_xlsxwriter::worksheet::IntoExcelData;
 use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 
-/// `PolarsXlsxWriter` provides an interface to serialize Polars dataframes to
+/// `PolarsExcelWriter` provides an interface to serialize Polars dataframes to
 /// Excel via the [`rust_xlsxwriter`] library. This allows Excel serialization
 /// with a straightforward interface but also a high degree of configurability
 /// over the output, when required.
 ///
-/// For ease of use, and portability, `PolarsXlsxWriter` tries to replicate the
+/// For ease of use, and portability, `PolarsExcelWriter` tries to replicate the
 /// interface options provided by the Polars Python [`write_excel()`] dataframe
 /// method.
 ///
@@ -34,7 +34,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// ## Examples
 ///
 /// Here is an example of writing a Polars Rust dataframe to an Excel file using
-/// `PolarsXlsxWriter`.
+/// `PolarsExcelWriter`.
 ///
 /// ```
 /// # // This code is available in examples/write_excel_intro.rs
@@ -42,7 +42,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// use chrono::prelude::*;
 /// use polars::prelude::*;
 ///
-/// use polars_excel_writer::PolarsXlsxWriter;
+/// use polars_excel_writer::PolarsExcelWriter;
 ///
 /// fn main() -> PolarsResult<()> {
 ///     // Create a sample dataframe for the example.
@@ -71,7 +71,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 ///     )?;
 ///
 ///     // Create a new Excel writer.
-///     let mut xlsx_writer = PolarsXlsxWriter::new();
+///     let mut xlsx_writer = PolarsExcelWriter::new();
 ///
 ///     // Write the dataframe to Excel.
 ///     xlsx_writer.write_dataframe(&df)?;
@@ -94,12 +94,12 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// hyperlinks, page setup, merged ranges, image support, rich multi-format
 /// strings, autofilters and tables.
 ///
-/// `PolarsXlsxWriter` uses `rust_xlsxwriter` internally as its Excel writing
+/// `PolarsExcelWriter` uses `rust_xlsxwriter` internally as its Excel writing
 /// engine but it can also be used in conjunction with larger `rust_xlsxwriter`
 /// programs to access functionality that it doesn't provide natively.
 ///
 /// For example, say we wanted to write a dataframe to an Excel workbook but
-/// also plot the data on an Excel chart. We can use `PolarsXlsxWriter` crate
+/// also plot the data on an Excel chart. We can use `PolarsExcelWriter` crate
 /// for the data writing part and `rust_xlsxwriter` for all the other
 /// functionality.
 ///
@@ -111,7 +111,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// # // This code is available in examples/write_excel_chart.rs
 /// #
 /// use polars::prelude::*;
-/// use polars_excel_writer::PolarsXlsxWriter;
+/// use polars_excel_writer::PolarsExcelWriter;
 /// use rust_xlsxwriter::{Chart, ChartType, Workbook};
 ///
 /// fn main() -> PolarsResult<()> {
@@ -128,8 +128,8 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 ///     let mut workbook = Workbook::new();
 ///     let worksheet = workbook.add_worksheet();
 ///
-///     // Write the dataframe to the worksheet using `PolarsXlsxWriter`.
-///     let mut xlsx_writer = PolarsXlsxWriter::new();
+///     // Write the dataframe to the worksheet using `PolarsExcelWriter`.
+///     let mut xlsx_writer = PolarsExcelWriter::new();
 ///     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 ///
 ///     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
@@ -159,13 +159,13 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// 1. `polars` to create/manipulate the dataframe.
 /// 2. `rust_xlsxwriter` to create an Excel workbook and worksheet and
 ///    optionally add other features to the worksheet.
-/// 3. `polars_excel_writer::PolarsXlsxWriter` to write the Polars dataframe to
+/// 3. `polars_excel_writer::PolarsExcelWriter` to write the Polars dataframe to
 ///    the worksheet.
 ///
 /// This may seem initially complicated but it divides the solution into
 /// specialized libraries that are best suited for their task and it allow you
 /// to access advanced Excel functionality that isn't provided by
-/// `PolarsXlsxWriter`.
+/// `PolarsExcelWriter`.
 ///
 /// One aspect to note in this example is the transparent handling of the
 /// different error types. That is explained in the next section.
@@ -174,7 +174,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 ///
 /// The `rust_xlsxwriter` crate uses an error type called
 /// [`XlsxError`](rust_xlsxwriter::XlsxError) while `Polars` and
-/// `PolarsXlsxWriter` use an error type called [`PolarsError`]. In order to
+/// `PolarsExcelWriter` use an error type called [`PolarsError`]. In order to
 /// make interoperability with Polars easier the `rust_xlsxwriter::XlsxError`
 /// type maps to (and from) the `PolarsError` type.
 ///
@@ -187,25 +187,25 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// crate feature, however, this is turned on automatically when you use
 /// `polars_excel_writer`.
 ///
-pub struct PolarsXlsxWriter {
+pub struct PolarsExcelWriter {
     pub(crate) workbook: Workbook,
     pub(crate) options: WriterOptions,
 }
 
-impl Default for PolarsXlsxWriter {
+impl Default for PolarsExcelWriter {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PolarsXlsxWriter {
-    /// Create a new `PolarsXlsxWriter` instance.
+impl PolarsExcelWriter {
+    /// Create a new `PolarsExcelWriter` instance.
     ///
-    pub fn new() -> PolarsXlsxWriter {
+    pub fn new() -> PolarsExcelWriter {
         let mut workbook = Workbook::new();
         workbook.add_worksheet();
 
-        PolarsXlsxWriter {
+        PolarsExcelWriter {
             workbook,
             options: WriterOptions::default(),
         }
@@ -214,11 +214,11 @@ impl PolarsXlsxWriter {
     /// Write a dataframe to a worksheet.
     ///
     /// Writes the supplied dataframe to cell `(0, 0)` in the first sheet of a
-    /// new Excel workbook. See [`PolarsXlsxWriter::write_dataframe_to_cell()`]
+    /// new Excel workbook. See [`PolarsExcelWriter::write_dataframe_to_cell()`]
     /// below to write to a specific cell in the worksheet.
     ///
     /// The worksheet must be written to a file using
-    /// [`save()`](PolarsXlsxWriter::save).
+    /// [`save()`](PolarsExcelWriter::save).
     ///
     /// # Parameters
     ///
@@ -238,7 +238,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -247,7 +247,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     xlsx_writer.write_dataframe(&df)?;
     ///
@@ -279,7 +279,7 @@ impl PolarsXlsxWriter {
     /// same worksheet, at different positions and without overlapping.
     ///
     /// The worksheet must be written to a file using
-    /// [`save()`](PolarsXlsxWriter::save).
+    /// [`save()`](PolarsExcelWriter::save).
     ///
     /// # Parameters
     ///
@@ -302,7 +302,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -315,7 +315,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Write two dataframes to the same worksheet.
     ///     xlsx_writer.write_dataframe_to_cell(&df1, 0, 0)?;
@@ -351,10 +351,10 @@ impl PolarsXlsxWriter {
     ///
     /// Writes the dataframe to a `rust_xlsxwriter` [`Worksheet`] object. This
     /// worksheet cannot be saved via
-    /// [`save()`](PolarsXlsxWriter::save). Instead it must be
+    /// [`save()`](PolarsExcelWriter::save). Instead it must be
     /// used in conjunction with a `rust_xlsxwriter` [`Workbook`].
     ///
-    /// This is useful for mixing `PolarsXlsxWriter` data writing with
+    /// This is useful for mixing `PolarsExcelWriter` data writing with
     /// additional Excel functionality provided by `rust_xlsxwriter`. See
     /// [Interacting with `rust_xlsxwriter`](#interacting-with-rust_xlsxwriter)
     /// and the example below.
@@ -382,7 +382,7 @@ impl PolarsXlsxWriter {
     /// # // This code is available in examples/write_excel_chart.rs
     /// #
     /// # use polars::prelude::*;
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     /// use rust_xlsxwriter::{Chart, ChartType, Workbook};
     ///
     /// fn main() -> PolarsResult<()> {
@@ -399,8 +399,8 @@ impl PolarsXlsxWriter {
     ///     let mut workbook = Workbook::new();
     ///     let worksheet = workbook.add_worksheet();
     ///
-    ///     // Write the dataframe to the worksheet using `PolarsXlsxWriter`.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     // Write the dataframe to the worksheet using `PolarsExcelWriter`.
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
     ///
     ///     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
@@ -484,7 +484,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -496,7 +496,7 @@ impl PolarsXlsxWriter {
     ///     .unwrap();
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Turn off the default header.
     ///     xlsx_writer.set_header(false);
@@ -516,7 +516,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_has_header_off.png">
     ///
-    pub fn set_header(&mut self, has_header: bool) -> &mut PolarsXlsxWriter {
+    pub fn set_header(&mut self, has_header: bool) -> &mut PolarsExcelWriter {
         let table = self.options.table.clone().set_header_row(has_header);
         self.options.table = table;
         self
@@ -571,11 +571,11 @@ impl PolarsXlsxWriter {
     /// library provides additional helper methods to set the format for related
     /// types:
     ///
-    /// - [`set_dtype_int_format()`](PolarsXlsxWriter::set_dtype_int_format):
+    /// - [`set_dtype_int_format()`](PolarsExcelWriter::set_dtype_int_format):
     ///   All the integer types.
-    /// - [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format):
+    /// - [`set_dtype_float_format()`](PolarsExcelWriter::set_dtype_float_format):
     ///   Both float types.
-    /// - [`set_dtype_number_format()`](PolarsXlsxWriter::set_dtype_number_format):
+    /// - [`set_dtype_number_format()`](PolarsExcelWriter::set_dtype_number_format):
     ///   All the integer and float types.
     ///
     /// **Date and Time types**
@@ -597,7 +597,7 @@ impl PolarsXlsxWriter {
     ///
     /// Alternative date and time formats can be specified as shown in the
     /// examples below and in the
-    /// [`PolarsXlsxWriter::set_dtype_datetime_format()`] method.
+    /// [`PolarsExcelWriter::set_dtype_datetime_format()`] method.
     ///
     /// Note, Excel doesn't use timezones or try to convert or encode timezone
     /// information in any way so they aren't supported by this library.
@@ -620,7 +620,7 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -634,7 +634,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the time format.
     ///     xlsx_writer.set_dtype_format(DataType::Time, "hh:mm");
@@ -663,7 +663,7 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -677,7 +677,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Create a new Excel writer.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the date format.
     ///     xlsx_writer.set_dtype_format(DataType::Date, "mmm d yyyy");
@@ -701,7 +701,7 @@ impl PolarsXlsxWriter {
         &mut self,
         dtype: DataType,
         format: impl Into<Format>,
-    ) -> &mut PolarsXlsxWriter {
+    ) -> &mut PolarsExcelWriter {
         self.options.dtype_formats.insert(dtype, format.into());
         self
     }
@@ -711,7 +711,7 @@ impl PolarsXlsxWriter {
     /// Sets a cell format to be applied to Polar [`DataType`] integer types in
     /// a dataframe. This is a shortcut for setting the format for all the
     /// following integer types with
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format):
     ///
     /// - [`DataType::Int8`]
     /// - [`DataType::Int16`]
@@ -727,7 +727,7 @@ impl PolarsXlsxWriter {
     /// - `format` - A `rust_xlsxwriter` [`Format`] or an Excel number format
     ///   string that can be converted to a `Format`.
     ///
-    pub fn set_dtype_int_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_dtype_int_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         let format = format.into();
 
         self.set_dtype_format(DataType::Int8, format.clone());
@@ -747,7 +747,7 @@ impl PolarsXlsxWriter {
     /// Sets a cell format to be applied to Polar [`DataType`] float types in a
     /// dataframe. This method is a shortcut for setting the format for the
     /// following `f32`/`f64` float types with
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format):
     ///
     /// - [`DataType::Float32`]
     /// - [`DataType::Float64`]
@@ -773,7 +773,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -783,7 +783,7 @@ impl PolarsXlsxWriter {
     ///     .unwrap();
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the float format.
     ///     xlsx_writer.set_dtype_float_format("#,##0.00");
@@ -803,7 +803,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_format.png">
     ///
-    pub fn set_dtype_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_dtype_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         let format = format.into();
 
         self.set_dtype_format(DataType::Float32, format.clone());
@@ -817,7 +817,7 @@ impl PolarsXlsxWriter {
     /// Sets a cell format to be applied to Polar [`DataType`] number types in a
     /// dataframe. This is a shortcut for setting the format for all the
     /// following types with
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format):
     ///
     /// # Parameters
     ///
@@ -837,7 +837,7 @@ impl PolarsXlsxWriter {
     ///
     /// Note, excel treats all of these types as a [`f64`] float type.
     ///
-    pub fn set_dtype_number_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_dtype_number_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         let format = format.into();
 
         self.set_dtype_int_format(format.clone());
@@ -856,7 +856,7 @@ impl PolarsXlsxWriter {
     ///
     /// This method is a shortcut for setting the format for the following
     /// [`DataType::Datetime`] types with
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format):
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format):
     ///
     /// - [`DataType::Datetime(TimeUnit::Nanoseconds, None)`]
     /// - [`DataType::Datetime(TimeUnit::Microseconds, None)`]
@@ -883,7 +883,7 @@ impl PolarsXlsxWriter {
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -897,7 +897,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the datetime format.
     ///     xlsx_writer.set_dtype_datetime_format("hh::mm - mmm d yyyy");
@@ -921,7 +921,7 @@ impl PolarsXlsxWriter {
     pub fn set_dtype_datetime_format(
         &mut self,
         format: impl Into<Format>,
-    ) -> &mut PolarsXlsxWriter {
+    ) -> &mut PolarsExcelWriter {
         let format = format.into();
 
         self.set_dtype_format(
@@ -944,7 +944,7 @@ impl PolarsXlsxWriter {
     ///
     /// Set the number precision of all floats exported from the dataframe to
     /// Excel. The precision is converted to an Excel number format (see
-    /// [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format) above), so for
+    /// [`set_dtype_float_format()`](PolarsExcelWriter::set_dtype_float_format) above), so for
     /// example 3 is converted to the Excel format `0.000`.
     ///
     /// Note, the numeric values aren't truncated in Excel, this option just
@@ -965,7 +965,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -975,7 +975,7 @@ impl PolarsXlsxWriter {
     ///     .unwrap();
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the float precision.
     ///     xlsx_writer.set_float_precision(3);
@@ -995,7 +995,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_float_precision.png">
     ///
-    pub fn set_float_precision(&mut self, precision: usize) -> &mut PolarsXlsxWriter {
+    pub fn set_float_precision(&mut self, precision: usize) -> &mut PolarsExcelWriter {
         if (1..=30).contains(&precision) {
             let precision = "0".repeat(precision);
             let format = Format::new().set_num_format(format!("0.{precision}"));
@@ -1008,7 +1008,7 @@ impl PolarsXlsxWriter {
     ///
     /// Set an Excel format for a specific column in the dataframe. This is
     /// similar to the
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) method expect
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format) method expect
     /// that is gives a different level of granularity. For example you could
     /// use this to format tow `f64` columns with different formats.
     ///
@@ -1029,7 +1029,7 @@ impl PolarsXlsxWriter {
     /// #
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -1039,7 +1039,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the number formats for the columns.
     ///     xlsx_writer.set_column_format("East", "0.00");
@@ -1064,7 +1064,7 @@ impl PolarsXlsxWriter {
         &mut self,
         column_name: &str,
         format: impl Into<Format>,
-    ) -> &mut PolarsXlsxWriter {
+    ) -> &mut PolarsExcelWriter {
         self.options
             .column_formats
             .insert(column_name.to_string(), format.into());
@@ -1090,7 +1090,7 @@ impl PolarsXlsxWriter {
     /// #
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     /// use rust_xlsxwriter::Format;
     ///
     /// fn main() -> PolarsResult<()> {
@@ -1103,7 +1103,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Create an set the header format.
     ///     let header_format = Format::new()
@@ -1128,7 +1128,7 @@ impl PolarsXlsxWriter {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_header_format.png">
     ///
-    pub fn set_header_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_header_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         self.options.header_format = Some(format.into());
         self
     }
@@ -1154,7 +1154,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a dataframe with Null values.
@@ -1169,7 +1169,7 @@ impl PolarsXlsxWriter {
     /// #         .unwrap();
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set an output string value for Null.
     ///     xlsx_writer.set_null_value("Null");
@@ -1189,7 +1189,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_null_values.png">
     ///
-    pub fn set_null_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+    pub fn set_null_value(&mut self, value: impl Into<String>) -> &mut PolarsExcelWriter {
         self.options.null_value = Some(value.into());
         self
     }
@@ -1217,7 +1217,7 @@ impl PolarsXlsxWriter {
     /// #
     /// use polars::prelude::*;
     ///
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -1227,7 +1227,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set custom values for NaN, Infinity, and -Infinity.
     ///     xlsx_writer.set_nan_value("NaN");
@@ -1251,7 +1251,7 @@ impl PolarsXlsxWriter {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_nan_value.png">
     ///
-    pub fn set_nan_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+    pub fn set_nan_value(&mut self, value: impl Into<String>) -> &mut PolarsExcelWriter {
         self.options.nan_value = Some(value.into());
         self
     }
@@ -1268,7 +1268,7 @@ impl PolarsXlsxWriter {
     ///
     /// - `value` - A replacement string for Null values.
     ///
-    pub fn set_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+    pub fn set_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsExcelWriter {
         self.options.infinity_value = Some(value.into());
         self
     }
@@ -1286,7 +1286,7 @@ impl PolarsXlsxWriter {
     ///
     /// - `value` - A replacement string for Null values.
     ///
-    pub fn set_neg_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsXlsxWriter {
+    pub fn set_neg_infinity_value(&mut self, value: impl Into<String>) -> &mut PolarsExcelWriter {
         self.options.neg_infinity_value = Some(value.into());
         self
     }
@@ -1316,7 +1316,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
@@ -1328,7 +1328,7 @@ impl PolarsXlsxWriter {
     ///     )?;
     ///
     ///     // Create a new Excel writer.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Autofit the output data.
     ///     xlsx_writer.set_autofit(true);
@@ -1348,7 +1348,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/excelwriter_autofit.png">
     ///
-    pub fn set_autofit(&mut self, autofit: bool) -> &mut PolarsXlsxWriter {
+    pub fn set_autofit(&mut self, autofit: bool) -> &mut PolarsExcelWriter {
         self.options.use_autofit = autofit;
         self
     }
@@ -1371,7 +1371,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1382,7 +1382,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the worksheet zoom level.
     ///     xlsx_writer.set_zoom(200);
@@ -1401,7 +1401,7 @@ impl PolarsXlsxWriter {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_zoom.png">
     ///
-    pub fn set_zoom(&mut self, zoom: u16) -> &mut PolarsXlsxWriter {
+    pub fn set_zoom(&mut self, zoom: u16) -> &mut PolarsExcelWriter {
         self.options.zoom = zoom;
         self
     }
@@ -1426,7 +1426,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1437,7 +1437,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Turn off the screen gridlines.
     ///     xlsx_writer.set_screen_gridlines(false);
@@ -1456,7 +1456,7 @@ impl PolarsXlsxWriter {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_screen_gridlines.png">
     ///
-    pub fn set_screen_gridlines(&mut self, enable: bool) -> &mut PolarsXlsxWriter {
+    pub fn set_screen_gridlines(&mut self, enable: bool) -> &mut PolarsExcelWriter {
         self.options.screen_gridlines = enable;
 
         self
@@ -1493,7 +1493,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1504,7 +1504,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Freeze the top row.
     ///     xlsx_writer.set_freeze_panes(1, 0);
@@ -1524,7 +1524,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/write_excel_set_freeze_panes.png">
     ///
-    pub fn set_freeze_panes(&mut self, row: u32, col: u16) -> &mut PolarsXlsxWriter {
+    pub fn set_freeze_panes(&mut self, row: u32, col: u16) -> &mut PolarsExcelWriter {
         self.options.freeze_cell = (row, col);
 
         self
@@ -1533,7 +1533,7 @@ impl PolarsXlsxWriter {
     /// Set the top most cell in the scrolling area of a freeze pane.
     ///
     /// This method is used in conjunction with the
-    /// [`PolarsXlsxWriter::set_freeze_panes()`] method to set the top most
+    /// [`PolarsExcelWriter::set_freeze_panes()`] method to set the top most
     /// visible cell in the scrolling range. For example you may want to freeze
     /// the top row but have the worksheet pre-scrolled so that a cell other
     /// than `(0, 0)` is visible in the scrolled area.
@@ -1555,7 +1555,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1566,7 +1566,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Freeze the top row and set the first row in the range.
     ///     xlsx_writer.set_freeze_panes(1, 0);
@@ -1587,7 +1587,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/write_excel_set_freeze_panes_top_cell.png">
     ///
-    pub fn set_freeze_panes_top_cell(&mut self, row: u32, col: u16) -> &mut PolarsXlsxWriter {
+    pub fn set_freeze_panes_top_cell(&mut self, row: u32, col: u16) -> &mut PolarsExcelWriter {
         self.options.top_cell = (row, col);
 
         self
@@ -1599,13 +1599,13 @@ impl PolarsXlsxWriter {
     /// method can be used to turn it off if necessary.
     ///
     /// Note, you can call this method directly on a [`Table`] object which is
-    /// passed to [`PolarsXlsxWriter::set_table()`].
+    /// passed to [`PolarsExcelWriter::set_table()`].
     ///
     /// # Parameters
     ///
     /// - `enable` - Turn the property on/off. It is on by default.
     ///
-    pub fn set_autofilter(&mut self, enable: bool) -> &mut PolarsXlsxWriter {
+    pub fn set_autofilter(&mut self, enable: bool) -> &mut PolarsExcelWriter {
         let table = self.options.table.clone().set_autofilter(enable);
         self.options.table = table;
 
@@ -1615,7 +1615,7 @@ impl PolarsXlsxWriter {
     /// Set the worksheet table for the output dataframe.
     ///
     /// By default, and by convention with the Polars [`write_excel()`] method,
-    /// `PolarsXlsxWriter` adds an Excel worksheet table to each exported
+    /// `PolarsExcelWriter` adds an Excel worksheet table to each exported
     /// dataframe.
     ///
     /// Tables in Excel are a way of grouping a range of cells into a single
@@ -1651,7 +1651,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// # use rust_xlsxwriter::{Table, TableStyle};
     /// #
     /// # fn main() -> PolarsResult<()> {
@@ -1663,7 +1663,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Add a `rust_xlsxwriter` table and set the style.
     ///     let table = Table::new().set_style(TableStyle::Medium4);
@@ -1686,7 +1686,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/write_excel_set_table.png">
     ///
-    pub fn set_table(&mut self, table: &Table) -> &mut PolarsXlsxWriter {
+    pub fn set_table(&mut self, table: &Table) -> &mut PolarsExcelWriter {
         self.options.table = table.clone();
         self
     }
@@ -1732,7 +1732,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1743,7 +1743,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the worksheet name.
     ///     xlsx_writer.set_worksheet_name("Polars Data")?;
@@ -1766,7 +1766,7 @@ impl PolarsXlsxWriter {
     pub fn set_worksheet_name(
         &mut self,
         name: impl Into<String>,
-    ) -> PolarsResult<&mut PolarsXlsxWriter> {
+    ) -> PolarsResult<&mut PolarsExcelWriter> {
         let worksheet = self.worksheet()?;
         worksheet.set_name(name)?;
         Ok(self)
@@ -1787,7 +1787,7 @@ impl PolarsXlsxWriter {
     /// # // This code is available in examples/write_excel_add_worksheet.rs
     /// #
     /// # use polars::prelude::*;
-    /// use polars_excel_writer::PolarsXlsxWriter;
+    /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     let df1: DataFrame = df!(
@@ -1798,7 +1798,7 @@ impl PolarsXlsxWriter {
     ///         "Data 2" => &[20, 21, 22, 23, 24, 25],
     ///     )?;
     ///
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Write the first dataframe to the first/default worksheet.
     ///     xlsx_writer.write_dataframe(&df1)?;
@@ -1819,7 +1819,7 @@ impl PolarsXlsxWriter {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/write_excel_add_worksheet.png">
     ///
-    pub fn add_worksheet(&mut self) -> &mut PolarsXlsxWriter {
+    pub fn add_worksheet(&mut self) -> &mut PolarsExcelWriter {
         self.workbook.add_worksheet();
 
         self
@@ -1830,11 +1830,11 @@ impl PolarsXlsxWriter {
     /// Get a reference to the current/last worksheet in the workbook in order
     /// to manipulate it with a `rust_xlsxwriter` [`Worksheet`] method. This is
     /// occasionally useful when you need to access some feature of the
-    /// worksheet APIs that isn't supported directly by `PolarsXlsxWriter`.
+    /// worksheet APIs that isn't supported directly by `PolarsExcelWriter`.
     ///
     /// Note, it is also possible to create a [`Worksheet`] separately and then
     /// write the Polar dataframe to it using the
-    /// [`write_dataframe_to_worksheet()`](PolarsXlsxWriter::write_dataframe_to_worksheet)
+    /// [`write_dataframe_to_worksheet()`](PolarsExcelWriter::write_dataframe_to_worksheet)
     /// method. That latter is more useful if you need to do a lot of
     /// manipulation of the worksheet.
     ///
@@ -1854,7 +1854,7 @@ impl PolarsXlsxWriter {
     /// #
     /// # use polars::prelude::*;
     /// #
-    /// # use polars_excel_writer::PolarsXlsxWriter;
+    /// # use polars_excel_writer::PolarsExcelWriter;
     /// #
     /// # fn main() -> PolarsResult<()> {
     /// #     // Create a sample dataframe for the example.
@@ -1865,7 +1865,7 @@ impl PolarsXlsxWriter {
     /// #     )?;
     /// #
     ///     // Write the dataframe to an Excel file.
-    ///     let mut xlsx_writer = PolarsXlsxWriter::new();
+    ///     let mut xlsx_writer = PolarsExcelWriter::new();
     ///
     ///     // Get the worksheet that the dataframe will be written to.
     ///     let worksheet = xlsx_writer.worksheet()?;
@@ -1907,7 +1907,7 @@ impl PolarsXlsxWriter {
     /// Set the Excel number format for floats.
     ///
     /// This method is deprecated. Use
-    /// [`set_dtype_float_format()`](PolarsXlsxWriter::set_dtype_float_format)
+    /// [`set_dtype_float_format()`](PolarsExcelWriter::set_dtype_float_format)
     /// instead.
     ///
     /// # Parameters
@@ -1919,7 +1919,7 @@ impl PolarsXlsxWriter {
         since = "0.14.0",
         note = "use `set_dtype_format()` or `set_dtype_float_format()` instead"
     )]
-    pub fn set_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_float_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         self.set_dtype_float_format(format);
         self
     }
@@ -1927,7 +1927,7 @@ impl PolarsXlsxWriter {
     /// Set the Excel number format for time values.
     ///
     /// This method is deprecated. Use
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) instead.
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format) instead.
     ///
     /// # Parameters
     ///
@@ -1935,7 +1935,7 @@ impl PolarsXlsxWriter {
     ///   string that can be converted to a `Format`.
     ///
     #[deprecated(since = "0.14.0", note = "use `set_dtype_format()` instead")]
-    pub fn set_time_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_time_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         self.set_dtype_format(DataType::Time, format);
         self
     }
@@ -1943,7 +1943,7 @@ impl PolarsXlsxWriter {
     /// Set the Excel number format for date values.
     ///
     /// This method is deprecated. Use
-    /// [`set_dtype_format()`](PolarsXlsxWriter::set_dtype_format) instead.
+    /// [`set_dtype_format()`](PolarsExcelWriter::set_dtype_format) instead.
     ///
     /// # Parameters
     ///
@@ -1951,7 +1951,7 @@ impl PolarsXlsxWriter {
     ///   string that can be converted to a `Format`.
     ///
     #[deprecated(since = "0.14.0", note = "use `set_dtype_format()` instead")]
-    pub fn set_date_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_date_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         self.set_dtype_format(DataType::Date, format);
         self
     }
@@ -1959,7 +1959,7 @@ impl PolarsXlsxWriter {
     /// Set the Excel number format for datetime values.
     ///
     /// This method is deprecated. Use
-    /// [`PolarsXlsxWriter::set_dtype_datetime_format()`] instead.
+    /// [`PolarsExcelWriter::set_dtype_datetime_format()`] instead.
     ///
     /// # Parameters
     ///
@@ -1970,7 +1970,7 @@ impl PolarsXlsxWriter {
         since = "0.14.0",
         note = "use `set_dtype_format()` or `set_dtype_datetime_format()` instead"
     )]
-    pub fn set_datetime_format(&mut self, format: impl Into<Format>) -> &mut PolarsXlsxWriter {
+    pub fn set_datetime_format(&mut self, format: impl Into<Format>) -> &mut PolarsExcelWriter {
         self.set_dtype_datetime_format(format);
         self
     }
@@ -2197,6 +2197,11 @@ fn write_value(
 // -----------------------------------------------------------------------
 // Helper structs.
 // -----------------------------------------------------------------------
+
+/// Backwards compatibility type alias for the deprecated `PolarXlsxWriter`
+/// struct name.
+#[deprecated(since = "0.15.0", note = "use `PolarsExcelWriter` instead")]
+pub type PolarsXlsxWriter = PolarsExcelWriter;
 
 // A struct for storing and passing configuration settings.
 #[derive(Clone)]

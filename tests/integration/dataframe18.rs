@@ -9,10 +9,10 @@ use crate::common;
 
 use chrono::{NaiveDate, NaiveTime};
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Format, XlsxError};
 
-// Compare output against target Excel file using PolarsXlsxWriter.
+// Compare output against target Excel file using PolarsExcelWriter.
 
 // The test case uses numbers and formats instead of dates/times.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -22,7 +22,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         "Column3" => &[0.5, 0.5, 0.5],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format1 = Format::new().set_num_format("yyyy/mm/dd\\ hh:mm");
     let format2 = Format::new().set_num_format("yyyy/mm/dd");
     let format3 = Format::new().set_num_format("hh\\ mm");
@@ -62,7 +62,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         ],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     let format1 = Format::new().set_num_format("yyyy/mm/dd\\ hh:mm");
     let format2 = Format::new().set_num_format("yyyy/mm/dd");
     let format3 = Format::new().set_num_format("hh\\ mm");

@@ -7,7 +7,7 @@
 //! chart to plot the data.
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Chart, ChartType, Workbook};
 
 fn main() -> PolarsResult<()> {
@@ -24,8 +24,8 @@ fn main() -> PolarsResult<()> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    // Write the dataframe to the worksheet using `PolarsXlsxWriter`.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    // Write the dataframe to the worksheet using `PolarsExcelWriter`.
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 
     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the

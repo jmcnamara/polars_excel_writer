@@ -6,12 +6,12 @@ to Excel Xlsx files.
 The crate uses [`rust_xlsxwriter`] to do the Excel serialization and is
 typically 5x faster than Polars when exporting large dataframes to Excel.
 
-It provides a primary interface [`PolarsXlsxWriter`] which is a configurable
+It provides a primary interface [`PolarsExcelWriter`] which is a configurable
 Excel serializer that resembles the interface options provided by the Polars
 [`write_excel()`] dataframe method.
 
 
-[`PolarsXlsxWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsXlsxWriter.html
+[`PolarsExcelWriter`]: https://docs.rs/polars_excel_writer/latest/polars_excel_writer/xlsx_writer/struct.PolarsExcelWriter.html
 
 [`SerWriter`]:
     https://docs.rs/polars/latest/polars/prelude/trait.SerWriter.html
@@ -24,13 +24,13 @@ Excel serializer that resembles the interface options provided by the Polars
 ## Example
 
 An example of writing a Polar Rust dataframe to an Excel file using the
-`PolarsXlsxWriter` interface.
+`PolarsExcelWriter` interface.
 
 ```rust
 use chrono::prelude::*;
 use polars::prelude::*;
 
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
@@ -59,7 +59,7 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     // Write the dataframe to Excel.
     xlsx_writer.write_dataframe(&df)?;
@@ -79,7 +79,7 @@ Output file:
 ## Performance
 
 The table below shows the performance of writing a dataframe using Python
-Polars, Python Pandas and `PolarsXlsxWriter`.
+Polars, Python Pandas and `PolarsExcelWriter`.
 
   | Test Case                     | Time (s) | Relative (%) |
   | :---------------------------- | :------- | :----------- |

@@ -8,17 +8,17 @@
 use crate::common;
 
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
-// Compare output against target Excel file using PolarsXlsxWriter.
+// Compare output against target Excel file using PolarsExcelWriter.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let df: DataFrame = df!(
         "Foo" => &[1, 1, 1],
         "Bar" => &[2, 2, 2],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
     xlsx_writer.write_dataframe(&df)?;
     xlsx_writer.save(filename)?;
 
@@ -35,7 +35,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 
@@ -58,7 +58,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     xlsx_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 

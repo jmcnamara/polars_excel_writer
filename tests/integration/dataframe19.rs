@@ -9,10 +9,10 @@ use crate::common;
 
 use chrono::{NaiveDate, NaiveTime};
 use polars::prelude::*;
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::XlsxError;
 
-// Compare output against target Excel file using PolarsXlsxWriter.
+// Compare output against target Excel file using PolarsExcelWriter.
 
 // Test with default date/time formats.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -35,7 +35,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         ],
     )?;
 
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     xlsx_writer.write_dataframe(&df)?;
 

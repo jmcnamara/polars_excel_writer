@@ -7,7 +7,7 @@
 //! A crate for serializing Polars dataframes to Excel Xlsx files.
 //!
 //! The `polars_excel_writer` crate provides a primary interface
-//! [`PolarsXlsxWriter`] which is a configurable Excel serializer that resembles
+//! [`PolarsExcelWriter`] which is a configurable Excel serializer that resembles
 //! the interface options provided by the Polars [`write_excel()`] dataframe
 //! method.
 //!
@@ -28,7 +28,7 @@
 //! # use chrono::prelude::*;
 //! # use polars::prelude::*;
 //! #
-//! use polars_excel_writer::PolarsXlsxWriter;
+//! use polars_excel_writer::PolarsExcelWriter;
 //!
 //! fn main() -> PolarsResult<()> {
 //!     // Create a sample dataframe for the example.
@@ -58,7 +58,7 @@
 //!     .unwrap();
 //!
 //!     // Create a new Excel writer.
-//!     let mut xlsx_writer = PolarsXlsxWriter::new();
+//!     let mut xlsx_writer = PolarsExcelWriter::new();
 //!
 //!     // Write the dataframe to Excel.
 //!     xlsx_writer.write_dataframe(&df)?;
@@ -78,7 +78,7 @@
 //! ## Performance
 //!
 //! The table below shows the performance of writing a dataframe using Python
-//! Polars, Python Pandas and `PolarsXlsxWriter`.
+//! Polars, Python Pandas and `PolarsExcelWriter`.
 //!
 //! - Performance data:
 //!
@@ -97,7 +97,7 @@
 //!   then written via the Pandas [`to_excel()`] function. See also
 //!   [`perf_test.py`].
 //! - `polars_excel_writer`: The dataframe was created in Rust Polars and
-//!   written using the `PolarsXlsxWriter` interface. See [`perf_test.rs`].
+//!   written using the `PolarsExcelWriter` interface. See [`perf_test.rs`].
 //! - `polars_excel_writer` + `zlib`: Same as the previous test case but uses
 //!   the `zlib` feature flag to enable the C zlib library in conjunction with
 //!   the backend `ZipWriter`.
@@ -119,7 +119,7 @@
 //!  - [`Changelog`](crate::changelog): Release notes and changelog.
 //!
 
-/// A module that exports the `PolarsXlsxWriter` struct which provides the
+/// A module that exports the `PolarsExcelWriter` struct which provides the
 /// primary Excel Xlsx serializer that works with Polars dataframes and which
 /// can also interact with the [`rust_xlsxwriter`] writing engine that it wraps.
 ///
@@ -128,6 +128,6 @@ pub mod xlsx_writer;
 #[doc(hidden)]
 pub use xlsx_writer::*;
 
-pub use PolarsXlsxWriter;
+pub use PolarsExcelWriter;
 
 pub mod changelog;

@@ -7,7 +7,7 @@
 
 use polars::prelude::*;
 
-use polars_excel_writer::PolarsXlsxWriter;
+use polars_excel_writer::PolarsExcelWriter;
 
 fn main() -> PolarsResult<()> {
     // Create a sample dataframe for the example.
@@ -19,7 +19,7 @@ fn main() -> PolarsResult<()> {
     )?;
 
     // Create a new Excel writer.
-    let mut xlsx_writer = PolarsXlsxWriter::new();
+    let mut xlsx_writer = PolarsExcelWriter::new();
 
     // Autofit the output data.
     xlsx_writer.set_autofit(true);
