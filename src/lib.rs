@@ -23,7 +23,7 @@
 //! An example of writing a Polar Rust dataframe to an Excel file:.
 //!
 //! ```rust
-//! # // This code is available in examples/write_excel_intro.rs
+//! # // This code is available in examples/doc_write_excel_intro.rs
 //! #
 //! # use chrono::prelude::*;
 //! # use polars::prelude::*;

@@ -37,7 +37,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// `PolarsExcelWriter`.
 ///
 /// ```
-/// # // This code is available in examples/write_excel_intro.rs
+/// # // This code is available in examples/doc_write_excel_intro.rs
 /// #
 /// use chrono::prelude::*;
 /// use polars::prelude::*;
@@ -108,7 +108,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// [`rust_xlsxwriter`]: ../../rust_xlsxwriter/
 ///
 /// ```
-/// # // This code is available in examples/write_excel_chart.rs
+/// # // This code is available in examples/doc_write_excel_chart.rs
 /// #
 /// use polars::prelude::*;
 /// use polars_excel_writer::PolarsExcelWriter;
@@ -234,7 +234,7 @@ impl PolarsExcelWriter {
     /// An example of writing a Polar Rust dataframe to an Excel file.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_write_dataframe.rs
+    /// # // This code is available in examples/doc_write_excel_write_dataframe.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -298,7 +298,7 @@ impl PolarsExcelWriter {
     /// worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_write_dataframe_to_cell.rs
+    /// # // This code is available in examples/doc_write_excel_write_dataframe_to_cell.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -379,7 +379,7 @@ impl PolarsExcelWriter {
     /// add a chart to plot the data.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_chart.rs
+    /// # // This code is available in examples/doc_write_excel_chart.rs
     /// #
     /// # use polars::prelude::*;
     /// use polars_excel_writer::PolarsExcelWriter;
@@ -480,7 +480,7 @@ impl PolarsExcelWriter {
     /// demonstrates saving the dataframe without a header.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_header.rs
+    /// # // This code is available in examples/doc_write_excel_set_header.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -615,7 +615,7 @@ impl PolarsExcelWriter {
     /// types.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_time_format.rs
+    /// # // This code is available in examples/doc_write_excel_time_format.rs
     /// #
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
@@ -658,7 +658,7 @@ impl PolarsExcelWriter {
     /// date types.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_date_format.rs
+    /// # // This code is available in examples/doc_write_excel_date_format.rs
     /// #
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
@@ -769,7 +769,7 @@ impl PolarsExcelWriter {
     /// demonstrates setting an Excel number format for floats.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_float_format.rs
+    /// # // This code is available in examples/doc_write_excel_float_format.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -878,7 +878,7 @@ impl PolarsExcelWriter {
     /// datetime types.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_datetime_format.rs
+    /// # // This code is available in examples/doc_write_excel_datetime_format.rs
     /// #
     /// use chrono::prelude::*;
     /// use polars::prelude::*;
@@ -961,7 +961,7 @@ impl PolarsExcelWriter {
     /// precision to 3 is equivalent to an Excel number format of `0.000`.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_float_precision.rs
+    /// # // This code is available in examples/doc_write_excel_float_precision.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1025,7 +1025,7 @@ impl PolarsExcelWriter {
     /// demonstrates setting formats for different columns.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_column_format.rs
+    /// # // This code is available in examples/doc_write_excel_set_column_format.rs
     /// #
     /// use polars::prelude::*;
     ///
@@ -1086,7 +1086,7 @@ impl PolarsExcelWriter {
     /// demonstrates setting the format for the header row.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_header_format.rs
+    /// # // This code is available in examples/doc_write_excel_set_header_format.rs
     /// #
     /// use polars::prelude::*;
     ///
@@ -1150,7 +1150,7 @@ impl PolarsExcelWriter {
     /// is to write them as blank cells.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_null_values.rs
+    /// # // This code is available in examples/doc_write_excel_null_values.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1213,7 +1213,7 @@ impl PolarsExcelWriter {
     /// representations.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_nan_value.rs
+    /// # // This code is available in examples/doc_write_excel_set_nan_value.rs
     /// #
     /// use polars::prelude::*;
     ///
@@ -1312,7 +1312,7 @@ impl PolarsExcelWriter {
     /// demonstrates autofitting column widths in the output worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_autofit.rs
+    /// # // This code is available in examples/doc_write_excel_autofit.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1367,7 +1367,7 @@ impl PolarsExcelWriter {
     /// demonstrates setting the worksheet zoom level.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_zoom.rs
+    /// # // This code is available in examples/doc_write_excel_set_zoom.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1422,7 +1422,7 @@ impl PolarsExcelWriter {
     /// demonstrates turning off the screen gridlines.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_screen_gridlines.rs
+    /// # // This code is available in examples/doc_write_excel_set_screen_gridlines.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1489,7 +1489,7 @@ impl PolarsExcelWriter {
     /// demonstrates freezing the top row.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_freeze_panes.rs
+    /// # // This code is available in examples/doc_write_excel_set_freeze_panes.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1551,7 +1551,7 @@ impl PolarsExcelWriter {
     /// within the pane.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_freeze_panes_top_cell.rs
+    /// # // This code is available in examples/doc_write_excel_set_freeze_panes_top_cell.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1647,7 +1647,7 @@ impl PolarsExcelWriter {
     /// output dataframe.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_table.rs
+    /// # // This code is available in examples/doc_write_excel_set_table.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1728,7 +1728,7 @@ impl PolarsExcelWriter {
     /// demonstrates setting the name for the output worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_set_worksheet_name.rs
+    /// # // This code is available in examples/doc_write_excel_set_worksheet_name.rs
     /// #
     /// # use polars::prelude::*;
     /// #
@@ -1784,7 +1784,7 @@ impl PolarsExcelWriter {
     /// an Excel workbook.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_add_worksheet.rs
+    /// # // This code is available in examples/doc_write_excel_add_worksheet.rs
     /// #
     /// # use polars::prelude::*;
     /// use polars_excel_writer::PolarsExcelWriter;
@@ -1850,7 +1850,7 @@ impl PolarsExcelWriter {
     /// dataframe and setting its tab color.
     ///
     /// ```
-    /// # // This code is available in examples/write_excel_worksheet.rs
+    /// # // This code is available in examples/doc_write_excel_worksheet.rs
     /// #
     /// # use polars::prelude::*;
     /// #
