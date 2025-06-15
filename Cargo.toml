@@ -6,20 +6,20 @@ repository = "https://github.com/jmcnamara/polars_excel_writer"
 keywords = ["polars", "excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.14.0"
+version = "0.15.0"
 edition = "2021"
 
 
 [dependencies]
-chrono = "0.4.39"
-polars = {version = "0.46", features = ["lazy"]}
-polars-arrow = {version = "0.46"}
-rust_xlsxwriter = {version = "0.84", features = ["chrono", "polars"]}
+chrono = "0.4"
+polars = {version = "0.48", features = ["lazy"]}
+polars-arrow = {version = "0.48"}
+rust_xlsxwriter = {version = "0.88", features = ["chrono", "polars"]}
 
 
 [dev-dependencies]
-zip = {version = "2.2.2", default-features = false, features = ["deflate"]}
-regex = "1.11.1"
+zip = {version = "0.4", default-features = false, features = ["deflate"]}
+regex = "1.11"
 pretty_assertions = "1.4.1"
 
 [features]
@@ -28,7 +28,7 @@ default = []
 
 # `zlib`: Adds dependency on zlib and a C compiler. This includes the same
 #  features as `default` but is 1.5x faster for large files.
-zlib = ["zip/deflate-zlib"]
+zlib = ["rust_xlsxwriter/zlib"]
 
 [package.metadata.commands]
 # Some local package management and release check commands.

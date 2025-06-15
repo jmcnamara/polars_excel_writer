@@ -5,15 +5,32 @@ All notable changes to `polars_excel_writer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.14.0] - 2025-05-03
 
-**Deprecation Notice**: The next version of this crate will drop support for the
-Polars `SerWriter` interface or move it to another crate in order to maximize
-compatibility with the Polars `write_excel` interface. This may also break
-backward compatibility with some APIs or interfaces. See the
-[`polars_excel_writer` Roadmap].
+## [0.15.0] - 2025-06-15
+
+### Added
+
+- Update dependencies to `rust_xlsxwriter` 0.88 and `polars` 0.48.
+
+- This version emphasizes the `PolarsExcelWriter`interface and compatibility
+  with the Polars `write_excel` interface. See the [`polars_excel_writer`
+  Roadmap].
 
 [`polars_excel_writer` Roadmap]: https://github.com/jmcnamara/polars_excel_writer/issues/1
+
+### Deprecated
+
+- This version of crate drops support for the Polars `SerWriter` interface in
+  order to maximize compatibility with the Polars `write_excel` interface. The
+  `SerWriter` interface will eventually move to another crate.
+
+- Rename `PolarsXlsxWriter` struct to `PolarsExcelWriter`.
+
+  This rename is for consistency with Polars. The deprecated `PolarsXlsxWriter`
+  struct name is still supported via a type alias.
+
+
+## [0.14.0] - 2025-05-03
 
 ### Added
 

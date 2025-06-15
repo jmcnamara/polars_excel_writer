@@ -18,7 +18,7 @@
 //![`write_excel()`]:
 //!    https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
 //!
-//!  # Examples
+//! # Examples
 //!
 //! An example of writing a Polar Rust dataframe to an Excel file:.
 //!
@@ -75,7 +75,7 @@
 //! <img src="https://rustxlsxwriter.github.io/images/write_excel_combined.png">
 //!
 //!
-//! ## Performance
+//! # Performance
 //!
 //! The table below shows the performance of writing a dataframe using Python
 //! Polars, Python Pandas and `PolarsExcelWriter`.
@@ -114,7 +114,7 @@
 //!
 //!
 //!
-//! ## See also
+//! # See also
 //!
 //!  - [`Changelog`](crate::changelog): Release notes and changelog.
 //!
