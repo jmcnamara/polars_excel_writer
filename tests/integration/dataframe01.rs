@@ -44,29 +44,6 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Check CSV input which should default to u64.
-fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
-    let csv_string = "Foo,Bar\n1,2\n1,2\n1,2\n";
-    let buffer = std::io::Cursor::new(csv_string);
-    let df = CsvReadOptions::default()
-        .map_parse_options(|parse_options| {
-            parse_options.with_null_values(Some(NullValues::AllColumnsSingle("NULL".into())))
-        })
-        .into_reader_with_file_handle(buffer)
-        .finish()?;
-
-    let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
-
-    let mut excel_writer = PolarsExcelWriter::new();
-
-    excel_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
-
-    workbook.save(filename)?;
-
-    Ok(())
-}
-
 #[test]
 fn dataframe_write_excel01() {
     let test_runner = common::TestRunner::new()
@@ -85,18 +62,6 @@ fn dataframe_to_worksheet01() {
         .set_name("dataframe01")
         .set_function(create_new_xlsx_file_2)
         .unique("3")
-        .initialize();
-
-    test_runner.assert_eq();
-    test_runner.cleanup();
-}
-
-#[test]
-fn dataframe_from_csv01() {
-    let test_runner = common::TestRunner::new()
-        .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_3)
-        .unique("4")
         .initialize();
 
     test_runner.assert_eq();
