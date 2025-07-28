@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Reduced Polars dependencies for smaller/faster builds.
 
+  [Issue #27].
+
+  [Issue #27]: https://github.com/jmcnamara/polars_excel_writer/issues/27
+
 
 ## [0.16.0] - 2025-06-29
 
