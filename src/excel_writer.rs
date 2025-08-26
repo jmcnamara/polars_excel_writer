@@ -468,6 +468,142 @@ impl PolarsExcelWriter {
         Ok(())
     }
 
+    /// Save the dataframe as an xlsx file and return it as a byte vector.
+    ///
+    /// The `save_to_buffer()` method is similar to the
+    /// [`PolarsExcelWriter::save()`] method above, except that it returns the
+    /// xlsx file as a `Vec<u8>` buffer.
+    ///
+    /// # Errors
+    ///
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file and
+    /// returning it as a byte vector buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_write_excel_save_to_buffer.rs
+    /// #
+    /// use std::fs::File;
+    /// use std::io::Write;
+    ///
+    /// use polars::prelude::*;
+    /// use polars_excel_writer::PolarsExcelWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Month" => &["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    ///         "Volume" => &[100, 110, 100, 90, 90, 105],
+    ///     )?;
+    ///
+    ///     // Create a new Excel writer.
+    ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     excel_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the dataframe as an excel file in a byte vector buffer.
+    ///     let buf = excel_writer.save_to_buffer()?;
+    ///
+    ///     // Write the buffer to a file for the sake of the example.
+    ///     let mut file = File::create("dataframe.xlsx")?;
+    ///     Write::write_all(&mut file, &buf)?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_save_to_writer.png">
+    ///
+    pub fn save_to_buffer(&mut self) -> Result<Vec<u8>, PolarsError> {
+        let buf = self.workbook.save_to_buffer()?;
+
+        Ok(buf)
+    }
+
+    /// Save the dataframe as an xlsx file to a user supplied file/buffer.
+    ///
+    /// The `save_to_writer()` method is similar to the
+    /// [`PolarsExcelWriter::save()`] method above, except that it writes the
+    /// xlsx file to types that implement the [`Write`] trait, such as the
+    /// [`std::fs::File`] type or buffers.
+    ///
+    /// # Parameters
+    ///
+    /// - `writer` - A generic type that supports the [`Write`] trait. For
+    ///   compatibility with `rust_xlsxwriter`, it must also implement the
+    ///   [`Seek`] and [`Send`] traits.
+    ///
+    /// # Errors
+    ///
+    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
+    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file to a type
+    /// that implements the [`Write`] trait. In this example we write to an
+    /// in-memory buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_write_excel_save_to_writer.rs
+    /// #
+    /// use std::fs::File;
+    /// use std::io::{Cursor, Write};
+    ///
+    /// use polars::prelude::*;
+    /// use polars_excel_writer::PolarsExcelWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Month" => &["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    ///         "Volume" => &[100, 110, 100, 90, 90, 105],
+    ///     )?;
+    ///
+    ///     // Create a new Excel writer.
+    ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     excel_writer.write_dataframe(&df)?;
+    ///
+    ///     // Create an in-memory buffer as the writer object. It is wrapped in a
+    ///     // Cursor in order to add the `Seek` trait.
+    ///     let mut cursor = Cursor::new(Vec::new());
+    ///
+    ///     // Save the dataframe to the writer object.
+    ///     excel_writer.save_to_writer(&mut cursor)?;
+    ///
+    ///     // Write the buffer to a file for the sake of the example.
+    ///     let buf = cursor.into_inner();
+    ///     let mut file = File::create("dataframe.xlsx")?;
+    ///     Write::write_all(&mut file, &buf)?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_save_to_writer.png">
+    ///
+    pub fn save_to_writer<W>(&mut self, writer: W) -> PolarsResult<()>
+    where
+        W: Write + Seek + Send,
+    {
+        self.workbook.save_to_writer(writer)?;
+
+        Ok(())
+    }
+
     /// Turn on/off the dataframe header row in the Excel table. It is on by
     /// default.
     ///
@@ -1898,37 +2034,6 @@ impl PolarsExcelWriter {
         let worksheet = self.workbook.worksheet_from_index(last_index)?;
 
         Ok(worksheet)
-    }
-
-    /// Method to support writing to `ExcelWriter` writer<W>.
-    ///
-    /// This is a hidden method to support the deprecated `ExcelWriter` module.
-    /// Support for `ExcelWriter` may be moved to a separate crate in the
-    /// future.
-    ///
-    /// # Parameters
-    ///
-    /// - `df` - A Polars dataframe.
-    /// - `writer` - A generic type that supports the Write trait.
-    ///
-    /// # Errors
-    ///
-    /// A [`PolarsError::ComputeError`] that wraps a `rust_xlsxwriter`
-    /// [`XlsxError`](rust_xlsxwriter::XlsxError) error.
-    ///
-    #[doc(hidden)]
-    pub fn save_to_writer<W>(&mut self, df: &DataFrame, writer: W) -> PolarsResult<()>
-    where
-        W: Write + Seek + Send,
-    {
-        let options = self.options.clone();
-        let worksheet = self.worksheet()?;
-
-        Self::write_dataframe_internal(df, worksheet, 0, 0, &options)?;
-
-        self.workbook.save_to_writer(writer)?;
-
-        Ok(())
     }
 
     // -----------------------------------------------------------------------

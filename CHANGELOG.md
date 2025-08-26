@@ -5,6 +5,17 @@ All notable changes to `polars_excel_writer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2025-08-XX
+
+### Added
+
+- Added the `PolarsExcelWriter::save_to_buffer()` method to allow writing a
+  dataframe as an Excel file to a byte vector buffer.
+
+- Added the `PolarsExcelWriter::save_to_writer()` method to allow writing a
+  dataframe as an Excel file to a type that implements the `Write` trait.
+
+
 ## [0.18.0] - 2025-08-13
 
 ### Added

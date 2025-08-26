@@ -7,6 +7,9 @@
 
 use crate::common;
 
+use std::fs::File;
+use std::io::{Cursor, Write};
+
 use polars::prelude::*;
 use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Workbook, XlsxError};
@@ -44,11 +47,61 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Compare output against target Excel using `save_to_buffer()`.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let df: DataFrame = df!(
+        "Foo" => &[1, 1, 1],
+        "Bar" => &[2, 2, 2],
+    )?;
+
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.write_dataframe(&df)?;
+
+    let buf = excel_writer.save_to_buffer()?;
+
+    let mut file = File::create(filename)?;
+    Write::write_all(&mut file, &buf)?;
+
+    Ok(())
+}
+
+// Compare output against target Excel using `save_to_writer()`.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let df: DataFrame = df!(
+        "Foo" => &[1, 1, 1],
+        "Bar" => &[2, 2, 2],
+    )?;
+
+    let mut excel_writer = PolarsExcelWriter::new();
+    excel_writer.write_dataframe(&df)?;
+
+    let mut cursor = Cursor::new(Vec::new());
+    excel_writer.save_to_writer(&mut cursor)?;
+
+    let buf = cursor.into_inner();
+    let mut file = File::create(filename)?;
+    Write::write_all(&mut file, &buf)?;
+
+    Ok(())
+}
+
 #[test]
-fn dataframe_write_excel01() {
+fn dataframe_write_excel01_1() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
         .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn dataframe_write_excel01_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dataframe01")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();
 
@@ -57,11 +110,23 @@ fn dataframe_write_excel01() {
 }
 
 #[test]
-fn dataframe_to_worksheet01() {
+fn dataframe_write_excel01_3() {
     let test_runner = common::TestRunner::new()
         .set_name("dataframe01")
-        .set_function(create_new_xlsx_file_2)
+        .set_function(create_new_xlsx_file_3)
         .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn dataframe_write_excel01_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dataframe01")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

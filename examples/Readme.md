@@ -47,6 +47,13 @@ documentation and generally show how an individual function works.
   dataframe to an Excel file. This demonstrates setting a value for Null
   values in the dataframe. The default is to write them as blank cells.
 
+* `doc_write_excel_save_to_buffer.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file and returning it as a byte vector buffer.
+
+* `doc_write_excel_save_to_writer.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file to a type that implements the [`Write`] trait.
+  In this example we write to an in-memory buffer.
+
 * `doc_write_excel_set_column_format.rs` - An example of writing a Polar
   Rust dataframe to an Excel file. This demonstrates setting formats for
   different columns.
