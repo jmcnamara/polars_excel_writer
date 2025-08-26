@@ -16,7 +16,7 @@ fn main() -> PolarsResult<()> {
         "Custom" => &[f64::NAN, f64::INFINITY, f64::NEG_INFINITY],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Set custom values for NaN, Infinity, and -Infinity.

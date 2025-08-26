@@ -18,7 +18,7 @@ fn main() -> PolarsResult<()> {
         "Data 2" => &[1.23, 2.34, 3.56],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Write two dataframes to the same worksheet.

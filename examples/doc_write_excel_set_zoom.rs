@@ -17,7 +17,7 @@ fn main() -> PolarsResult<()> {
         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Set the worksheet zoom level.

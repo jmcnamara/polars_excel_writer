@@ -14,9 +14,10 @@ fn main() -> PolarsResult<()> {
         "Data" => &[10, 20, 15, 25, 30, 20],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
+    // Write the dataframe to Excel.
     excel_writer.write_dataframe(&df)?;
 
     // Save the file to disk.

@@ -19,7 +19,7 @@ fn main() -> PolarsResult<()> {
         "South" => &[4, 4, 4, 4],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Create an set the header format.

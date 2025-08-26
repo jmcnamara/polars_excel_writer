@@ -21,7 +21,7 @@ fn main() -> PolarsResult<()> {
         ],
     )?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Set the time format.

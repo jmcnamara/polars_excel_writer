@@ -246,9 +246,10 @@ impl PolarsExcelWriter {
     ///         "Data" => &[10, 20, 15, 25, 30, 20],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
+    ///     // Write the dataframe to Excel.
     ///     excel_writer.write_dataframe(&df)?;
     ///
     ///     // Save the file to disk.
@@ -314,7 +315,7 @@ impl PolarsExcelWriter {
     ///         "Data 2" => &[1.23, 2.34, 3.56],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Write two dataframes to the same worksheet.
@@ -439,7 +440,7 @@ impl PolarsExcelWriter {
         Ok(())
     }
 
-    /// Save the Workbook as an xlsx file.
+    /// Save the dataframe as an xlsx file.
     ///
     /// The `save()` method writes all the workbook and worksheet data to
     /// a new xlsx file. It will overwrite any existing file.
@@ -495,7 +496,7 @@ impl PolarsExcelWriter {
     ///     )
     ///     .unwrap();
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Turn off the default header.
@@ -633,7 +634,7 @@ impl PolarsExcelWriter {
     ///         ],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the time format.
@@ -782,7 +783,7 @@ impl PolarsExcelWriter {
     ///     )
     ///     .unwrap();
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the float format.
@@ -896,7 +897,7 @@ impl PolarsExcelWriter {
     ///         ],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the datetime format.
@@ -974,7 +975,7 @@ impl PolarsExcelWriter {
     ///     )
     ///     .unwrap();
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the float precision.
@@ -1038,7 +1039,7 @@ impl PolarsExcelWriter {
     ///         "West" => &[1.0, 2.22, 3.333, 4.4444],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the number formats for the columns.
@@ -1102,7 +1103,7 @@ impl PolarsExcelWriter {
     ///         "South" => &[4, 4, 4, 4],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Create an set the header format.
@@ -1163,7 +1164,7 @@ impl PolarsExcelWriter {
     ///         "Bar" => [Some("B"), Some("B"), None, Some("B")],
     ///     ]?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set an output string value for Null.
@@ -1221,7 +1222,7 @@ impl PolarsExcelWriter {
     ///         "Custom" => &[f64::NAN, f64::INFINITY, f64::NEG_INFINITY],
     ///     )?;
     ///
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set custom values for NaN, Infinity, and -Infinity.
@@ -1376,7 +1377,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the worksheet zoom level.
@@ -1431,7 +1432,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Turn off the screen gridlines.
@@ -1498,7 +1499,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Freeze the top row.
@@ -1560,7 +1561,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Freeze the top row and set the first row in the range.
@@ -1657,7 +1658,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Add a `rust_xlsxwriter` table and set the style.
@@ -1737,7 +1738,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Set the worksheet name.
@@ -1859,7 +1860,7 @@ impl PolarsExcelWriter {
     /// #         "Float" => &[1.0, 2.22, 3.333, 4.4444],
     /// #     )?;
     /// #
-    ///     // Write the dataframe to an Excel file.
+    ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
     ///     // Get the worksheet that the dataframe will be written to.

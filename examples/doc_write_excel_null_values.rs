@@ -17,7 +17,7 @@ fn main() -> PolarsResult<()> {
         "Bar" => [Some("B"), Some("B"), None, Some("B")],
     ]?;
 
-    // Write the dataframe to an Excel file.
+    // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
     // Set an output string value for Null.
