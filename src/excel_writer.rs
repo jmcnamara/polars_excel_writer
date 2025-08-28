@@ -2230,6 +2230,7 @@ fn write_value(
 
 /// Backwards compatibility type alias for the deprecated `PolarsXlsxWriter`
 /// struct name.
+#[doc(hidden)]
 #[deprecated(since = "0.15.0", note = "use `PolarsExcelWriter` instead")]
 pub type PolarsXlsxWriter = PolarsExcelWriter;
 

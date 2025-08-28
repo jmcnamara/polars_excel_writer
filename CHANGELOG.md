@@ -1,19 +1,20 @@
 # Changelog
 
-All notable changes to `polars_excel_writer` will be documented in this file.
+This is the changelog/release notes for the `polars_excel_writer` crate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.19.0] - 2025-08-XX
+## [0.19.0] - 2025-08-28
 
 ### Added
 
-- Added the `PolarsExcelWriter::save_to_buffer()` method to allow writing a
-  dataframe as an Excel file to a byte vector buffer.
+- Added the [`save_to_buffer()`](crate::PolarsExcelWriter::save_to_buffer)
+  method to allow writing a dataframe as an Excel file to a byte vector buffer.
 
-- Added the `PolarsExcelWriter::save_to_writer()` method to allow writing a
-  dataframe as an Excel file to a type that implements the `Write` trait.
+- Added the [`save_to_writer()`](crate::PolarsExcelWriter::save_to_writer)
+  method to allow writing a dataframe as an Excel file to a type that implements
+  the `Write` trait.
 
 
 ## [0.18.0] - 2025-08-13
@@ -81,9 +82,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for setting dataframe formatting based on data types or columns.
   It also adds header formatting. See:
 
-  - `PolarsExcelWriter::set_dtype_format()`
-  - `PolarsExcelWriter::set_column_format()`
-  - `PolarsExcelWriter::set_header_format()`
+  - [`set_dtype_format()`](crate::PolarsExcelWriter::set_dtype_format)
+  - [`set_column_format()`](crate::PolarsExcelWriter::set_column_format)
+  - [`set_header_format()`](crate::PolarsExcelWriter::set_header_format)
 
 ### Deprecated
 
@@ -113,9 +114,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   These aren't supported by Excel so they are replaced with default or custom
   string values. See:
 
-  - `PolarsExcelWriter::set_nan_value()`
-  - `PolarsExcelWriter::set_infinity_value()`
-  - `PolarsExcelWriter::set_neg_infinity_value()`
+  - [`set_nan_value()`](crate::PolarsExcelWriter::set_nan_value)
+  - [`set_infinity_value()`](crate::PolarsExcelWriter::set_infinity_value)
+  - [`set_neg_infinity_value()`](crate::PolarsExcelWriter::set_neg_infinity_value)
 
 
 ## [0.11.0] - 2025-01-18
