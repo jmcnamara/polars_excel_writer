@@ -25,9 +25,9 @@
 //! ```rust
 //! # // This code is available in examples/doc_write_excel_intro.rs
 //! #
-//! # use chrono::prelude::*;
-//! # use polars::prelude::*;
-//! #
+//! use chrono::prelude::*;
+//! use polars::prelude::*;
+//!
 //! use polars_excel_writer::PolarsExcelWriter;
 //!
 //! fn main() -> PolarsResult<()> {
@@ -54,8 +54,7 @@
 //!             NaiveDate::from_ymd_opt(2022, 1, 3).unwrap().and_hms_opt(3, 0, 0).unwrap(),
 //!             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 //!         ],
-//!     )
-//!     .unwrap();
+//!     )?;
 //!
 //!     // Create a new Excel writer.
 //!     let mut excel_writer = PolarsExcelWriter::new();
@@ -131,9 +130,9 @@
 /// ```rust
 /// # // This code is available in examples/doc_write_excel_intro.rs
 /// #
-/// # use chrono::prelude::*;
-/// # use polars::prelude::*;
-/// #
+/// use chrono::prelude::*;
+/// use polars::prelude::*;
+///
 /// use polars_excel_writer::PolarsExcelWriter;
 ///
 /// fn main() -> PolarsResult<()> {
@@ -160,8 +159,7 @@
 ///             NaiveDate::from_ymd_opt(2022, 1, 3).unwrap().and_hms_opt(3, 0, 0).unwrap(),
 ///             NaiveDate::from_ymd_opt(2022, 1, 4).unwrap().and_hms_opt(4, 0, 0).unwrap(),
 ///         ],
-///     )
-///     .unwrap();
+///     )?;
 ///
 ///     // Create a new Excel writer.
 ///     let mut excel_writer = PolarsExcelWriter::new();

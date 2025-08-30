@@ -236,8 +236,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_write_dataframe.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
@@ -301,8 +301,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_write_dataframe_to_cell.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
@@ -382,7 +382,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_chart.rs
     /// #
-    /// # use polars::prelude::*;
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     /// use rust_xlsxwriter::{Chart, ChartType, Workbook};
     ///
@@ -619,8 +620,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_set_header.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
@@ -629,8 +630,7 @@ impl PolarsExcelWriter {
     ///         "String" => &["North", "South", "East", "West"],
     ///         "Int" => &[1, 2, 3, 4],
     ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
     ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
@@ -908,16 +908,15 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_float_format.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Float" => &[1000.0, 2000.22, 3000.333, 4000.4444],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
     ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
@@ -1100,16 +1099,15 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_float_precision.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Float" => &[1.0, 2.22, 3.333, 4.4444],
-    ///     )
-    ///     .unwrap();
+    ///     )?;
     ///
     ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
@@ -1446,8 +1444,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_autofit.rs
     /// #
-    /// # use polars::prelude::*;
-    /// #
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {
@@ -1918,7 +1916,8 @@ impl PolarsExcelWriter {
     /// ```
     /// # // This code is available in examples/doc_write_excel_add_worksheet.rs
     /// #
-    /// # use polars::prelude::*;
+    /// use polars::prelude::*;
+    ///
     /// use polars_excel_writer::PolarsExcelWriter;
     ///
     /// fn main() -> PolarsResult<()> {

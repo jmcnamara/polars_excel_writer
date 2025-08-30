@@ -8,6 +8,7 @@
 
 use polars::prelude::*;
 use polars_excel_writer::PolarsExcelWriter;
+
 use rust_xlsxwriter::{Chart, ChartType, Workbook};
 
 fn main() -> PolarsResult<()> {
