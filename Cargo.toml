@@ -6,15 +6,15 @@ repository = "https://github.com/jmcnamara/polars_excel_writer"
 keywords = ["polars", "excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.19.0"
+version = "0.20.0"
 edition = "2021"
 
 
 [dependencies]
 chrono = {version =  "0.4"}
-polars = {version = "0.50", default-features = false, features = ["temporal"]}
-polars-arrow = {version = "0.50"}
-rust_xlsxwriter = {version = "0.90.0", features = ["chrono", "polars"]}
+polars = {version = "0.51", default-features = false, features = ["temporal"]}
+polars-arrow = {version = "0.51"}
+rust_xlsxwriter = {version = "0.90.1", features = ["chrono", "polars"]}
 
 
 [dev-dependencies]
