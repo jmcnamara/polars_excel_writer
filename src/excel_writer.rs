@@ -27,7 +27,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// interface options provided by the Polars Python [`write_excel()`] dataframe
 /// method.
 ///
-/// [`rust_xlsxwriter`]: ../../rust_xlsxwriter/
+/// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 /// [`write_excel()`]:
 ///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
 ///
@@ -105,7 +105,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 ///
 /// Here is an example that demonstrate this:
 ///
-/// [`rust_xlsxwriter`]: ../../rust_xlsxwriter/
+/// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 ///
 /// ```
 /// # // This code is available in examples/doc_write_excel_chart.rs
@@ -115,7 +115,7 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// use rust_xlsxwriter::{Chart, ChartType, Workbook};
 ///
 /// fn main() -> PolarsResult<()> {
-///     // Create a sample dataframe using `Polars`
+///     // Create a sample dataframe using Polars.
 ///     let df: DataFrame = df!(
 ///         "Data" => &[10, 20, 15, 25, 30, 20],
 ///     )?;
@@ -124,15 +124,15 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 ///     let row_min = 1; // Skip the header row.
 ///     let row_max = df.height() as u32;
 ///
-///     // Create a new workbook and worksheet using `rust_xlsxwriter`.
+///     // Create a new workbook and worksheet using rust_xlsxwriter.
 ///     let mut workbook = Workbook::new();
 ///     let worksheet = workbook.add_worksheet();
 ///
-///     // Write the dataframe to the worksheet using `PolarsExcelWriter`.
+///     // Write the dataframe to the worksheet using PolarsExcelWriter.
 ///     let mut excel_writer = PolarsExcelWriter::new();
 ///     excel_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 ///
-///     // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
+///     // Move back to rust_xlsxwriter to create a new chart and have it plot the
 ///     // range of the dataframe in the worksheet.
 ///     let mut chart = Chart::new(ChartType::Line);
 ///     chart
@@ -1240,7 +1240,7 @@ impl PolarsExcelWriter {
     ///     // Create a new excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
     ///
-    ///     // Create an set the header format.
+    ///     // Create and set the header format.
     ///     let header_format = Format::new()
     ///         .set_background_color("#C6EFCE")
     ///         .set_font_color("#006100")
@@ -1423,7 +1423,7 @@ impl PolarsExcelWriter {
 
     /// Simulate autofit for columns in the dataframe output.
     ///
-    /// Use a simulated autofit to adjust dataframe columns to the maximum
+    /// Use a simulated autofit to adjust the dataframe columns to the maximum
     /// string or number widths.
     ///
     /// **Note**: There are several limitations to this autofit method, see the
@@ -1438,8 +1438,8 @@ impl PolarsExcelWriter {
     ///
     /// # Examples
     ///
-    /// An example of writing a Polar Rust dataframe to an Excel file. This example
-    /// demonstrates autofitting column widths in the output worksheet.
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates autofitting column widths in the output worksheet.
     ///
     /// ```
     /// # // This code is available in examples/doc_write_excel_autofit.rs

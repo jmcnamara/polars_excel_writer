@@ -188,3 +188,4 @@ pub use excel_writer::*;
 pub use PolarsExcelWriter;
 
 pub mod changelog;
+pub mod polars_comparison;

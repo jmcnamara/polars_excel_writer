@@ -22,7 +22,7 @@ fn main() -> PolarsResult<()> {
     // Create a new excel writer.
     let mut excel_writer = PolarsExcelWriter::new();
 
-    // Create an set the header format.
+    // Create and set the header format.
     let header_format = Format::new()
         .set_background_color("#C6EFCE")
         .set_font_color("#006100")

@@ -12,7 +12,7 @@ use polars_excel_writer::PolarsExcelWriter;
 use rust_xlsxwriter::{Chart, ChartType, Workbook};
 
 fn main() -> PolarsResult<()> {
-    // Create a sample dataframe using `Polars`
+    // Create a sample dataframe using Polars.
     let df: DataFrame = df!(
         "Data" => &[10, 20, 15, 25, 30, 20],
     )?;
@@ -21,7 +21,7 @@ fn main() -> PolarsResult<()> {
     let row_min = 1; // Skip the header row.
     let row_max = df.height() as u32;
 
-    // Create a new workbook and worksheet using `rust_xlsxwriter`.
+    // Create a new workbook and worksheet using rust_xlsxwriter.
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
@@ -29,7 +29,7 @@ fn main() -> PolarsResult<()> {
     let mut excel_writer = PolarsExcelWriter::new();
     excel_writer.write_dataframe_to_worksheet(&df, worksheet, 0, 0)?;
 
-    // Move back to `rust_xlsxwriter` to create a new chart and have it plot the
+    // Move back to rust_xlsxwriter to create a new chart and have it plot the
     // range of the dataframe in the worksheet.
     let mut chart = Chart::new(ChartType::Line);
     chart
