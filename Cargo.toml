@@ -14,7 +14,7 @@ edition = "2021"
 chrono = {version =  "0.4"}
 polars = {version = "0.51", default-features = false, features = ["temporal"]}
 polars-arrow = {version = "0.51"}
-rust_xlsxwriter = {version = "0.90.1", features = ["chrono", "polars"]}
+rust_xlsxwriter = {version = "0.90.2", features = ["chrono", "polars"]}
 
 
 [dev-dependencies]

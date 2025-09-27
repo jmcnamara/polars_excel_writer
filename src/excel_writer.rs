@@ -16,9 +16,11 @@ use polars_arrow::temporal_conversions::{
     timestamp_us_to_datetime,
 };
 use rust_xlsxwriter::worksheet::IntoExcelData;
-use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
+use rust_xlsxwriter::{Format, Formula, Table, TableColumn, Url, Workbook, Worksheet};
 
-/// `PolarsExcelWriter` provides an interface to serialize Polars dataframes to
+/// ## Introduction
+///
+///  `PolarsExcelWriter` provides an interface to serialize Polars dataframes to
 /// Excel via the [`rust_xlsxwriter`] library. This allows Excel serialization
 /// with a straightforward interface but also a high degree of configurability
 /// over the output, when required.
@@ -30,8 +32,6 @@ use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, Worksheet};
 /// [`rust_xlsxwriter`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 /// [`write_excel()`]:
 ///     https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
-///
-/// ## Examples
 ///
 /// Here is an example of writing a Polars Rust dataframe to an Excel file using
 /// `PolarsExcelWriter`.
@@ -1268,6 +1268,196 @@ impl PolarsExcelWriter {
         self
     }
 
+    /// Treat a string column as a list of URLs and export as hyperlinks.
+    ///
+    /// This option allows you to treat a string column as a list of URLs
+    /// strings and write them as Excel hyperlinks.
+    ///
+    /// The start of the strings must correspond to one of the URL protocols
+    /// supported by Excel. See the documentation for the `rust_xlsxwriter`
+    /// [`Url`] type.
+    ///
+    /// # Parameters
+    ///
+    /// - `column_name` - The name of the column to treat as URLs. Unknown
+    ///   columns are silently ignored.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing a Polar Rust dataframe to an Excel file. This
+    /// example demonstrates converting strings to urls.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_enable_column_urls.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsExcelWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Site" => &["Rust home", "Crates.io", "Docs.rs", "Polars"],
+    ///         "Link" => &["https://www.rust-lang.org/",
+    ///                     "https://crates.io/",
+    ///                     "https://docs.rs/",
+    ///                     "https://pola.rs/"],
+    ///     )?;
+    ///
+    ///     // Create a new Excel writer.
+    ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Treat a string column as a list of URLs.
+    ///     excel_writer.enable_column_urls("Link");
+    ///
+    ///     // Autofit the output data.
+    ///     excel_writer.set_autofit(true);
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     excel_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     excel_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_enable_column_urls.png">
+    ///
+    pub fn enable_column_urls(&mut self, column_name: &str) -> &mut PolarsExcelWriter {
+        self.options
+            .column_string_types
+            .insert(column_name.to_string(), ColumnStringType::Url);
+        self
+    }
+
+    /// Treat a string column as a list of formulas.
+    ///
+    /// This option allows you to treat a string column as a list ofExcel
+    /// formulas.
+    ///
+    /// It is a common use case to add a summation column as the last column in
+    /// a dataframe table. In order to do this you might by tempted to add a
+    /// column like `"=SUM(B2:E2)"`, `"=SUM(B3:E3)"`, etc. However, this is
+    /// slightly tricky to construct since it changes for each row and it also
+    /// isn't how Excel adds formulas to a table. Table formulas in Excel use a
+    /// special shorthand syntax called [Structured References] which can refer
+    /// to an entire table or rows or columns of data within the table. For
+    /// example the previous summation could be written as something like
+    /// `=SUM(Table1[@[Quarter 1]:[Quarter 4]])` which would be the same for
+    /// each row. See the examples below for a visual display of the difference.
+    ///
+    /// [Structured References]:
+    ///     https://support.microsoft.com/en-us/office/using-structured-references-with-excel-tables-f5ed2452-2337-4f71-bed3-c8ae6d2b276e
+    ///
+    /// # Parameters
+    ///
+    /// - `column_name` - The name of the column to treat as formulas. Unknown
+    ///   columns are silently ignored.
+    ///
+    /// # Examples
+    ///
+    /// An example of converting strings in a dataframe column to formulas. See
+    /// the next example for a more typical use of "Structured References" in a
+    /// table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_enable_column_formulas01.rs
+    /// #
+    /// use polars::prelude::*;
+    ///
+    /// use polars_excel_writer::PolarsExcelWriter;
+    ///
+    /// fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Region" => &["North", "South", "East", "West"],
+    ///         "Q1" => &[80, 20, 75, 85],
+    ///         "Q2" => &[80, 50, 65, 80],
+    ///         "Q3" => &[75, 60, 75, 80],
+    ///         "Q4" => &[70, 70, 65, 85],
+    ///         "Total" => &["=SUM(B2:E2)",
+    ///                      "=SUM(B3:E3)",
+    ///                      "=SUM(B4:E4)",
+    ///                      "=SUM(B5:E5)"],
+    ///     )?;
+    ///
+    ///     // Create a new Excel writer.
+    ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Treat the Total column as a list of formulas.
+    ///     excel_writer.enable_column_formulas("Total");
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     excel_writer.write_dataframe(&df)?;
+    ///
+    ///     // Save the file to disk.
+    ///     excel_writer.save("dataframe.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_enable_column_formulas01.png">
+    ///
+    /// Similar example except the formulas are written as "Structured References":
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_enable_column_formulas02.rs
+    /// #
+    /// # use polars::prelude::*;
+    /// #
+    /// # use polars_excel_writer::PolarsExcelWriter;
+    /// #
+    /// # fn main() -> PolarsResult<()> {
+    ///     // Create a sample dataframe for the example.
+    ///     let df: DataFrame = df!(
+    ///         "Region" => &["North", "South", "East", "West"],
+    ///         "Q1" => &[80, 20, 75, 85],
+    ///         "Q2" => &[80, 50, 65, 80],
+    ///         "Q3" => &[75, 60, 75, 80],
+    ///         "Q4" => &[70, 70, 65, 85],
+    ///         "Total" => &["=SUM(Table1[@[Q1]:[Q4]])",
+    ///                      "=SUM(Table1[@[Q1]:[Q4]])",
+    ///                      "=SUM(Table1[@[Q1]:[Q4]])",
+    ///                      "=SUM(Table1[@[Q1]:[Q4]])"],
+    ///     )?;
+    ///
+    ///     // Create a new Excel writer.
+    ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Treat the Total column as a list of formulas.
+    ///     excel_writer.enable_column_formulas("Total");
+    ///
+    ///     // Write the dataframe to Excel.
+    ///     excel_writer.write_dataframe(&df)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     excel_writer.save("dataframe.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/write_excel_enable_column_formulas02.png">
+    ///
+    pub fn enable_column_formulas(&mut self, column_name: &str) -> &mut PolarsExcelWriter {
+        self.options
+            .column_string_types
+            .insert(column_name.to_string(), ColumnStringType::Formula);
+        self
+    }
+
     /// Replace Null values in the exported dataframe with string values.
     ///
     /// By default Null values in a dataframe aren't exported to Excel and will
@@ -2066,6 +2256,7 @@ impl PolarsExcelWriter {
         // Iterate through the dataframe column by column.
         for (col_num, column) in df.get_columns().iter().enumerate() {
             let col = col_offset + col_num as u16;
+            let column_name = column.name().to_string();
 
             // Add the header format to the table columns
             if let Some(header_format) = &options.header_format {
@@ -2076,7 +2267,7 @@ impl PolarsExcelWriter {
 
             // Store the column names for use as table headers.
             if options.table.has_header_row() {
-                worksheet.write(row_offset, col, column.name().as_str())?;
+                worksheet.write(row_offset, col, &column_name)?;
             }
 
             // Check for a custom dtype or column format.
@@ -2086,9 +2277,15 @@ impl PolarsExcelWriter {
             }
 
             // Column format takes precedence over dtype format since it is more specific.
-            if let Some(column_format) = options.column_formats.get(&column.name().to_string()) {
+            if let Some(column_format) = options.column_formats.get(&column_name) {
                 format = Some(column_format);
             }
+
+            // Check if a string column needs to be treated as urls or formulas.
+            let string_type = options
+                .column_string_types
+                .get(&column_name)
+                .unwrap_or(&ColumnStringType::Default);
 
             // Write the row data for each column/type.
             for (row_num, any_value) in column.as_materialized_series().iter().enumerate() {
@@ -2108,11 +2305,35 @@ impl PolarsExcelWriter {
                     AnyValue::Float32(value) => write_value(worksheet, row, col, value, format)?,
                     AnyValue::Float64(value) => write_value(worksheet, row, col, value, format)?,
 
-                    // Write the string types to the worksheet.
-                    AnyValue::String(value) => write_value(worksheet, row, col, value, format)?,
-                    AnyValue::StringOwned(value) => {
-                        write_value(worksheet, row, col, value.as_str(), format)?;
-                    }
+                    // Write string type to the worksheet. Depending on the user
+                    // options this may need to be handled as a formula or url.
+                    AnyValue::String(value) => match string_type {
+                        ColumnStringType::Formula => {
+                            let mut formula = Formula::new(value);
+                            formula = formula.clone().escape_table_functions();
+                            write_value(worksheet, row, col, formula, format)?;
+                        }
+                        ColumnStringType::Url => {
+                            write_value(worksheet, row, col, Url::new(value), format)?;
+                        }
+                        ColumnStringType::Default => {
+                            write_value(worksheet, row, col, value, format)?;
+                        }
+                    },
+
+                    AnyValue::StringOwned(value) => match string_type {
+                        ColumnStringType::Formula => {
+                            let mut formula = Formula::new(value);
+                            formula = formula.clone().escape_table_functions();
+                            write_value(worksheet, row, col, formula, format)?;
+                        }
+                        ColumnStringType::Url => {
+                            write_value(worksheet, row, col, Url::new(value), format)?;
+                        }
+                        ColumnStringType::Default => {
+                            write_value(worksheet, row, col, value.as_str(), format)?;
+                        }
+                    },
 
                     AnyValue::Datetime(value, time_units, _) => {
                         let value = match time_units {
@@ -2224,7 +2445,7 @@ fn write_value(
 }
 
 // -----------------------------------------------------------------------
-// Helper structs.
+// Helper structs and enums.
 // -----------------------------------------------------------------------
 
 /// Backwards compatibility type alias for the deprecated `PolarsXlsxWriter`
@@ -2232,6 +2453,14 @@ fn write_value(
 #[doc(hidden)]
 #[deprecated(since = "0.15.0", note = "use `PolarsExcelWriter` instead")]
 pub type PolarsXlsxWriter = PolarsExcelWriter;
+
+// Track if a string column contains simple string data, a formula or a URL.
+#[derive(Clone)]
+pub(crate) enum ColumnStringType {
+    Default,
+    Formula,
+    Url,
+}
 
 // A struct for storing and passing configuration settings.
 #[derive(Clone)]
@@ -2249,6 +2478,7 @@ pub(crate) struct WriterOptions {
     pub(crate) header_format: Option<Format>,
     pub(crate) column_formats: HashMap<String, Format>,
     pub(crate) dtype_formats: HashMap<DataType, Format>,
+    pub(crate) column_string_types: HashMap<String, ColumnStringType>,
 }
 
 impl Default for WriterOptions {
@@ -2272,6 +2502,7 @@ impl WriterOptions {
             top_cell: (0, 0),
             header_format: None,
             column_formats: HashMap::new(),
+            column_string_types: HashMap::new(),
             dtype_formats: HashMap::from([
                 (DataType::Time, "hh:mm:ss;@".into()),
                 (DataType::Date, "yyyy\\-mm\\-dd;@".into()),
