@@ -5,6 +5,29 @@ This is the changelog/release notes for the `polars_excel_writer` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2025-09-27
+
+### Added
+
+- Added [`polars_comparison`](crate::polars_comparison) documentation section
+  comparing the key similarities and differences between `PolarsExcelWriter` and
+  the Polars [`write_excel()`] function.
+
+  [`write_excel()`]: https://pola-rs.github.io/polars/py-polars/html/reference/api/polars.DataFrame.write_excel.html#polars.DataFrame.write_excel
+
+- Added [`enable_column_urls()`](crate::PolarsExcelWriter::enable_column_urls)
+  option to convert a string column as a list of URLs and export as Excel
+  hyperlinks.
+
+  <img src="https://rustxlsxwriter.github.io/images/write_excel_enable_column_urls.png">
+
+- Added
+  [`enable_column_formulas()`](crate::PolarsExcelWriter::enable_column_formulas)
+  option to convert a string column as a list of Excel functions.
+
+  <img src="https://rustxlsxwriter.github.io/images/write_excel_enable_column_formulas02.png">
+
+
 ## [0.20.0] - 2025-09-17
 
 ### Added

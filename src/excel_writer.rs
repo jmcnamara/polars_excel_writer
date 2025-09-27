@@ -1337,7 +1337,7 @@ impl PolarsExcelWriter {
 
     /// Treat a string column as a list of formulas.
     ///
-    /// This option allows you to treat a string column as a list ofExcel
+    /// This option allows you to treat a string column as a list of Excel
     /// formulas.
     ///
     /// It is a common use case to add a summation column as the last column in

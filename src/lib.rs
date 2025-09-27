@@ -7,9 +7,9 @@
 //! A crate for serializing Polars dataframes to Excel Xlsx files.
 //!
 //! The `polars_excel_writer` crate provides a primary interface
-//! [`PolarsExcelWriter`] which is a configurable Excel serializer that resembles
-//! the interface options provided by the Polars [`write_excel()`] dataframe
-//! method.
+//! [`PolarsExcelWriter`] which is a configurable Excel serializer that
+//! resembles the interface options provided by the Polars [`write_excel()`]
+//! dataframe method.
 //!
 //! This crate uses [`rust_xlsxwriter`] to do the Excel serialization and is
 //! typically 5x faster than Polars when exporting large dataframes to Excel,
@@ -116,7 +116,11 @@
 //!
 //! # See also
 //!
-//!  - [`Changelog`](crate::changelog): Release notes and changelog.
+//! - [`Changelog`](crate::changelog): Release notes and changelog.
+//! - [`PolarsExcelWriter`]: The main API documentation for writing Polars
+//!   dataframes to Excel files.
+//! - [`polars_comparison`]: A comparison between `PolarsExcelWriter` and the
+//!   Polars `write_excel()` function.
 //!
 
 /// A module that exports the `PolarsExcelWriter` struct which provides the

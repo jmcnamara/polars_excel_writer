@@ -9,6 +9,18 @@ collection of features.
 The `doc_{struct}_{function}.rs` examples are more specific examples from the
 documentation and generally show how an individual function works.
 
+* `doc_enable_column_formulas01.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This example demonstrates converting strings
+  to formulas.
+
+* `doc_enable_column_formulas02.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This example demonstrates converting strings
+  to formulas. This example uses structured table formulas.
+
+* `doc_enable_column_urls.rs` - An example of writing a Polar Rust
+  dataframe to an Excel file. This example demonstrates converting strings
+  to urls.
+
 * `doc_write_excel_add_worksheet.rs` - An example of writing a Polar Rust
   dataframes to separate worksheets in an Excel workbook.
 
