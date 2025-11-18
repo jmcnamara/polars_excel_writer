@@ -8,6 +8,8 @@ All patches and pull requests are welcome but must start with an issue tracker.
 
 If the change is small such as a documentation or syntax fix then submit the change without the steps below.
 
+Please don't open a PR to bump the `polars` version since it isn't sufficient to just update it in `polars_excel_writer`. It is better to open a Feature Request with the requested version and a note about any breakages and/or fixes.
+
 For anything else follow the steps below:
 
 1. Pull requests and new feature proposals must start with an [Issue Tracker](https://github.com/jmcnamara/polars_excel_writer/issues). This serves as the focal point for the design discussion. Start with the Question or Feature Request template.
