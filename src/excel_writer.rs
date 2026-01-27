@@ -6,6 +6,7 @@
 
 #![warn(missing_docs)]
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::io::{Seek, Write};
 use std::path::Path;
@@ -2296,6 +2297,13 @@ impl PolarsExcelWriter {
         col_offset: u16,
         options: &WriterOptions,
     ) -> Result<(), PolarsError> {
+        // Ensure single-chunk DataFrame for iteration. This handles DataFrames
+        // from parquet or other lazy sources that may have multiple chunks.
+        let mut df: Cow<'_, DataFrame> = Cow::Borrowed(df);
+        if df.first_col_n_chunks() > 1 {
+            df.to_mut().rechunk_mut();
+        }
+
         let header_offset = u32::from(options.table.has_header_row());
         let mut table_columns = vec![];
 
