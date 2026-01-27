@@ -1616,7 +1616,7 @@ impl PolarsExcelWriter {
     /// Use a simulated autofit to adjust the dataframe columns to the maximum
     /// string or number widths.
     ///
-    /// **Note**: There are several limitations to this autofit method, see the
+    /// There are some limitations to this autofit method, see the
     /// `rust_xlsxwriter` docs on [`Worksheet::autofit()`] for details.
     ///
     /// [`Worksheet::autofit()`]:
@@ -1642,13 +1642,15 @@ impl PolarsExcelWriter {
     ///     // Create a sample dataframe for the example.
     ///     let df: DataFrame = df!(
     ///         "Col 1" => &["A", "B", "C", "D"],
-    ///         "Column 2" => &["A", "B", "C", "D"],
-    ///         "Column 3" => &["Hello", "World", "Hello, world", "Ciao"],
-    ///         "Column 4" => &[1234567, 12345678, 123456789, 1234567],
+    ///         "Col 2" => &["Hello", "World", "Hello, world", "Ciao"],
+    ///         "Col 3" => &[1.234578, 123.45678, 123456.78, 12345679.0],
     ///     )?;
     ///
     ///     // Create a new Excel writer.
     ///     let mut excel_writer = PolarsExcelWriter::new();
+    ///
+    ///     // Set an number format for column 3.
+    ///     excel_writer.set_column_format("Col 3", "$#,##0.00");
     ///
     ///     // Autofit the output data.
     ///     excel_writer.set_autofit(true);
@@ -1670,6 +1672,61 @@ impl PolarsExcelWriter {
     ///
     pub fn set_autofit(&mut self, autofit: bool) -> &mut PolarsExcelWriter {
         self.options.use_autofit = autofit;
+        self
+    }
+
+    /// Set the maximum row used for autofitting worksheet columns.
+    ///
+    /// Autofitting a large dataframe can be computationally expensive since it
+    /// requires calculating the width of each cell based on its contents. In
+    /// order to mitigate this the `set_autofit_max_row()` method can be used to
+    /// limit the number of rows processed for autofitting. This takes advantage
+    /// of the fact that a user will typically only see about 50 to 100 rows on
+    /// a screen so it is often sufficient to autofit just the first few hundred
+    /// rows. This can significantly speed up the autofit operation for large
+    /// datasets.
+    ///
+    /// By default `PolarsExcelWriter` sets a limit of 200 rows for autofitting.
+    ///
+    /// See the `rust_xlsxwriter` docs on [`Worksheet::set_autofit_max_row()`]
+    /// for more details.
+    ///
+    /// [`Worksheet::set_autofit_max_row()`]:
+    ///     ../../rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_autofit_max_row
+    ///
+    /// # Parameters
+    ///
+    /// - `max_row` - The maximum row to use for autofitting. The default is
+    ///   200.
+    ///
+    pub fn set_autofit_max_row(&mut self, max_row: u32) -> &mut PolarsExcelWriter {
+        self.options.autofit_max_row = max_row;
+        self
+    }
+
+    /// Set the maximum autofit width for worksheet columns.
+    ///
+    /// Excel autofits very long strings up to limit of 255 characters/1790
+    /// pixels. This is often too wide to display on a single screen at normal
+    /// zoom. As such the `set_autofit_max_width()` method can be used to set a
+    /// smaller upper limit for autofitting long strings.
+    ///
+    /// By default `PolarsExcelWriter` sets a limit of 300 pixels for the
+    /// maximum autofitted column width.
+    ///
+    /// See the `rust_xlsxwriter` docs on [`Worksheet::set_autofit_max_width()`]
+    /// for more details.
+    ///
+    /// [`Worksheet::set_autofit_max_width()`]:
+    ///     ../../rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_autofit_max_width
+    ///
+    /// # Parameters
+    ///
+    /// - `max_width`: The maximum column width, in pixels, to use for
+    ///   autofitting. The default is300 pixels.
+    ///
+    pub fn set_autofit_max_width(&mut self, max_width: u32) -> &mut PolarsExcelWriter {
+        self.options.autofit_max_width = max_width;
         self
     }
 
@@ -2408,8 +2465,11 @@ impl PolarsExcelWriter {
             &table,
         )?;
 
-        // Autofit the columns.
+        // Autofit the columns. Add default, or user defined, limits to avoid
+        // performance and display issues.
         if options.use_autofit {
+            worksheet.set_autofit_max_width(options.autofit_max_width);
+            worksheet.set_autofit_max_row(options.autofit_max_row);
             worksheet.autofit();
         }
 
@@ -2466,6 +2526,8 @@ pub(crate) enum ColumnStringType {
 #[derive(Clone)]
 pub(crate) struct WriterOptions {
     pub(crate) use_autofit: bool,
+    pub(crate) autofit_max_width: u32,
+    pub(crate) autofit_max_row: u32,
     pub(crate) null_value: Option<String>,
     pub(crate) nan_value: Option<String>,
     pub(crate) infinity_value: Option<String>,
@@ -2491,6 +2553,8 @@ impl WriterOptions {
     fn new() -> WriterOptions {
         WriterOptions {
             use_autofit: false,
+            autofit_max_width: 300,
+            autofit_max_row: 200,
             null_value: None,
             nan_value: None,
             infinity_value: None,
