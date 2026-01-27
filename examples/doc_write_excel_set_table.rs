@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2026, John McNamara, jmcnamara@cpan.org
 
 //! An example of writing a Polar Rust dataframe to an Excel file. This
 //! demonstrates setting properties of the worksheet table that wraps the output

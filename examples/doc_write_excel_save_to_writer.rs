@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2026, John McNamara, jmcnamara@cpan.org
 
 //! An example of writing a Polar Rust dataframe to an Excel file to a type
 //! that implements the [`Write`] trait. In this example we write to an
