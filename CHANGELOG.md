@@ -5,6 +5,20 @@ This is the changelog/release notes for the `polars_excel_writer` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2026-01-28
+
+### Fixed
+
+- Fixed issue where dataframes needed to be rechunked before converting to
+  Excel. This could happen with Parquet files or files loaded using one of the
+  "Lazy" Polars methods. The issue showed up as a cryptic `assertion left ==
+  right failed` error.
+
+  [Issue #26].
+
+  [Issue #26]: https://github.com/jmcnamara/polars_excel_writer/issues/26
+
+
 ## [0.23.0] - 2026-01-27
 
 ### Added
