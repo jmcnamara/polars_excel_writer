@@ -5,6 +5,13 @@ This is the changelog/release notes for the `polars_excel_writer` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2026-02-28
+
+### Added
+
+- Updated dependencies to `rust_xlsxwriter` 0.94 and `polars` 0.53.
+
+
 ## [0.24.0] - 2026-01-28
 
 ### Fixed
@@ -23,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.93.0 to take advantage of the new
+- Updated dependencies to `rust_xlsxwriter` 0.93.0 to take advantage of the new
   enhanced autofit in that version. This autofits formatted numbers and dates
   more accurately.
 
@@ -31,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Update dependencies to `rust_xlsxwriter` 0.92.1 and `polars` 0.52.
+- Updated dependencies to `rust_xlsxwriter` 0.92.1 and `polars` 0.52.
 
 
 ## [0.21.0] - 2025-09-27
