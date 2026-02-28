@@ -2319,7 +2319,7 @@ impl PolarsExcelWriter {
         }
 
         // Iterate through the dataframe column by column.
-        for (col_num, column) in df.get_columns().iter().enumerate() {
+        for (col_num, column) in df.columns().iter().enumerate() {
             let col = col_offset + col_num as u16;
             let column_name = column.name().to_string();
 
