@@ -5,6 +5,18 @@ This is the changelog/release notes for the `polars_excel_writer` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0] - 2026-07-02
+
+### Added
+
+- Updated dependencies to `rust_xlsxwriter` 0.96 and `polars` 0.54.
+
+- Removed the `Seek` trait requirement from
+  [`save_to_writer()`](crate::PolarsExcelWriter::save_to_writer) (similarly to
+  `rust_xlsxwriter`). This allows it to write to STDOUT or other `Write`
+  interfaces that don't require seek.
+
+
 ## [0.25.0] - 2026-02-28
 
 ### Added

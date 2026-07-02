@@ -10,6 +10,33 @@ library.
 This comparison highlights the key similarities and differences between
 `PolarsExcelWriter` and the Polars `write_excel()` function.
 
+| `write_excel()` parameter | `PolarsExcelWriter` method |
+|---------------------------|----------------------------|
+| `workbook`                | [`PolarsExcelWriter::save()`]<br>[`PolarsExcelWriter::save_to_buffer()`]<br>[`PolarsExcelWriter::save_to_writer()`] |
+| `worksheet`               | [`PolarsExcelWriter::set_worksheet_name()`] |
+| `position`                | [`PolarsExcelWriter::write_dataframe_to_cell()`] |
+| `table_style`             | In progress. |
+| `table_name`              | In progress. |
+| `column_formats`          | [`PolarsExcelWriter::set_column_format()`] |
+| `dtype_formats`           | [`PolarsExcelWriter::set_dtype_format()`]<br>[`PolarsExcelWriter::set_dtype_int_format()`]<br>[`PolarsExcelWriter::set_dtype_float_format()`]<br>[`PolarsExcelWriter::set_dtype_number_format()`]<br>[`PolarsExcelWriter::set_dtype_datetime_format()`] |
+| `conditional_formats`     | In progress. |
+| `header_format`           | [`PolarsExcelWriter::set_header()`] |
+| `column_totals`           | In progress. |
+| `column_widths`           | In progress. |
+| `row_totals`              | In progress. |
+| `row_heights`             | In progress. |
+| `sparklines`              | In progress. |
+| `formulas`                | In progress. |
+| `float_precision`         | [`PolarsExcelWriter::set_float_precision()`] |
+| `include_header`          | [`PolarsExcelWriter::set_header()`] |
+| `autofilter`              | [`PolarsExcelWriter::set_autofilter()`] |
+| `autofit`                 | [`PolarsExcelWriter::set_autofit()`] |
+| `hidden_columns`          | In progress. |
+| `hide_gridlines`          | [`PolarsExcelWriter::set_screen_gridlines()`] |
+| `sheet_zoom`              | [`PolarsExcelWriter::set_zoom()`] |
+| `freeze_panes`            | [`PolarsExcelWriter::set_freeze_panes()`] |
+
+
 # Contents
 
 - [Comparison of `PolarsExcelWriter` and `Polars` `write_excel()`.](#comparison-of-polarsexcelwriter-and-polars-write_excel)

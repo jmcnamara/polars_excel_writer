@@ -8,7 +8,7 @@
 
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::io::{Seek, Write};
+use std::io::Write;
 use std::path::Path;
 
 use polars::prelude::*;
@@ -535,13 +535,14 @@ impl PolarsExcelWriter {
     /// The `save_to_writer()` method is similar to the
     /// [`PolarsExcelWriter::save()`] method above, except that it writes the
     /// xlsx file to types that implement the [`Write`] trait, such as the
-    /// [`std::fs::File`] type or buffers.
+    /// [`std::fs::File`] type or buffers. The interface doesn't require `Seek`
+    /// so it is also possible to write directly to STDOUT.
     ///
     /// # Parameters
     ///
     /// - `writer` - A generic type that supports the [`Write`] trait. For
     ///   compatibility with `rust_xlsxwriter`, it must also implement the
-    ///   [`Seek`] and [`Send`] traits.
+    ///   [`Send`] trait.
     ///
     /// # Errors
     ///
@@ -558,7 +559,7 @@ impl PolarsExcelWriter {
     /// # // This code is available in examples/doc_write_excel_save_to_writer.rs
     /// #
     /// use std::fs::File;
-    /// use std::io::{Cursor, Write};
+    /// use std::io::Write;
     ///
     /// use polars::prelude::*;
     /// use polars_excel_writer::PolarsExcelWriter;
@@ -576,17 +577,15 @@ impl PolarsExcelWriter {
     ///     // Write the dataframe to Excel.
     ///     excel_writer.write_dataframe(&df)?;
     ///
-    ///     // Create an in-memory buffer as the writer object. It is wrapped in a
-    ///     // Cursor in order to add the `Seek` trait.
-    ///     let mut cursor = Cursor::new(Vec::new());
+    ///     // Create an in-memory buffer as the writer object.
+    ///     let mut buf = Vec::new();
     ///
     ///     // Save the dataframe to the writer object.
-    ///     excel_writer.save_to_writer(&mut cursor)?;
+    ///     excel_writer.save_to_writer(&mut buf)?;
     ///
     ///     // Write the buffer to a file for the sake of the example.
-    ///     let buf = cursor.into_inner();
     ///     let mut file = File::create("dataframe.xlsx")?;
-    ///     Write::write_all(&mut file, &buf)?;
+    ///     file.write_all(&buf)?;
     ///
     ///     Ok(())
     /// }
@@ -599,7 +598,7 @@ impl PolarsExcelWriter {
     ///
     pub fn save_to_writer<W>(&mut self, writer: W) -> PolarsResult<()>
     where
-        W: Write + Seek + Send,
+        W: Write + Send,
     {
         self.workbook.save_to_writer(writer)?;
 

@@ -7,7 +7,7 @@
 //! in-memory buffer.
 
 use std::fs::File;
-use std::io::{Cursor, Write};
+use std::io::Write;
 
 use polars::prelude::*;
 use polars_excel_writer::PolarsExcelWriter;
@@ -25,17 +25,15 @@ fn main() -> PolarsResult<()> {
     // Write the dataframe to Excel.
     excel_writer.write_dataframe(&df)?;
 
-    // Create an in-memory buffer as the writer object. It is wrapped in a
-    // Cursor in order to add the `Seek` trait.
-    let mut cursor = Cursor::new(Vec::new());
+    // Create an in-memory buffer as the writer object.
+    let mut buf = Vec::new();
 
     // Save the dataframe to the writer object.
-    excel_writer.save_to_writer(&mut cursor)?;
+    excel_writer.save_to_writer(&mut buf)?;
 
     // Write the buffer to a file for the sake of the example.
-    let buf = cursor.into_inner();
     let mut file = File::create("dataframe.xlsx")?;
-    Write::write_all(&mut file, &buf)?;
+    file.write_all(&buf)?;
 
     Ok(())
 }
