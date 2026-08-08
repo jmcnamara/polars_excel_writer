@@ -1194,7 +1194,6 @@ impl PolarsExcelWriter {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/write_excel_set_column_format.png">
     ///
-    ///
     pub fn set_column_format(
         &mut self,
         column_name: &str,
@@ -2304,6 +2303,9 @@ impl PolarsExcelWriter {
         }
 
         let header_offset = u32::from(options.table.has_header_row());
+        let num_rows = df.height();
+        let num_cols = df.width();
+        let columns = df.columns();
         let mut table_columns = vec![];
 
         // Set NaN and Infinity values, if required.
@@ -2317,47 +2319,94 @@ impl PolarsExcelWriter {
             worksheet.set_neg_infinity_value(neg_infinity_value);
         }
 
-        // Iterate through the dataframe column by column.
-        for (col_num, column) in df.columns().iter().enumerate() {
-            let col = col_offset + col_num as u16;
-            let column_name = column.name().to_string();
-
-            // Add the header format to the table columns
-            if let Some(header_format) = &options.header_format {
-                let table_column = TableColumn::new().set_header_format(header_format);
-
-                table_columns.push(table_column);
-            }
-
-            // Store the column names for use as table headers.
-            if options.table.has_header_row() {
+        // 1. Write the column names as table headers if requested.
+        // Under row-major writing, this header row (at index `row_offset`) is written
+        // first, immediately preparing the worksheet structure before data streaming.
+        if options.table.has_header_row() {
+            for (col_num, column) in columns.iter().enumerate() {
+                let col = col_offset + col_num as u16;
+                let column_name = column.name().to_string();
                 worksheet.write(row_offset, col, &column_name)?;
             }
+        }
 
-            // Check for a custom dtype or column format.
+        // Pre-calculate formatting types and metadata to avoid expensive lookups
+        // inside the row-by-row iteration loop.
+        let mut col_formats = Vec::with_capacity(num_cols);
+        let mut col_string_types = Vec::with_capacity(num_cols);
+
+        for column in columns {
+            let column_name = column.name().to_string();
+
             let mut format = None;
             if let Some(dtype_format) = options.dtype_formats.get(column.dtype()) {
                 format = Some(dtype_format);
             }
-
-            // Column format takes precedence over dtype format since it is more specific.
             if let Some(column_format) = options.column_formats.get(&column_name) {
                 format = Some(column_format);
             }
+            col_formats.push(format);
 
-            // Check if a string column needs to be treated as urls or formulas.
             let string_type = options
                 .column_string_types
                 .get(&column_name)
                 .unwrap_or(&ColumnStringType::Default);
+            col_string_types.push(string_type.clone());
+        }
 
-            // Write the row data for each column/type.
-            for (row_num, any_value) in column.as_materialized_series().iter().enumerate() {
-                let row = header_offset + row_offset + row_num as u32;
+        // Pre-calculate total table dimensions before adding the structure
+        let (mut max_row, max_col) = df.shape();
+        if !options.table.has_header_row() {
+            max_row -= 1;
+        }
+        if options.table.has_total_row() {
+            max_row += 1;
+        }
 
-                // Map Polars AnyValue types to Excel/rust_xlsxwriter types.
+        // Prepare the table object. Columns are only manually configured if
+        // a custom header_format is present. This avoids wiping out existing
+        // column configurations (like totals row functions) defined in `options.table`.
+        let mut table = options.table.clone();
+        if let Some(header_format) = &options.header_format {
+            for _ in columns {
+                let table_column = TableColumn::new().set_header_format(header_format);
+                table_columns.push(table_column);
+            }
+            table = table.set_columns(&table_columns);
+        }
+
+        // 2. Add the table structure to the worksheet BEFORE writing the subsequent data rows.
+        // In sequential 'constant_memory' streaming mode, rust_xlsxwriter flushes written rows to
+        // disk immediately. Adding the table structure first establishes the worksheet metadata on
+        // row 0, preventing the engine from trying to revisit or modify row 0 later (which is prohibited).
+        worksheet.add_table(
+            row_offset,
+            col_offset,
+            row_offset + max_row as u32,
+            col_offset + max_col as u16 - 1,
+            &table,
+        )?;
+
+        // 3. Row-major iteration (row-by-row) instead of the original column-by-column approach.
+        // Changing to row-major progression enables single-pass sequential writing.
+        //
+        // PERFORMANCE & MEMORY IMPACT:
+        // - Memory: Decreases memory consumption dramatically. Instead of buffering the entire sheet
+        //   in memory to support multi-column backtracking, row-major order allows the low-level
+        //   writer to stream and flush rows to disk, maintaining a near-constant memory footprint.
+        // - Time/CPU: Remains highly efficient as cell element access via `.get(row_num)` on pre-chunked
+        //   Polars series executes in O(1) time complexity, yielding comparable generation speeds.
+        for row_num in 0..num_rows {
+            let row = header_offset + row_offset + row_num as u32;
+
+            for (col_idx, column) in columns.iter().enumerate() {
+                let col = col_offset + col_idx as u16;
+
+                let any_value = column.as_materialized_series().get(row_num)?;
+                let string_type = &col_string_types[col_idx];
+                let format = col_formats[col_idx];
+
                 match any_value {
-                    // Write the number types to the worksheet.
                     AnyValue::Int8(value) => write_value(worksheet, row, col, value, format)?,
                     AnyValue::Int16(value) => write_value(worksheet, row, col, value, format)?,
                     AnyValue::Int32(value) => write_value(worksheet, row, col, value, format)?,
@@ -2407,6 +2456,7 @@ impl PolarsExcelWriter {
                         };
 
                         write_value(worksheet, row, col, &value, format)?;
+                        // Retain standard upstream column width layout for Datetime columns
                         worksheet.set_column_width(col, 18)?;
                     }
 
@@ -2414,6 +2464,7 @@ impl PolarsExcelWriter {
                         let value = date32_to_date(value);
 
                         write_value(worksheet, row, col, &value, format)?;
+                        // Retain standard upstream column width layout for Date columns
                         worksheet.set_column_width(col, 10)?;
                     }
 
@@ -2447,30 +2498,6 @@ impl PolarsExcelWriter {
                 }
             }
         }
-
-        // Create a table for the dataframe range.
-        let (mut max_row, max_col) = df.shape();
-        if !options.table.has_header_row() {
-            max_row -= 1;
-        }
-        if options.table.has_total_row() {
-            max_row += 1;
-        }
-
-        // Add a column header format via table columns.
-        let mut table = options.table.clone();
-        if !table_columns.is_empty() {
-            table = table.set_columns(&table_columns);
-        }
-
-        // Add the table to the worksheet.
-        worksheet.add_table(
-            row_offset,
-            col_offset,
-            row_offset + max_row as u32,
-            col_offset + max_col as u16 - 1,
-            &table,
-        )?;
 
         // Autofit the columns. Add default, or user defined, limits to avoid
         // performance and display issues.
